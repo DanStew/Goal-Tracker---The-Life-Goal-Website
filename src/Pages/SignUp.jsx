@@ -124,28 +124,37 @@ function SignUp(){
     }
 
     return(
-        <div className="SignUp">
-            <h1>Sign Up</h1>
-            <form>
-                {/* Collecting the inputs from the users */}
-                {/* Whenever a change is made to the inputs, the UseState update function is called */}
-                <input type="text" placeholder="First Name..." onChange={(e) => setFirstName(e.target.value)}/>
-                <input type="text" placeholder="Last Name..." onChange={(e) => setLastName(e.target.value)}/>
-                <input type="text" placeholder="Email..." onChange={(e) => setEmail(e.target.value)}/>
-                <input type="text" placeholder="Password..." onChange={(e) => setPassword(e.target.value)}/>
-                {/* The input below is hidden, but then replaced by the htmlFor section to act as that input */}
-                {/* HTMLFor basically uses the functionality of that input with its own bit of code */}
-                <input type="file" style={{display:"none"}} id="file" onChange={(e) => setProfilePic(e.target.files[0])}/>
-                <label htmlFor="file">
-                            <img src={imgIcon} alt=""/>
-                            <span>Add Profile Image</span>
-                        </label>
-            </form>
-            {/* Submit Button, to make the new user on the website */}
-            <button onClick={(e) => handleSelect(e)}>Make Account</button>
-            {/* Line of code to output the error message to the user */}
-            {/* Uses conditional rendering, so it only displays when there is a error message set */}
-            {errorMsg != "" ? <span className="error">{errorMsg}</span> : <span>Nothing</span>}
+        <div className="SignUp PageBody">
+            {/* Creating the header for the page */}
+            <div className='header flexItems'>
+                <h1>GoalTracker</h1>
+            </div>
+            <div className="mainBody formBackground flexItems">
+                <h1>Sign Up</h1>
+                <form>
+                    {/* Collecting the inputs from the users */}
+                    {/* Whenever a change is made to the inputs, the UseState update function is called */}
+                    <input type="text" placeholder="First Name..." onChange={(e) => setFirstName(e.target.value)}/>
+                    <input type="text" placeholder="Last Name..." onChange={(e) => setLastName(e.target.value)}/>
+                    <input type="text" placeholder="Email..." onChange={(e) => setEmail(e.target.value)}/>
+                    <input type="text" placeholder="Password..." onChange={(e) => setPassword(e.target.value)}/>
+                    {/* The input below is hidden, but then replaced by the htmlFor section to act as that input */}
+                    {/* HTMLFor basically uses the functionality of that input with its own bit of code */}
+                    <input type="file" style={{display:"none"}} id="file" onChange={(e) => setProfilePic(e.target.files[0])}/>
+                    <label htmlFor="file">
+                                <img src={imgIcon} alt=""/>
+                                <span>Add Profile Image</span>
+                    </label>
+                </form>
+                {/* Submit Button, to make the new user on the website */}
+                <button className="formButton" onClick={(e) => handleSelect(e)}>Make Account</button>
+                {/* Line of code to output the error message to the user */}
+                {/* Uses conditional rendering, so it only displays when there is a error message set */}
+                <div></div>
+                {errorMsg != "" ? <span className="error">{errorMsg}</span> : <span></span>}
+                {/* Allowing the user to go to the Login Page */}
+                <p>Already have an account? <Link to="/login">Login</Link></p>
+            </div>
         </div>
     )
 }
