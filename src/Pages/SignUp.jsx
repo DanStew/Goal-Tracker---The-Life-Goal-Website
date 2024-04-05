@@ -153,7 +153,7 @@ function SignUp(){
                 <div></div>
                 {errorMsg != "" ? <span className="error">{errorMsg}</span> : <span></span>}
                 {/* Allowing the user to go to the Login Page */}
-                <p>Already have an account? <Link to="/login">Login</Link></p>
+                <p>Already have an account? <Link to="/SignIn">Login</Link></p>
             </div>
         </div>
     )
