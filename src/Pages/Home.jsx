@@ -1,7 +1,10 @@
+import { auth } from "../Config/firebase"
+import { signOut } from "firebase/auth"
+
 function Home(){
     return(
         <div>
-            Home
+            <button onClick={() => signOut(auth)}>Log Out</button>
         </div>
     )
 }
