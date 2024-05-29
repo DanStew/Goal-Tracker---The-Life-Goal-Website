@@ -25,6 +25,7 @@ body{
     align-items: center;
     text-align: center;
     background-color: rgb(109, 109, 109);
+    overflow-x: hidden;
 
     .mainBody{
         flex : 5 5;
@@ -104,3 +105,37 @@ body{
     }
 }
 
+/* Styling for the homepage of the website */
+.home{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+}
+
+.main{
+    flex: 4 4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    .header{
+        flex: 1 1;
+        background-color: black;
+
+        img{
+            width: 30px;
+            height: 30px;
+        }
+    }
+
+    .content{
+        flex: 8 8;
+    }
+}
+
+.sideBar{
+    background-color: red;
+    flex: 1 1;
+}
