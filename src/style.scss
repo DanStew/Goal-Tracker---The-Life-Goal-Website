@@ -125,6 +125,7 @@ body{
     }
 }
 
+/* Styling the header of pages on the website*/
 .header{
     flex: 1 1;
     background-color: black;
@@ -132,18 +133,52 @@ body{
     align-items: center;
     justify-content: space-between;
 
-    img{
-        width: 48px;
-        border-radius: 50%;
-        object-fit: cover;
-        cursor: pointer;
-        margin-left: 30px;
-        margin-right: 30px;
-    }
 }
 
+/* Generic image stylign for images on the website */
+img{
+    width: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+    margin-left: 30px;
+    margin-right: 30px;
+}
 
+/* Styling for the sidebar of the website */
 .sideBar{
-    background-color: red;
     flex: 1 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    .sideBarHeader{
+        flex: 1 1;
+        display: flex;
+        justify-content: right;
+        align-items: center;
+        background-color: black;
+    }
+    
+    .sideBarContent{
+        background-color: rgb(155, 155, 155);
+        flex : 8 8;
+        display: flex;
+        flex-direction: column;
+        
+        .sideBarElement{
+            font-size: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 1s;
+            cursor: pointer;
+            
+
+            &:hover{
+                background-color: rgb(109, 109, 109);
+            }
+        }
+    }
 }

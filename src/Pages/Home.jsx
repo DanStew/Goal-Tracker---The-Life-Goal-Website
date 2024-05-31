@@ -41,11 +41,11 @@ function Home(){
                     <div className="sideBarHeader flexItems">
                     <img onClick={() => sidebarShown ? setSidebarShown(false) : setSidebarShown(true)} src={SettingsIcon} alt="Toggle Sidebar" />
                     </div>
-                    <div className="sidebarContent flexItems">
+                    <div className="sideBarContent flexItems">
                         <Sidebar/>
                     </div>
                 </div> : 
-                <div style={{display: "none"}}className="sideBar flexItems"><Sidebar/></div>
+                <div style={{display:"none"}}className="sideBar flexItems"><Sidebar/></div>
             }      
         </div>
     )
