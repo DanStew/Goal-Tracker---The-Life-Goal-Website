@@ -1,7 +1,8 @@
-import { useContext, useEffect, useState } from "react"
+import { useContext, useState } from "react"
 import { AuthContext } from '../Context/AuthContext';
 import Header from "../Components/Header"
 import Sidebar from "../Components/Sidebar";
+import SettingsIcon from "../Images/settingsIcon.jpg"
 
 function Home(){
 
@@ -21,7 +22,12 @@ function Home(){
                     {/* Passing the current user into the Header Component */}
                     <Header currentUser={currentUser}></Header>
                     {/* Button included to toggle and untoggle the sidebar */}
-                    <button onClick={() => sidebarShown ? setSidebarShown(false) : setSidebarShown(true)}>Toggle Sidebar</button>
+                    {/* This button is only shown when there is no sidebar currently being shown */}
+                    
+                    {!sidebarShown ?
+                        <img onClick={() => sidebarShown ? setSidebarShown(false) : setSidebarShown(true)} src={SettingsIcon} alt="Toggle Sidebar" /> : 
+                        <div></div>
+                    }
                 </div>
                 <div className="content flexItems">
                     {/* The main content of the page */}
@@ -31,7 +37,14 @@ function Home(){
             {/* The content for the sidebar of the website */}
             {/* Includes the code to conditionally render the component, depending on whether it is toggled or not */}
             {sidebarShown?
-                <div className="sideBar flexItems"><Sidebar/></div> : 
+                <div className="sideBar flexItems">
+                    <div className="sideBarHeader flexItems">
+                    <img onClick={() => sidebarShown ? setSidebarShown(false) : setSidebarShown(true)} src={SettingsIcon} alt="Toggle Sidebar" />
+                    </div>
+                    <div className="sidebarContent flexItems">
+                        <Sidebar/>
+                    </div>
+                </div> : 
                 <div style={{display: "none"}}className="sideBar flexItems"><Sidebar/></div>
             }      
         </div>

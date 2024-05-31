@@ -120,20 +120,28 @@ body{
     align-items: center;
     flex-direction: column;
 
-    .header{
-        flex: 1 1;
-        background-color: black;
-
-        img{
-            width: 30px;
-            height: 30px;
-        }
-    }
-
     .content{
         flex: 8 8;
     }
 }
+
+.header{
+    flex: 1 1;
+    background-color: black;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    img{
+        width: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        cursor: pointer;
+        margin-left: 30px;
+        margin-right: 30px;
+    }
+}
+
 
 .sideBar{
     background-color: red;
