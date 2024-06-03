@@ -2,7 +2,9 @@ import { useContext, useState } from "react"
 import { AuthContext } from '../Context/AuthContext';
 import Header from "../Components/Header"
 import Sidebar from "../Components/Sidebar";
+import TimeTableDisplay from "../Components/TimeTableDisplay.jsx"
 import SettingsIcon from "../Images/settingsIcon.jpg"
+import Goals from "../Components/Goals";
 
 function Home(){
 
@@ -13,17 +15,15 @@ function Home(){
     const [sidebarShown, setSidebarShown] = useState(false)
 
     return(
-        <div className="PageBody home">
+        <div className="PageBody home flexItems">
             {/* The content for the main body of the website */}
             <div className="main flexItems">
                 <div className="header flexItems">
                     {/* The header of the page*/}
-                    {/* The circle for the profile image and the square top right for the 3 lines */} 
                     {/* Passing the current user into the Header Component */}
                     <Header currentUser={currentUser}></Header>
                     {/* Button included to toggle and untoggle the sidebar */}
                     {/* This button is only shown when there is no sidebar currently being shown */}
-                    
                     {!sidebarShown ?
                         <img onClick={() => sidebarShown ? setSidebarShown(false) : setSidebarShown(true)} src={SettingsIcon} alt="Toggle Sidebar" /> : 
                         <div></div>
@@ -32,6 +32,8 @@ function Home(){
                 <div className="content flexItems">
                     {/* The main content of the page */}
                     {/* Will have a Goals component and a Timetable component */}
+                    <Goals />
+                    <TimeTableDisplay />
                 </div> 
             </div>
             {/* The content for the sidebar of the website */}
@@ -39,7 +41,7 @@ function Home(){
             {sidebarShown?
                 <div className="sideBar flexItems">
                     <div className="sideBarHeader flexItems">
-                    <img onClick={() => sidebarShown ? setSidebarShown(false) : setSidebarShown(true)} src={SettingsIcon} alt="Toggle Sidebar" />
+                        <img onClick={() => sidebarShown ? setSidebarShown(false) : setSidebarShown(true)} src={SettingsIcon} alt="Toggle Sidebar" />
                     </div>
                     <div className="sideBarContent flexItems">
                         <Sidebar/>

@@ -1,11 +1,12 @@
 /* Removing the default padding and margin*/
 body{
-    margin : 0px;
-    padding : 0px;
+    margin: 0px;
+    padding: 0px;
     /* Making it so that all text on the website it Roboto */
     font-family: "Roboto", "San-Serif";
     color : white;
     font-weight: 600;
+    overflow-x: hidden;
 }
 
 //Applying styling to all the flexItems in the website
@@ -17,15 +18,16 @@ body{
 
 //Setting up the basic page layout for the website
 .PageBody{
-    height : 100vh;
+    height : 100%;
     width : 100vw;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: flex-start;
     text-align: center;
     background-color: rgb(109, 109, 109);
     overflow-x: hidden;
+    overflow-y: scroll;
 
     .mainBody{
         flex : 5 5;
@@ -107,9 +109,6 @@ body{
 
 /* Styling for the homepage of the website */
 .home{
-    display: flex;
-    align-items: center;
-    justify-content: center;
     flex-direction: row;
 }
 
@@ -119,20 +118,125 @@ body{
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    height: 100%;
 
     .content{
         flex: 8 8;
+    
+        .TimeTableDisplay{
+            background-color: red;
+            margin-top: 40px;
+        }
+
+        .Goals{
+            margin-top: 40px;
+
+            .GoalsHeader{
+                font-size: 48px;
+                cursor: pointer;
+
+                &:hover{
+                    text-decoration: underline;
+                }
+            }
+
+            .IndividualGoals{
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+
+                .homePageGoal{
+                    width: 80%;
+                    margin-top: 20px;
+                    border: 2px solid black;
+                    border-radius: 25px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    flex-direction: column;
+                    background-color: rgb(188, 188, 188);
+                    color: black;
+
+                    .hpgHeader{
+                        flex: 2 2;
+                        border-bottom: 1px solid black;
+                        font-size: 32px;
+
+                        p{
+                            font-size: 20px;
+                        }
+
+                        .hpgHeaderLine{
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 20px;
+                            height : 30px;
+                            
+                            .container {
+                                width: 20%;
+                                background-color: #ddd;
+                                border : 1px solid black;
+                            }
+                              
+                            .progress-bar {
+                                height: 24px;
+                                background-color: #4CAF50;
+                                text-align: center;
+                                line-height: 24px;
+                                font-size: 20px;
+                                color: white;
+                            }
+                        }
+                    }
+                    
+                    .hpgMain{
+                        font-size: 18px;
+                        flex: 1 1;
+                        height: 20px;
+
+                        p{
+                            padding: 0px;
+                            margin : 5px;
+
+                            &:hover{
+                                text-decoration: underline;
+                            }
+                        }
+                    }
+
+                    .hpgFooter{
+                        display: flex;
+                        justify-content: flex-end;
+                        align-items: flex-end;
+                        flex: 1 1;
+                        
+                        .hpgFooterEmpty{
+                            flex: 9 9;
+                        }
+                        
+                        .hpgFooterContent{
+                            height: 20px;
+                            border : 1px solid black;
+                            background-color: orange;
+                            cursor: pointer;
+                            border-radius: 10px;
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
 /* Styling the header of pages on the website*/
 .header{
-    flex: 1 1;
+    height: 60px;
     background-color: black;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
-
 }
 
 /* Generic image stylign for images on the website */
@@ -150,15 +254,17 @@ img{
     flex: 1 1;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: stretch;
+    height: 100vh;
 
     .sideBarHeader{
-        flex: 1 1;
+        height: 60px;
         display: flex;
         justify-content: right;
         align-items: center;
         background-color: black;
+        height: 100%;
     }
     
     .sideBarContent{
@@ -166,14 +272,18 @@ img{
         flex : 8 8;
         display: flex;
         flex-direction: column;
+        align-items: stretch;
+        height:100%;
         
         .sideBarElement{
             font-size: 24px;
             display: flex;
+            flex: 1 1;
             justify-content: center;
             align-items: center;
             transition: background-color 1s;
             cursor: pointer;
+            height: 100%;
             
 
             &:hover{
