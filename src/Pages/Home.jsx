@@ -22,6 +22,7 @@ function Home(){
                     {/* The header of the page*/}
                     {/* Passing the current user into the Header Component */}
                     <Header currentUser={currentUser}></Header>
+                    <p>Home</p>
                     {/* Button included to toggle and untoggle the sidebar */}
                     {/* This button is only shown when there is no sidebar currently being shown */}
                     {!sidebarShown ?
@@ -32,7 +33,7 @@ function Home(){
                 <div className="content flexItems">
                     {/* The main content of the page */}
                     {/* Will have a Goals component and a Timetable component */}
-                    <Goals />
+                    <Goals showOptions={false}/>
                     <TimeTableDisplay />
                 </div> 
             </div>

@@ -1,4 +1,4 @@
-import './style.scss'
+import './Style/style.scss'
 
 //Importing the needed Pages for this file
 import SignUp from './Pages/SignUp';

@@ -18,6 +18,7 @@ body{
 
 //Setting up the basic page layout for the website
 .PageBody{
+    min-height: 100vh;
     height : 100%;
     width : 100vw;
     display: flex;
@@ -131,12 +132,81 @@ body{
         .Goals{
             margin-top: 40px;
 
+            &.hideGoals{
+                /* Hiding all elements that I have chosen to hide, so it focuses on the form*/
+                .hideElement{
+                    opacity: 0.1;
+                }
+            }
+
             .GoalsHeader{
                 font-size: 48px;
                 cursor: pointer;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
 
-                &:hover{
-                    text-decoration: underline;
+                .titleArea{
+                    span:hover{
+                        text-decoration: underline;
+                    }
+                }
+
+                .buttonArea{
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    gap:10%;
+                    margin-top: 10px;
+
+                    button{
+                        padding: 14px;
+                        border-radius: 35px;
+                        width: 30%;
+                        background-color: orange;
+                        color: white;
+                        font-size: 28px;
+                        border: none;
+                        font-weight: 700;
+                        cursor:pointer;
+
+                        &:hover{
+                            border: 2px solid white;
+                        }
+                    }
+                }
+
+                .goalOptionsArea{
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    flex-direction: column;
+                    margin-top: 10px;
+                    gap: 20px;
+        
+                    .optionsLevel{
+                        display: flex;
+                        justify-content: center;
+                        align-items: space-evenly;
+                        gap: 20px;
+
+                        .option{
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            gap: 10px;
+                            font-size: 22px;
+                        }
+                    }
+                }
+
+                #MakeGoalForm{
+                    height : 60vh;
+                    margin-top: 10px;
+                    margin-left: 20vw;
+                    width: 60vw;
+                    background-color: red;
                 }
             }
 
@@ -237,6 +307,13 @@ body{
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
+    
+    p{
+        padding: 0px;
+        margin: 0px;
+        margin-top:5px;
+        font-size: 32px;
+    }
 }
 
 /* Generic image stylign for images on the website */
