@@ -1,8 +1,231 @@
-function MakeGoalForm(){
+import { useEffect, useState } from "react"
+import exitButton from "../Images/exitButton.jpg"
+
+function MakeGoalForm({toggleWindow}){
+
+    //UseState variables to store information from the form
+    const [goalName, setGoalName] = useState("")
+    const [subgoalOf, setSubgoalOf] = useState("")
+    const [skillsArray, setSkillsArray] = useState([])
+    const [currentSkill, setCurrentSkill] = useState("")
+    const [deadline, setDeadline] = useState("No")
+    const [deadlineDate, setDeadlineDate] = useState(null)
+    const [displayHomepage, setDisplayHomepage] = useState("Yes")
+    const [errorMsg, setErrorMsg] = useState("")
+
+    //Function to add the current enterred skill to the skill array, and set the skill variable to null
+    function addSkill(){
+        /* Appending the new skills to the skills array */
+        setSkillsArray(prevSkillsArr => {
+            return [
+              ...prevSkillsArr,
+              currentSkill
+            ]})
+        setCurrentSkill("")
+        document.getElementById("skillInput").value = ""
+    }
+
+    //Function to remove a given skill from an array
+    function removeSkill(skillName){
+        //Making a copy of the array without cloning it
+        let tempArray = skillsArray.slice()
+        //Finding the index of the item to be removed
+        let index = tempArray.indexOf(skillName)
+        //Removing the item at that index
+        tempArray.splice(index,1)
+        //Setting the changed array to be the actual array
+        setSkillsArray(tempArray)
+    }
+
+    //Function to process the information from the form, when the user submits
+    function processForm(){
+        //Resetting the error msg
+        setErrorMsg("")
+        //Boolean variable to say whether there is an error or not
+        let error = false
+        
+        //Validating the inputs from the user
+        if (goalName == ""){
+            setErrorMsg("Goal Name must not be empty")
+            error = true
+        }
+        //Processing the empty input for the subGoalOf variable
+        //NOTE : Being empty is an acceptable input for this variable, hence why no error will be occurring
+        if (subgoalOf == ""){
+            setSubgoalOf("None")
+        }
+        //Validating the deadline date
+        if (deadline == "Yes"){
+            //Ensuring deadlineDate isn't null
+            if(deadlineDate == null){
+                setErrorMsg("Deadline Date must not be empty")
+                error = true
+            }
+            //Ensuring deadline date isn't before the current date
+            //Getting the current date
+            let currentDate = new Date()
+            let currentDateObj = {
+                year : currentDate.getFullYear(), 
+                month : currentDate.getMonth()+1,
+                day : currentDate.getDate()}
+            //Breaking down the inputted users date into the same format object
+            let inputDateArr = deadlineDate.split("-")
+            let inputDateObj = {
+                year : inputDateArr[0],
+                month: inputDateArr[1],
+                day: inputDateArr[2]}
+            //Ensuring that the inputted date isn't less than the current date
+            if ( (inputDateObj.year < currentDateObj.year) ||
+                 ((inputDateObj.year == currentDateObj.year) && (inputDateObj.month < currentDateObj.month)) ||
+                 ((inputDateObj.year == currentDateObj.year) && (inputDateObj.month == currentDateObj.month) && (inputDateObj.day < currentDateObj.day))){
+                    setErrorMsg("Deadline Date has already passed, Invalid")
+                    error = true
+            }
+        }
+
+        //If no error msg, close the window
+        if (error == false){
+            //Closing the window
+            toggleWindow()
+        }
+    }
+
     return(
         <div id="MakeGoalForm">
-            <div className="formHeader">
-                <p>Make Goal</p>
+            {/* The title and button to exit the form */}
+            <div className="formHeader flexItems">
+                <p className="headerTitle flexItems">Make Goal</p>
+            </div>
+            <div className="formContent flexItems">
+                {/* The form, the main element of this window */}
+                <form action="#">
+                    <div className="formLine flexItems">
+                        <div className="lineTitle flexItems">
+                            <p>Goal Name : </p>
+                        </div>
+                        <div className="lineInput flexItems">
+                            <input type="text" placeholder="Enter Goal Name..." onChange={(e) => setGoalName(e.target.value)}/>
+                        </div>
+                    </div>
+                    <div className="formLine flexItems">
+                        <div className="lineTitle flexItems">
+                            <p>Subgoal of : </p>
+                        </div>
+                        <div className="lineInput flexItems">
+                            {/* Will output an option for every main goal that the website has */}
+                            <select onChange={(e) => setSubgoalOf(e.target.value)} name="SubgoalOf" id="SubgoalOf">
+                                <option value="none"></option>
+                                <option value="subGoal1">Subgoal 1</option>
+                                <option value="subGoal2">Subgoal 2</option>
+                                <option value="subGoal3">Subgoal 3</option>
+                                <option value="subGoal4">Subgoal 4</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className="skillsArea">
+                        {/* Enables the user to individually type in each skill they have */}
+                        <div className="formLine flexItems">
+                            <div className="lineTitle flexItems">
+                                <p>Skills :</p>
+                            </div>
+                            <div className="lineInput flexItems">
+                                <input id="skillInput" type="text" placeholder="Enter Skill..." onChange={(e) => setCurrentSkill(e.target.value)}/>
+                            </div>
+                            <div className="lineInput flexItems">
+                                <button type="button" onClick={() => addSkill()}>Add Skill</button>
+                            </div>
+                        </div>
+                        <div className="skillsOutput">
+                            {/* For each item in the skills array, output them here */}
+                            {/* NOTE : The skills are output in groups of two, that is why the code may be a bit funny */}
+                            {skillsArray.map((skill,index) => {
+                                return(
+                                    <div key={index}>
+                                        {index %4 ==0?
+                                            <div className="skillLine flexItem">
+                                                <div className="individualSkill flexItem">
+                                                    <p>{skillsArray[index]}</p>
+                                                    {/* Button to enable the user to remvoe the skill from the array */}
+                                                    <button type="button" onClick={() => removeSkill(skillsArray[index])}>-</button>
+                                                </div>
+                                                {skillsArray[index+1]?
+                                                    <div className="individualSkill flexItem">
+                                                        <p>{skillsArray[index+1]}</p>
+                                                        <button type="button" onClick={() => removeSkill(skillsArray[index+1])}>-</button>
+                                                    </div> : <div className="individualSkill flexItem"> </div>
+                                                }
+                                                {skillsArray[index+2]?
+                                                    <div className="individualSkill flexItem">
+                                                        <p>{skillsArray[index+2]}</p>
+                                                        <button type="button" onClick={() => removeSkill(skillsArray[index+2])}>-</button>
+                                                    </div> : <div className="individualSkill flexItem"> </div>
+                                                }
+                                                {skillsArray[index+3]?
+                                                    <div className="individualSkill flexItem">
+                                                        <p>{skillsArray[index+3]}</p>
+                                                        <button type="button" onClick={() => removeSkill(skillsArray[index+3])}>-</button>
+                                                    </div> : <div className="individualSkill flexItem"> </div>
+                                                }
+                                            </div> : <div style={{display:"none"}}></div>
+                                        }
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
+                    {/* Enables the user to choose if they want a deadline date or not */}
+                    <div className="formLine flexItems">
+                        <div className="lineTitle flexItems">
+                            <p>Deadline Date :</p>
+                        </div>
+                        <div className="lineInput flexItems">
+                            <select onChange={(e) => setDeadline(e.target.value)} name="DeadlineDate" id="DeadlineDate">
+                                {/* No is first as that is the default option in the form */}
+                                <option value="No">No</option>
+                                <option value="Yes">Yes</option>
+                            </select>
+                        </div>
+                    </div>
+                    {/* Allowing the user to pick a deadline date, if they have deadline selected yes */}
+                    {deadline=="Yes"?
+                        <div className="formLine flexItems indent">
+                            <div className="lineTitle flexItems">
+                                <p>-- Pick Date :</p>
+                            </div>
+                            <div className="lineInput flexItems">
+                                <input type="date" onChange={(e) => setDeadlineDate(e.target.value)} />
+                            </div>
+                        </div>
+                        : <div style={{display:"none"}}></div>
+                    }
+                    <div className="formLine flexItems">
+                        <div className="lineTitle flexItems">
+                            <p>Display on Homepage : </p>
+                        </div>
+                        <div className="lineInput flexItems">
+                            <select onChange={(e) => setDisplayHomepage(e.target.value)} name="DisplayHomepage" id="DisplayHomepage">
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                    </div>
+                    {/* Displaying the error msg to the screen, if there is one */}
+                    {errorMsg != ""? 
+                        <div className="error">
+                            <p>{errorMsg}</p>
+                        </div>
+                        : <div style={{display:"none"}}></div>}
+                    <div className="buttonLine">
+                        <div>
+                            {/* Allowing the user to submit the information they have enterred on the form */}
+                            <button type="button" onClick={() => processForm()}>Make Goal</button>
+                        </div>
+                        <div>
+                            {/* Exiting the user from the window */}
+                            <img src={exitButton} alt="Exit Button" className="exitImg" onClick={toggleWindow}/>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     )

@@ -56,7 +56,7 @@ function Goals({showOptions}){
                             </div>
                             {/* The code to conditionally render the form for the user to Make a Goal */}
                             {windowShown?
-                                <MakeGoalForm/> : <div style={{display:"none"}}></div>
+                                <MakeGoalForm toggleWindow={() => showWindow()}/> : <div style={{display:"none"}}></div>
                             }
                             {/* The goalOptions, conditionally rendered below the buttons */}
                             {goalOptions?
