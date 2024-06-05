@@ -4,7 +4,7 @@ import ToggleSwitch from "./ToggleSwitch"
 import { useState } from "react"
 import MakeGoalForm from "./MakeGoalForm"
 
-function Goals({showOptions}){
+function Goals({showOptions,currentUser}){
 
     //Creating the navigator for the website 
     const navigator = useNavigate()
@@ -56,7 +56,7 @@ function Goals({showOptions}){
                             </div>
                             {/* The code to conditionally render the form for the user to Make a Goal */}
                             {windowShown?
-                                <MakeGoalForm toggleWindow={() => showWindow()}/> : <div style={{display:"none"}}></div>
+                                <MakeGoalForm toggleWindow={() => showWindow()} currentUser={currentUser}/> : <div style={{display:"none"}}></div>
                             }
                             {/* The goalOptions, conditionally rendered below the buttons */}
                             {goalOptions?

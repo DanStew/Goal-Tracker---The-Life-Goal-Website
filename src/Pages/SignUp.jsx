@@ -67,7 +67,10 @@ function SignUp(){
                 })
     
                 //Making the user record to store all of the users goals
-                await setDoc(doc(db,"userGoals", res.user.uid), {goals:[]})
+                await setDoc(doc(db,"userGoals", res.user.uid),{
+                    goals:[],
+                    subgoals:[]
+                })
             })
     
             //Transporting the user to the homepage
@@ -126,7 +129,7 @@ function SignUp(){
     return(
         <div className="SignUp PageBody">
             {/* Creating the header for the page */}
-            <div className='header flexItems'>
+            <div className='topBanner flexItems'>
                 <h1>GoalTracker</h1>
             </div>
             <div className="mainBody formBackground flexItems">

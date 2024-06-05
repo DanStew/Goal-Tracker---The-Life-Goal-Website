@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react"
+import {v4 as uuidv4} from 'uuid';
 import exitButton from "../Images/exitButton.jpg"
+import { db } from "../Config/firebase"
+import { FieldValue, arrayUnion, doc, setDoc, updateDoc } from "firebase/firestore";
 
-function MakeGoalForm({toggleWindow}){
+function MakeGoalForm({toggleWindow,currentUser}){
 
     //UseState variables to store information from the form
     const [goalName, setGoalName] = useState("")
@@ -12,14 +15,31 @@ function MakeGoalForm({toggleWindow}){
     const [deadlineDate, setDeadlineDate] = useState(null)
     const [displayHomepage, setDisplayHomepage] = useState("Yes")
     const [errorMsg, setErrorMsg] = useState("")
+    const [subgoal, setSubgoal] = useState(true)
+
+    //Function used to correctly format the given input
+    function formatString(inputString){
+        //Copying the string without mutating and Making it formatted
+        let copyString = ""
+        for (let i=0 ; i<=inputString.length; i++){
+            if (i==0){
+                copyString += inputString.charAt(i).toUpperCase()
+                continue
+            }
+            copyString += inputString.charAt(i).toLowerCase()
+        }
+        return copyString
+    }
 
     //Function to add the current enterred skill to the skill array, and set the skill variable to null
     function addSkill(){
+        //Formatting the string correctly
+        let formattedString = formatString(currentSkill)
         /* Appending the new skills to the skills array */
         setSkillsArray(prevSkillsArr => {
             return [
               ...prevSkillsArr,
-              currentSkill
+              formattedString
             ]})
         setCurrentSkill("")
         document.getElementById("skillInput").value = ""
@@ -38,36 +58,46 @@ function MakeGoalForm({toggleWindow}){
     }
 
     //Function to process the information from the form, when the user submits
-    function processForm(){
+    async function processForm(){
         //Resetting the error msg
         setErrorMsg("")
         //Boolean variable to say whether there is an error or not
         let error = false
-        
+
         //Validating the inputs from the user
         if (goalName == ""){
             setErrorMsg("Goal Name must not be empty")
             error = true
+            return
         }
         //Processing the empty input for the subGoalOf variable
         //NOTE : Being empty is an acceptable input for this variable, hence why no error will be occurring
         if (subgoalOf == ""){
             setSubgoalOf("None")
+            setSubgoalOf(false) //By default, this variable is true, so you don't need to set it true
         }
+
+        //Getting the current date and time (will be used later)
+        let currentDate = new Date()
+        //Putting all the date information into an object
+        //The if statements are to ensure that the date is currently formatted, with 0s when needed
+        let currentDateObj = {
+                year : currentDate.getFullYear(), 
+                month : currentDate.getMonth()+1 < 10? "0" + (currentDate.getMonth()+1) : currentDate.getMonth() + 1,
+                day : currentDate.getDate() < 10 ? "0" + currentDate.getDate() : currentDate.getDate(),
+                hours: currentDate.getHours() < 10 ? "0" + currentDate.getHours() : currentDate.getHours(),
+                minutes: currentDate.getMinutes() < 10 ? "0" + currentDate.getMinutes() : currentDate.getMinutes()}
+        //Putting all this information into a single string, will be stored later
+        let currentDateString = currentDateObj.year + "/" + currentDateObj.month + "/" + currentDateObj.day + " " + currentDateObj.hours + ":" + currentDateObj.minutes
+
         //Validating the deadline date
         if (deadline == "Yes"){
             //Ensuring deadlineDate isn't null
             if(deadlineDate == null){
                 setErrorMsg("Deadline Date must not be empty")
                 error = true
+                return
             }
-            //Ensuring deadline date isn't before the current date
-            //Getting the current date
-            let currentDate = new Date()
-            let currentDateObj = {
-                year : currentDate.getFullYear(), 
-                month : currentDate.getMonth()+1,
-                day : currentDate.getDate()}
             //Breaking down the inputted users date into the same format object
             let inputDateArr = deadlineDate.split("-")
             let inputDateObj = {
@@ -80,14 +110,38 @@ function MakeGoalForm({toggleWindow}){
                  ((inputDateObj.year == currentDateObj.year) && (inputDateObj.month == currentDateObj.month) && (inputDateObj.day < currentDateObj.day))){
                     setErrorMsg("Deadline Date has already passed, Invalid")
                     error = true
+                    return
             }
         }
 
-        //If no error msg, close the window
-        if (error == false){
-            //Closing the window
-            toggleWindow()
-        }
+        //Formatting the strings recieved from the user
+        let formattedGoalName = formatString(goalName)
+        //Keeping track of the unique id we are using
+        let uniqueId = uuidv4()
+
+        //Making the Goals record with all the information
+        await setDoc(doc(db, "Goals", uniqueId),{
+            GoalName : formattedGoalName,
+            Skills : skillsArray,
+            Subgoals : [],
+            Entries : [],
+            LastUpdated : currentDateString,
+            Completed : false,
+            CompletionDate : "",
+            NmbGoals : 1,
+            CompleteGoals : 0,
+            DisplayHomepage : displayHomepage,
+            Subgoal : subgoal
+        })
+
+        //Updating the userGoals record with the additional uuid
+        const userGoalsRef = doc(db,"userGoals",currentUser.uid)
+        await updateDoc(userGoalsRef,{
+            Goals: arrayUnion(uniqueId)
+        })
+
+        //Closing the window
+        toggleWindow()
     }
 
     return(

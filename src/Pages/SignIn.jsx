@@ -60,7 +60,7 @@ function SignIn(){
 
     return(
         <div className="Login PageBody">
-            <div className='header flexItems'>
+            <div className='topBanner flexItems'>
                 <h1>GoalTracker</h1>
             </div>
             <div className="mainBody formBackground flexItems">
