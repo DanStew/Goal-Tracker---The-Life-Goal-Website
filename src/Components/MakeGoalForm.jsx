@@ -4,7 +4,7 @@ import exitButton from "../Images/exitButton.jpg"
 import { db } from "../Config/firebase"
 import { FieldValue, arrayUnion, doc, setDoc, updateDoc } from "firebase/firestore";
 
-function MakeGoalForm({toggleWindow,currentUser}){
+function MakeGoalForm({toggleWindow,currentUser, setGoalAdded, setGoalAddedRef}){
 
     //UseState variables to store information from the form
     const [goalName, setGoalName] = useState("")
@@ -121,6 +121,7 @@ function MakeGoalForm({toggleWindow,currentUser}){
 
         //Making the Goals record with all the information
         await setDoc(doc(db, "Goals", uniqueId),{
+            uid : uniqueId,
             GoalName : formattedGoalName,
             Skills : skillsArray,
             Subgoals : [],
@@ -137,8 +138,12 @@ function MakeGoalForm({toggleWindow,currentUser}){
         //Updating the userGoals record with the additional uuid
         const userGoalsRef = doc(db,"userGoals",currentUser.uid)
         await updateDoc(userGoalsRef,{
-            Goals: arrayUnion(uniqueId)
+            goals: arrayUnion(uniqueId)
         })
+
+        //Telling goals that a goal has been added
+        setGoalAdded(true)
+        setGoalAddedRef(uniqueId)
 
         //Closing the window
         toggleWindow()

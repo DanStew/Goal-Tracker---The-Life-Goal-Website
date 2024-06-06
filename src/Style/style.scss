@@ -388,7 +388,7 @@ p{
                 flex-direction: column;
 
                 .homePageGoal{
-                    width: 80%;
+                    width: 60vw;
                     margin-top: 20px;
                     border: 2px solid black;
                     border-radius: 25px;
@@ -402,12 +402,13 @@ p{
                     .hpgHeader{
                         flex: 2 2;
                         border-bottom: 1px solid black;
-                        font-size: 32px;
+                        font-size: 42px;
+                        margin-bottom: 10px;
 
                         p{
                             font-size: 20px;
                             padding: 5px;
-                            margin: 5px;
+                            margin: 10px;
                         }
 
                         .hpgHeaderLine{
@@ -421,6 +422,7 @@ p{
                                 width: 20%;
                                 background-color: #ddd;
                                 border : 1px solid black;
+                                text-align: center;
                             }
                               
                             .progress-bar {
@@ -437,7 +439,7 @@ p{
                     .hpgMain{
                         font-size: 18px;
                         flex: 1 1;
-                        height: 20px;
+                        min-height: 40px;
 
                         p{
                             padding: 0px;

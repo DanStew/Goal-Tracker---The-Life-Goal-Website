@@ -1,7 +1,9 @@
-function HomePageGoal(){
+function HomePageGoal({goalObj}){
 
     //The variable that will store the completedGoals / nmbGoals calculation
-    var progressTotal = 100
+    var progressTotal = goalObj.CompleteGoals / goalObj.NmbGoals
+    //Showing a little bit of green, to not demotivate the user
+    progressTotal == 0? progressTotal = 5 : progressTotal = progressTotal
 
     return(
         <div className="homePageGoal flexItems">
@@ -9,7 +11,7 @@ function HomePageGoal(){
             <div className="hpgHeader flexItems">
                 <div>
                     {/* Displaying the GoalName of the Goal */}
-                    <span>GoalName</span>
+                    <span>{goalObj.GoalName}</span>
                 </div>
                 {/* Displaying information about the goals */}
                 <div className="hpgHeaderLine">
@@ -17,7 +19,7 @@ function HomePageGoal(){
                     {/* Making the progress bar for the system */}
                     <div className="container">
                         {/* This line of code fill in the bar the variable amount that has currently been complete */}
-                        <div style={{width: `${progressTotal}%`}} className="progress-bar">CptGoals/NmbGoals</div>
+                        <div style={{width: `${progressTotal}%`}} className="progress-bar">{goalObj.CompleteGoals}/{goalObj.NmbGoals}</div>
                     </div>
                 </div>
                 {/* Displaying information about the goals */}
@@ -26,15 +28,15 @@ function HomePageGoal(){
                         <p>Last Updated : </p>
                     </div>
                     <div>
-                        <p>Date</p>
+                        <p>{goalObj.LastUpdated}</p>
                     </div>
                 </div>
             </div>
             {/* Displaying the subgoals of the goal, allowing the user to be able to click on them */}
             <div className="hpgMain flexItems">
-                <p>Subgoal1</p>
-                <p>Subgoal2</p>
-                <p>Subgoal3</p>
+                {goalObj.Subgoals.forEach((subgoal) => {
+                    <p>Subgoal</p>
+                })}
             </div>
             <div className="hpgFooter flexItems">
                 <div className="hpgFooterEmpty flexItems"></div>

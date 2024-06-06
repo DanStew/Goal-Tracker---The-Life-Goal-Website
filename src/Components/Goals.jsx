@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom"
 import HomePageGoal from "./HomePageGoal"
 import ToggleSwitch from "./ToggleSwitch"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import MakeGoalForm from "./MakeGoalForm"
+import { doc, getDoc } from "firebase/firestore"
+import { db } from "../Config/firebase"
 
 function Goals({showOptions,currentUser}){
 
@@ -23,9 +25,12 @@ function Goals({showOptions,currentUser}){
 
     }
 
+    //Usestate the store what the mainClass of the page will be, used to trigger hiding screen or not
     const [mainClass, setMainClass] = useState("Goals")
+    //Usestate to determine whether the Make A Goal window is currently being shown
     const [windowShown, setWindowShown] = useState(false)
 
+    //Function to trigger the showing of the window on the screen
     function showWindow(){
         //Showing / Hiding goals depending on whether window shown or not
         windowShown? setMainClass("Goals") : setMainClass("Goals hideGoals")
@@ -34,6 +39,69 @@ function Goals({showOptions,currentUser}){
         //Toggling windowShown
         setWindowShown(!windowShown)
     }
+    
+    //Usestates to determine whether a goal has been added and what the name of the goal is
+    //This is so that the new goal can be appended to the screen
+    const [goalAdded,setGoalAdded] = useState(false)
+    const [goalAddedRef,setGoalAddedRef] = useState("")
+    
+    //Usestate array to store all of the goals from the user
+    //Its called goalsObj as it will store goal objects, made from the goal records
+    const [goalsObjArray, setGoalsObjArray] = useState([])
+    
+    //Making an array to store all the goal names, this will be used in the Subgoal of part of the form
+    const [goalNames, setGoalNames] = useState([])
+
+    //Useeffect to collect all the goal information from the screen
+    useEffect(() => {
+        //Finding the users UserGoal record
+        const getUserGoals = async() => {
+            const userGoalsRef = doc(db,"userGoals",currentUser.uid)
+            const docSnap = await getDoc(userGoalsRef)
+            return docSnap.data()
+        }
+
+        //Finding the goal information from the goal ids
+        const getGoalObj = async(goalId) => {
+            //Getting the goal record data, using id 
+            const goalRef = doc(db,"Goals",goalId)
+            const docSnap = await getDoc(goalRef)
+            const goalData = docSnap.data()
+            //Adding the goal name to the goal names array
+            setGoalNames(prevNames => {
+                return [
+                    ...prevNames,
+                    goalData.GoalName
+                ]
+            })
+            //Returning the goal object
+            return goalData
+        }
+
+        //Making the main function
+        const mainFunction = async() => {
+            //Making sure that the website does have a current user 
+            if (currentUser.uid){
+                //Getting the userGoals record data
+                const userGoalsData = await getUserGoals()
+                //Finding the goal data from all of the users goals
+                userGoalsData.goals.forEach( async (goalId) => {
+                    //Getting the goal information and putting it into an object
+                    const goalObj = await getGoalObj(goalId)
+                    //Adding the goalInformation to the GoalsObjArray
+                    setGoalsObjArray(prevArr => {
+                        return [
+                            ...prevArr,
+                            goalObj
+                        ]
+                    })
+                }
+                )
+            }
+        }
+
+        mainFunction()
+      }, [currentUser,goalAddedRef]);
 
     return(
         <div className={mainClass}>
@@ -56,7 +124,7 @@ function Goals({showOptions,currentUser}){
                             </div>
                             {/* The code to conditionally render the form for the user to Make a Goal */}
                             {windowShown?
-                                <MakeGoalForm toggleWindow={() => showWindow()} currentUser={currentUser}/> : <div style={{display:"none"}}></div>
+                                <MakeGoalForm toggleWindow={() => showWindow()} currentUser={currentUser} setGoalAdded={() => setGoalAdded()} setGoalAddedRef={() => setGoalAddedRef()}/> : <div style={{display:"none"}}></div>
                             }
                             {/* The goalOptions, conditionally rendered below the buttons */}
                             {goalOptions?
@@ -92,10 +160,11 @@ function Goals({showOptions,currentUser}){
                 </div>
             </div>
             <div className="IndividualGoals flexItems hideElement">
-                {/* Outputs the HomePageGoal component for every goal where the user has SHOWN ON HOME PAGE active */}
-                <HomePageGoal />
-                <HomePageGoal />
-                <HomePageGoal />
+                {goalsObjArray.map((goalObj) =>
+                    <div key={goalObj.uid}>
+                        <HomePageGoal goalObj={goalObj} />
+                    </div>
+                )}
             </div>
         </div>
     )
