@@ -37,11 +37,11 @@ function App() {
           <Route path="SignIn" element={<SignIn/>} />
           {/* Implementing the protected route onto the home page */}
           <Route index element={<ProtectedRoute ><Home /></ProtectedRoute>} />
-          <Route path="Account" element={<Account/>} />
-          <Route path="MyGoals" element={<MyGoals/>} />
-          <Route path="Goals/:goalName" element={<Goal/>} />
-          <Route path="Timetable" element={<Timetable/>} />
-          <Route path="Settings" element={<Settings />} />
+          <Route path="Account" element={<ProtectedRoute ><Account/></ProtectedRoute>} />
+          <Route path="MyGoals" element={<ProtectedRoute ><MyGoals/></ProtectedRoute>} />
+          <Route path="Goals/:goalName" element={<ProtectedRoute><Goal/></ProtectedRoute>} />
+          <Route path="Timetable" element={<ProtectedRoute ><Timetable /></ProtectedRoute>} />
+          <Route path="Settings" element={<ProtectedRoute ><Settings /></ProtectedRoute>} />
         </Route>
       </Routes>
     </BrowserRouter>

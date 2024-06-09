@@ -68,8 +68,7 @@ function SignUp(){
     
                 //Making the user record to store all of the users goals
                 await setDoc(doc(db,"userGoals", res.user.uid),{
-                    goals:[],
-                    subgoals:[]
+                    goals:[]
                 })
             })
     

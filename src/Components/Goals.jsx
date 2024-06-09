@@ -20,6 +20,9 @@ function Goals({showOptions,currentUser}){
     const [sortLastUpdated, setSortLastUpdated] = useState(true) //Sorts goals by Last Updated
     const [sortDueDate, setSortDueDate] = useState(false) //Sorts goals by closest Due Date
 
+    //Object that connects the main goal names to the names of the subgoals that they have
+    let goalToSubgoalConnector = {}
+
     //Function to sort how the goals are sorted on the page
     function sortPriority(priorityOption,priorityValue){
 
@@ -45,12 +48,14 @@ function Goals({showOptions,currentUser}){
     const [goalAdded,setGoalAdded] = useState(false)
     const [goalAddedRef,setGoalAddedRef] = useState("")
     
-    //Usestate array to store all of the goals from the user
+    //Usestate array to store all of the goals  and subgoals from the user
     //Its called goalsObj as it will store goal objects, made from the goal records
     const [goalsObjArray, setGoalsObjArray] = useState([])
+    const [subgoalsObjArray, setSubgoalsObjArray] = useState([])
     
-    //Making an array to store all the goal names, this will be used in the Subgoal of part of the form
+    //Making an array to store all the goal names and subgoal names, this will be used in the Subgoal of part of the form
     const [goalNames, setGoalNames] = useState([])
+    const [subgoalNames, setSubgoalNames] = useState([])
 
     //Useeffect to collect all the goal information from the screen
     useEffect(() => {
@@ -67,15 +72,36 @@ function Goals({showOptions,currentUser}){
             const goalRef = doc(db,"Goals",goalId)
             const docSnap = await getDoc(goalRef)
             const goalData = docSnap.data()
-            //Adding the goal name to the goal names array
-            setGoalNames(prevNames => {
-                return [
-                    ...prevNames,
-                    goalData.GoalName
-                ]
-            })
-            //Returning the goal object
+            //Getting the names of the subgoals for that goal, if they exist
+            console.log(goalData.Subgoals)
+            if (goalData.Subgoals != undefined){
+                getSubgoals(goalData)
+            }
+            //Returning the goal data to the system
             return goalData
+        }
+
+        //Finding the names of all the subgoals for the goals
+        const getSubgoals = (goalData) => {
+            console.log(goalData)
+            let subgoalNames = []
+            //Looping through all the subgoalIds it has
+            goalData.Subgoals.forEach((subgoalId) => {
+            //Looping through all the subgoal objects
+            goalsObjArray.forEach((goalObj) => {
+                if (goalObj.uid == subgoalId){
+                    subgoalNames.push(goalObj.GoalName)
+                }})
+            subgoalsObjArray.forEach((subgoalObj) => {
+                if (subgoalObj.uid == subgoalId){
+                    subgoalNames.push(subgoalObj.GoalName)
+                }})
+            })
+            //Appending the new array to the object, that connects main goals names to the subgoals they contain
+            let mainGoalName = goalData.GoalName
+            let tempObj = {mainGoalName : subgoalNames}
+            goalToSubgoalConnector = {...goalToSubgoalConnector, ...tempObj}
+            console.log(goalToSubgoalConnector)
         }
 
         //Making the main function
@@ -84,10 +110,24 @@ function Goals({showOptions,currentUser}){
             if (currentUser.uid){
                 //Getting the userGoals record data
                 const userGoalsData = await getUserGoals()
+                //Resetting the goalsObj and goalNames array
+                setGoalsObjArray([])
+                setSubgoalsObjArray([])
+                setGoalNames([])
+                setSubgoalNames([])
+                setGoalAddedRef(false)
+                //Looping through the different goal types and storing all the information
                 //Finding the goal data from all of the users goals
                 userGoalsData.goals.forEach( async (goalId) => {
                     //Getting the goal information and putting it into an object
                     const goalObj = await getGoalObj(goalId)
+                    //Adding the goal name to the goalnames array
+                    setGoalNames(prevNames => {
+                        return [
+                            ...prevNames,
+                            goalObj.GoalName
+                        ]
+                    }) 
                     //Adding the goalInformation to the GoalsObjArray
                     setGoalsObjArray(prevArr => {
                         return [
@@ -95,13 +135,36 @@ function Goals({showOptions,currentUser}){
                             goalObj
                         ]
                     })
+                })
+                //Finding the goal data from all of the users goals
+                userGoalsData.subgoals.forEach( async (subgoalId) => {
+                    //Getting the goal information and putting it into an object
+                    const subgoalObj = await getGoalObj(subgoalId)
+                    //Adding the subgoal name to the array
+                    setSubgoalNames(prevSubgoalNames => {
+                        return ([
+                            ...prevSubgoalNames,
+                            subgoalObj.GoalName
+                            ])
+                        })
+                    //Adding the goalInformation to the GoalsObjArray
+                    setSubgoalsObjArray(prevArr => {
+                        return [
+                            ...prevArr,
+                            subgoalObj
+                        ]
+                    })
                 }
                 )
+                //Code which collects the subgoal names for all the goals which have subgoals
+                getSubgoals()
             }
         }
 
         mainFunction()
       }, [currentUser,goalAddedRef]);
+
+      
 
     return(
         <div className={mainClass}>
@@ -124,7 +187,7 @@ function Goals({showOptions,currentUser}){
                             </div>
                             {/* The code to conditionally render the form for the user to Make a Goal */}
                             {windowShown?
-                                <MakeGoalForm toggleWindow={() => showWindow()} currentUser={currentUser} setGoalAdded={() => setGoalAdded()} setGoalAddedRef={() => setGoalAddedRef()}/> : <div style={{display:"none"}}></div>
+                                <MakeGoalForm toggleWindow={() => showWindow()} currentUser={currentUser} setGoalAddedRef={() => setGoalAddedRef()} goalNames={goalNames} goalsObjArray={goalsObjArray} subgoalNames={subgoalNames} subgoalsObjArray={subgoalsObjArray}/> : <div style={{display:"none"}}></div>
                             }
                             {/* The goalOptions, conditionally rendered below the buttons */}
                             {goalOptions?

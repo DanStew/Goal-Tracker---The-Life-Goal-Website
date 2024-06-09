@@ -2,9 +2,9 @@ import { useEffect, useState } from "react"
 import {v4 as uuidv4} from 'uuid';
 import exitButton from "../Images/exitButton.jpg"
 import { db } from "../Config/firebase"
-import { FieldValue, arrayUnion, doc, setDoc, updateDoc } from "firebase/firestore";
+import { FieldValue, arrayRemove, arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 
-function MakeGoalForm({toggleWindow,currentUser, setGoalAdded, setGoalAddedRef}){
+function MakeGoalForm({toggleWindow,currentUser,setGoalAddedRef,goalNames,goalsObjArray,subgoalNames,subgoalsObjArray}){
 
     //UseState variables to store information from the form
     const [goalName, setGoalName] = useState("")
@@ -15,7 +15,6 @@ function MakeGoalForm({toggleWindow,currentUser, setGoalAdded, setGoalAddedRef})
     const [deadlineDate, setDeadlineDate] = useState(null)
     const [displayHomepage, setDisplayHomepage] = useState("Yes")
     const [errorMsg, setErrorMsg] = useState("")
-    const [subgoal, setSubgoal] = useState(true)
 
     //Function used to correctly format the given input
     function formatString(inputString){
@@ -33,6 +32,10 @@ function MakeGoalForm({toggleWindow,currentUser, setGoalAdded, setGoalAddedRef})
 
     //Function to add the current enterred skill to the skill array, and set the skill variable to null
     function addSkill(){
+        //If the skill is empty, reject it
+        if (currentSkill == ""){
+            return
+        }
         //Formatting the string correctly
         let formattedString = formatString(currentSkill)
         /* Appending the new skills to the skills array */
@@ -61,20 +64,20 @@ function MakeGoalForm({toggleWindow,currentUser, setGoalAdded, setGoalAddedRef})
     async function processForm(){
         //Resetting the error msg
         setErrorMsg("")
-        //Boolean variable to say whether there is an error or not
-        let error = false
 
         //Validating the inputs from the user
         if (goalName == ""){
             setErrorMsg("Goal Name must not be empty")
-            error = true
             return
         }
+
+        //Boolean subgoal variable to see whether variable is a subgoal or not
+        let subgoal = true
         //Processing the empty input for the subGoalOf variable
         //NOTE : Being empty is an acceptable input for this variable, hence why no error will be occurring
         if (subgoalOf == ""){
             setSubgoalOf("None")
-            setSubgoalOf(false) //By default, this variable is true, so you don't need to set it true
+            subgoal = false //By default, this variable is true, so you don't need to set it true
         }
 
         //Getting the current date and time (will be used later)
@@ -95,7 +98,6 @@ function MakeGoalForm({toggleWindow,currentUser, setGoalAdded, setGoalAddedRef})
             //Ensuring deadlineDate isn't null
             if(deadlineDate == null){
                 setErrorMsg("Deadline Date must not be empty")
-                error = true
                 return
             }
             //Breaking down the inputted users date into the same format object
@@ -109,13 +111,25 @@ function MakeGoalForm({toggleWindow,currentUser, setGoalAdded, setGoalAddedRef})
                  ((inputDateObj.year == currentDateObj.year) && (inputDateObj.month < currentDateObj.month)) ||
                  ((inputDateObj.year == currentDateObj.year) && (inputDateObj.month == currentDateObj.month) && (inputDateObj.day < currentDateObj.day))){
                     setErrorMsg("Deadline Date has already passed, Invalid")
-                    error = true
                     return
             }
         }
 
         //Formatting the strings recieved from the user
         let formattedGoalName = formatString(goalName)
+
+        //Ensuring that the new goal name hasn't already been used
+        let duplicateName = false
+        goalNames.map((goalName) => {
+            if (goalName == formattedGoalName){
+                duplicateName = true
+            }
+        })
+        if (duplicateName){
+            setErrorMsg("Goal Name has already been used, Invalid")
+            return
+        }
+
         //Keeping track of the unique id we are using
         let uniqueId = uuidv4()
 
@@ -135,14 +149,56 @@ function MakeGoalForm({toggleWindow,currentUser, setGoalAdded, setGoalAddedRef})
             Subgoal : subgoal
         })
 
-        //Updating the userGoals record with the additional uuid
+        //Getting the reference to the userGoals record for the record, to be used later
         const userGoalsRef = doc(db,"userGoals",currentUser.uid)
-        await updateDoc(userGoalsRef,{
-            goals: arrayUnion(uniqueId)
-        })
+
+        //If the goal is a subgoal, finding the goal record for its main goal
+        if (subgoal){
+            //Boolean test variable to see if the subgoal has been added or not
+            //Finding the goal object with the goal name selected
+            //First searching the main goals to see if it is there
+            goalsObjArray.map(async (goalsObj) => {
+                if (goalsObj.GoalName == subgoalOf){
+                    const mainGoalRef = doc(db,"Goals",goalsObj.uid)
+                    await updateDoc(mainGoalRef,{
+                        Subgoals: arrayUnion(uniqueId)
+                    })
+                }
+            })
+            //If it isn't there, check the subgoals to see if it is there
+            subgoalsObjArray.map(async (subgoalsObj) => {
+                if (subgoalsObj.GoalName == subgoalOf){
+                    //Adding the new subgoal to the existing subgoal
+                    const subGoalRef = doc(db,"Goals",subgoalsObj.uid)
+                    //Getting the data from the subGoalRef
+                    const docSnap = await getDoc(subGoalRef)
+                    const subgoalData = docSnap.data()
+                    await updateDoc(subGoalRef,{
+                        Subgoals : arrayUnion(uniqueId)
+                    })
+                    //Moving the subgoal from the subgoals array to the goals array
+                    //This is because this goal should now be displayed on the home screen, as it has its own subgoals
+                    await updateDoc(userGoalsRef,{
+                        goals: arrayUnion(subgoalData.uid),
+                        subgoals : arrayRemove(subgoalData.uid)
+                    })
+                }
+            })
+
+            //Adding the new subgoal to the userGoals subgoal area
+            await updateDoc(userGoalsRef,{
+                subgoals : arrayUnion(uniqueId)
+            })
+        }
+        //If the goal added isn't a subgoal, it can be added directly to the goals array
+        else{
+            //Updating the userGoals record with the additional uuid
+            await updateDoc(userGoalsRef,{
+                goals: arrayUnion(uniqueId)
+            })
+        }
 
         //Telling goals that a goal has been added
-        setGoalAdded(true)
         setGoalAddedRef(uniqueId)
 
         //Closing the window
@@ -173,11 +229,14 @@ function MakeGoalForm({toggleWindow,currentUser, setGoalAdded, setGoalAddedRef})
                         <div className="lineInput flexItems">
                             {/* Will output an option for every main goal that the website has */}
                             <select onChange={(e) => setSubgoalOf(e.target.value)} name="SubgoalOf" id="SubgoalOf">
-                                <option value="none"></option>
-                                <option value="subGoal1">Subgoal 1</option>
-                                <option value="subGoal2">Subgoal 2</option>
-                                <option value="subGoal3">Subgoal 3</option>
-                                <option value="subGoal4">Subgoal 4</option>
+                                <option value="none">None</option>
+                                {/* Going through and displaying all the goalNames there are */}
+                                {goalNames.map((goalName) =>
+                                        <option key={goalName} value={goalName}>{goalName}</option>
+                                )}
+                                {subgoalNames.map((goalName) =>
+                                        <option key={goalName} value={goalName}>{goalName}</option>
+                                )}
                             </select>
                         </div>
                     </div>
