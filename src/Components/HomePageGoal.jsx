@@ -1,4 +1,4 @@
-function HomePageGoal({goalObj}){
+function HomePageGoal({goalObj,subgoalToMaingoalConnector}){
 
     //The variable that will store the completedGoals / nmbGoals calculation
     var progressTotal = goalObj.CompleteGoals / goalObj.NmbGoals
@@ -34,9 +34,14 @@ function HomePageGoal({goalObj}){
             </div>
             {/* Displaying the subgoals of the goal, allowing the user to be able to click on them */}
             <div className="hpgMain flexItems">
-                {goalObj.Subgoals.forEach((subgoal) => {
-                    <p>Subgoal</p>
-                })}
+                {subgoalToMaingoalConnector[goalObj.GoalName] ? 
+                    subgoalToMaingoalConnector[goalObj.GoalName].map((goalName) => {
+                        return(
+                            <div key={goalName}>
+                                <p>{goalName}</p>
+                            </div>
+                        )})
+                    : <div style={{display:"none"}}></div>}
             </div>
             <div className="hpgFooter flexItems">
                 <div className="hpgFooterEmpty flexItems"></div>

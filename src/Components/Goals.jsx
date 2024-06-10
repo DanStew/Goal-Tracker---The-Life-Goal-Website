@@ -45,7 +45,6 @@ function Goals({showOptions,currentUser}){
     
     //Usestates to determine whether a goal has been added and what the name of the goal is
     //This is so that the new goal can be appended to the screen
-    const [goalAdded,setGoalAdded] = useState(false)
     const [goalAddedRef,setGoalAddedRef] = useState("")
     
     //Usestate array to store all of the goals  and subgoals from the user
@@ -56,6 +55,10 @@ function Goals({showOptions,currentUser}){
     //Making an array to store all the goal names and subgoal names, this will be used in the Subgoal of part of the form
     const [goalNames, setGoalNames] = useState([])
     const [subgoalNames, setSubgoalNames] = useState([])
+
+    //Connecting the subgoals to the maingoals in the system
+    const [subgoalsToMaingoals,setSubgoalsToMaingoals] = useState(false)
+    const [subgoalsToMaingoalsConnector, setSubgoalsToMaingoalsConnector] = useState({})
 
     //Useeffect to collect all the goal information from the screen
     useEffect(() => {
@@ -72,36 +75,8 @@ function Goals({showOptions,currentUser}){
             const goalRef = doc(db,"Goals",goalId)
             const docSnap = await getDoc(goalRef)
             const goalData = docSnap.data()
-            //Getting the names of the subgoals for that goal, if they exist
-            console.log(goalData.Subgoals)
-            if (goalData.Subgoals != undefined){
-                getSubgoals(goalData)
-            }
             //Returning the goal data to the system
             return goalData
-        }
-
-        //Finding the names of all the subgoals for the goals
-        const getSubgoals = (goalData) => {
-            console.log(goalData)
-            let subgoalNames = []
-            //Looping through all the subgoalIds it has
-            goalData.Subgoals.forEach((subgoalId) => {
-            //Looping through all the subgoal objects
-            goalsObjArray.forEach((goalObj) => {
-                if (goalObj.uid == subgoalId){
-                    subgoalNames.push(goalObj.GoalName)
-                }})
-            subgoalsObjArray.forEach((subgoalObj) => {
-                if (subgoalObj.uid == subgoalId){
-                    subgoalNames.push(subgoalObj.GoalName)
-                }})
-            })
-            //Appending the new array to the object, that connects main goals names to the subgoals they contain
-            let mainGoalName = goalData.GoalName
-            let tempObj = {mainGoalName : subgoalNames}
-            goalToSubgoalConnector = {...goalToSubgoalConnector, ...tempObj}
-            console.log(goalToSubgoalConnector)
         }
 
         //Making the main function
@@ -156,15 +131,44 @@ function Goals({showOptions,currentUser}){
                     })
                 }
                 )
-                //Code which collects the subgoal names for all the goals which have subgoals
-                getSubgoals()
             }
         }
 
         mainFunction()
       }, [currentUser,goalAddedRef]);
 
-      
+      useEffect(() => {
+        const mainFunction = () => {
+            let tempObj = {}
+            //Looping through all the main goals in the array
+            //NOTE : You don't need to loop through the subgoals as no subgoals will have subgoals
+            goalsObjArray.forEach((goalObj) => {
+                //Seeing if the goal has subgoals
+                if (goalObj.Subgoals != []){
+                    let subgoalsArr = []
+                    //Matching the subgoalsUid, to find the names of the subgoals
+                    goalObj.Subgoals.forEach((subgoalUid) => {
+                        goalsObjArray.forEach((subgoalObj) => {
+                            if (subgoalObj.uid == subgoalUid){
+                                subgoalsArr.push([subgoalObj.GoalName])
+                            }
+                        })
+                        subgoalsObjArray.forEach((subgoalObj) => {
+                            if (subgoalObj.uid == subgoalUid){
+                                subgoalsArr.push([subgoalObj.GoalName])
+                            }
+                        })
+                    })
+                    //Connecting the item temporarily
+                    tempObj[goalObj.GoalName] = subgoalsArr
+                }
+            })
+            //Permanently storing the changes made
+            setSubgoalsToMaingoalsConnector(tempObj)
+        } 
+
+        mainFunction()
+      }, [goalsObjArray])
 
     return(
         <div className={mainClass}>
@@ -225,7 +229,7 @@ function Goals({showOptions,currentUser}){
             <div className="IndividualGoals flexItems hideElement">
                 {goalsObjArray.map((goalObj) =>
                     <div key={goalObj.uid}>
-                        <HomePageGoal goalObj={goalObj} />
+                        <HomePageGoal goalObj={goalObj} subgoalToMaingoalConnector={subgoalsToMaingoalsConnector}/>
                     </div>
                 )}
             </div>
