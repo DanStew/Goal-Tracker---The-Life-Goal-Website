@@ -191,7 +191,7 @@ function Goals({showOptions,currentUser}){
                             </div>
                             {/* The code to conditionally render the form for the user to Make a Goal */}
                             {windowShown?
-                                <MakeGoalForm toggleWindow={() => showWindow()} currentUser={currentUser} setGoalAddedRef={() => setGoalAddedRef()} goalNames={goalNames} goalsObjArray={goalsObjArray} subgoalNames={subgoalNames} subgoalsObjArray={subgoalsObjArray}/> : <div style={{display:"none"}}></div>
+                                <MakeGoalForm toggleWindow={() => showWindow()} currentUser={currentUser} setGoalAddedRef={() => setGoalAddedRef()} goalNames={goalNames} goalsObjArray={goalsObjArray} subgoalNames={subgoalNames} subgoalsObjArray={subgoalsObjArray} showNone={true}/> : <div style={{display:"none"}}></div>
                             }
                             {/* The goalOptions, conditionally rendered below the buttons */}
                             {goalOptions?

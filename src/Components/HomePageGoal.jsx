@@ -1,9 +1,15 @@
+import { useNavigate } from "react-router-dom"
+
 function HomePageGoal({goalObj,subgoalToMaingoalConnector}){
 
     //The variable that will store the completedGoals / nmbGoals calculation
     var progressTotal = goalObj.CompleteGoals / goalObj.NmbGoals
+
     //Showing a little bit of green, to not demotivate the user
     progressTotal == 0? progressTotal = 5 : progressTotal = progressTotal
+
+    //Implementing the navigator
+    const navigator = useNavigate()
 
     return(
         <div className="homePageGoal flexItems">
@@ -11,7 +17,7 @@ function HomePageGoal({goalObj,subgoalToMaingoalConnector}){
             <div className="hpgHeader flexItems">
                 <div>
                     {/* Displaying the GoalName of the Goal */}
-                    <span>{goalObj.GoalName}</span>
+                    <span onClick={() => navigator(`/Goals/${goalObj.GoalName}`)}>{goalObj.GoalName}</span>
                 </div>
                 {/* Displaying information about the goals */}
                 <div className="hpgHeaderLine">
@@ -38,7 +44,7 @@ function HomePageGoal({goalObj,subgoalToMaingoalConnector}){
                     subgoalToMaingoalConnector[goalObj.GoalName].map((goalName) => {
                         return(
                             <div key={goalName}>
-                                <p>{goalName}</p>
+                                <p onClick={() => navigator(`/Goals/${goalName}`)}>{goalName}</p>
                             </div>
                         )})
                     : <div style={{display:"none"}}></div>}

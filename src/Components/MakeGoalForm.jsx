@@ -4,7 +4,7 @@ import exitButton from "../Images/exitButton.jpg"
 import { db } from "../Config/firebase"
 import { FieldValue, arrayRemove, arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 
-function MakeGoalForm({toggleWindow,currentUser,setGoalAddedRef,goalNames,goalsObjArray,subgoalNames,subgoalsObjArray}){
+function MakeGoalForm({toggleWindow,currentUser,setGoalAddedRef,goalNames,goalsObjArray,subgoalNames,subgoalsObjArray,showNone}){
 
     //UseState variables to store information from the form
     const [goalName, setGoalName] = useState("")
@@ -62,6 +62,7 @@ function MakeGoalForm({toggleWindow,currentUser,setGoalAddedRef,goalNames,goalsO
 
     //Function to process the information from the form, when the user submits
     async function processForm(){
+
         //Resetting the error msg
         setErrorMsg("")
 
@@ -76,8 +77,15 @@ function MakeGoalForm({toggleWindow,currentUser,setGoalAddedRef,goalNames,goalsO
         //Processing the empty input for the subGoalOf variable
         //NOTE : Being empty is an acceptable input for this variable, hence why no error will be occurring
         if (subgoalOf == ""){
-            setSubgoalOf("None")
-            subgoal = false //By default, this variable is true, so you don't need to set it true
+            if(showNone == true){
+                setSubgoalOf("None")
+                subgoal = false //By default, this variable is true, so you don't need to set it true
+            }
+            //If none can't be shown, then the user needs to select
+            else{
+                setErrorMsg("No set subgoal")
+                return
+            }
         }
 
         //Getting the current date and time (will be used later)
@@ -154,6 +162,7 @@ function MakeGoalForm({toggleWindow,currentUser,setGoalAddedRef,goalNames,goalsO
 
         //If the goal is a subgoal, finding the goal record for its main goal
         if (subgoal){
+            console.log("Runnign this code as its a subgoal")
             //Boolean test variable to see if the subgoal has been added or not
             //Finding the goal object with the goal name selected
             //First searching the main goals to see if it is there
@@ -229,7 +238,7 @@ function MakeGoalForm({toggleWindow,currentUser,setGoalAddedRef,goalNames,goalsO
                         <div className="lineInput flexItems">
                             {/* Will output an option for every main goal that the website has */}
                             <select onChange={(e) => setSubgoalOf(e.target.value)} name="SubgoalOf" id="SubgoalOf">
-                                <option value="none">None</option>
+                                {showNone ? <option value="none">None</option> : <option style={{display:"none"}}></option>}
                                 {/* Going through and displaying all the goalNames there are */}
                                 {goalNames.map((goalName) =>
                                         <option key={goalName} value={goalName}>{goalName}</option>
@@ -250,7 +259,7 @@ function MakeGoalForm({toggleWindow,currentUser,setGoalAddedRef,goalNames,goalsO
                                 <input id="skillInput" type="text" placeholder="Enter Skill..." onChange={(e) => setCurrentSkill(e.target.value)}/>
                             </div>
                             <div className="lineInput flexItems">
-                                <button type="button" onClick={() => addSkill()}>Add Skill</button>
+                                <button type="button" className="addSkill" onClick={() => addSkill()}>Add Skill</button>
                             </div>
                         </div>
                         <div className="skillsOutput">
