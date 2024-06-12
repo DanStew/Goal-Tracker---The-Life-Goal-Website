@@ -387,7 +387,7 @@ img{
 }
 
 //Styling the MakeAGoal form
-#MakeGoalForm{
+#MakeForm{
     height : 100%;
     margin-top: 10px;
     margin-left: 20vw;
@@ -431,6 +431,10 @@ img{
             align-items: center;
             text-align: left;
             gap: 40px;
+
+            button{
+                margin-top: 5px;
+            }
 
             .lineInput{
                 margin: 5px;
@@ -670,5 +674,36 @@ img{
 
     .accounts{
         margin-top: 10px;
+        margin-bottom: 30px;
+
+        #MakeForm{
+            p{
+                font-size: 30px;
+            }
+
+            .headerTitle{
+                margin-top: 10px;
+                font-size: 42px;
+            }
+
+            .EntryDetails{
+                text-align: left;
+                display: flex;
+                justify-content: start;
+                align-items: start;
+                flex-direction: column;
+                gap: 20px;
+
+                textarea{
+                    min-width: 100%;
+                    max-width: 120%;
+                    min-height: 20vh;
+                    font-size: 20px;
+                    padding: 10px;
+                    margin-bottom: 20px;
+                    resize: none;
+                }
+            }
+        }
     }
 }

@@ -5,7 +5,10 @@ import { useAsyncError, useNavigate } from "react-router-dom";
 
 function GoalPage({ goalName, currentUser, goalsObjArray, subgoalsObjArray,goalRecord, setGoalAddedRef }) {
   //UseState to toggle whether window shown or not
+  //Controls the Make a Subgoal window
   const [windowShown, setWindowShown] = useState(false);
+  //Controls the Make an Entry window
+  const [windowShown2, setWindowShown2] = useState(false)
   const [mainClass, setMainClass] = useState("goalPage")
 
   const [subgoalRecords, setSubgoalRecords] = useState([]);
@@ -53,9 +56,21 @@ function GoalPage({ goalName, currentUser, goalsObjArray, subgoalsObjArray,goalR
   function showWindow() {
     //Showing / Hiding goals depending on whether window shown or not
     windowShown? setMainClass("goalPage") : setMainClass("goalPage hideGoals")
+    //Hiding the showing of the make an entry form, if being shown
+    setWindowShown2(false)
     //Toggling windowShown
     setWindowShown(!windowShown)
   }
+
+    //Function to toggle the showing of the Make an Entry form
+    function showWindow2() {
+      //Showing / Hiding goals depending on whether window shown or not
+      windowShown2? setMainClass("goalPage") : setMainClass("goalPage hideGoals")
+      //Hiding the showing of the make an entry form, if being shown
+      setWindowShown(false)
+      //Toggling windowShown
+      setWindowShown2(!windowShown2)
+    }
 
   return (
     <div className={mainClass}>
@@ -116,8 +131,8 @@ function GoalPage({ goalName, currentUser, goalsObjArray, subgoalsObjArray,goalR
           )
         })}
       </div>
-      <div className="accounts flexItems hideElement">
-        <Accounts />
+      <div className="accounts flexItems">
+        <Accounts goalName={goalRecord.GoalName} goalUid={goalRecord.uid} entryIds={goalRecord.Entries} windowShown2={windowShown2} showWindow2={() => showWindow2()}/>
       </div>
     </div>
   );

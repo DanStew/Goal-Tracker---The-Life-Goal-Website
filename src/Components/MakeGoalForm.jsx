@@ -60,6 +60,17 @@ function MakeGoalForm({toggleWindow,currentUser,setGoalAddedRef,goalNames,goalsO
         setSkillsArray(tempArray)
     }
 
+    //Code to wipe all stored information from the system
+    function resetValues(){
+        setGoalName("")
+        setSubgoalOf("")
+        setSkillsArray([])
+        setCurrentSkill("")
+        setDeadline("No")
+        setDeadlineDate(null)
+        setDisplayHomepage("Yes")
+    }
+
     //Function to process the information from the form, when the user submits
     async function processForm(){
 
@@ -210,12 +221,15 @@ function MakeGoalForm({toggleWindow,currentUser,setGoalAddedRef,goalNames,goalsO
         //Telling goals that a goal has been added
         setGoalAddedRef(uniqueId)
 
+        //To end the function, reset all the values of the inputs
+        resetValues()
+
         //Closing the window
         toggleWindow()
     }
 
     return(
-        <div id="MakeGoalForm">
+        <div id="MakeForm">
             {/* The title and button to exit the form */}
             <div className="formHeader flexItems">
                 <p className="headerTitle flexItems">Make Goal</p>
