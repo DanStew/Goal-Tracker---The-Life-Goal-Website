@@ -21,6 +21,9 @@ function Goal() {
   //Usestate to signify that a goal has been added
   const [goalAddedRef, setGoalAddedRef] = useState(false);
 
+  //Usestate to signify new entry made, so recollect goal record
+  const [newEntry, setNewEntry] = useState(false)  
+
   //Usestate to store all of the goal information that the user has
   const [goalsObjArray, setGoalsObjArray] = useState([]);
   const [subgoalsObjArray, setSubgoalsObjArray] = useState([])
@@ -74,7 +77,7 @@ function Goal() {
     };
 
     mainFunction();
-  }, [goalName, goalAddedRef]);
+  }, [goalName, goalAddedRef, newEntry]);
 
   //Finding which goal the user is currently using (and the record for it)
   useEffect(() => {
@@ -119,7 +122,7 @@ function Goal() {
           {/* The main content of the page */}
           {/* Only displaying if there is a current goalrecord */}
           {goalRecord? 
-            <GoalPage goalName={goalName} currentUser={currentUser} goalsObjArray={goalsObjArray} subgoalsObjArray={subgoalsObjArray} goalRecord={goalRecord} setGoalAddedRef={() => setGoalAddedRef()}/> 
+            <GoalPage goalName={goalName} currentUser={currentUser} goalsObjArray={goalsObjArray} subgoalsObjArray={subgoalsObjArray} goalRecord={goalRecord} setGoalAddedRef={() => setGoalAddedRef()} setNewEntry={() => setNewEntry()}/> 
             : 
             <div>
                 <p>You don't have a goal of the name : {goalName}</p>

@@ -3,7 +3,7 @@ import MakeGoalForm from "./MakeGoalForm.jsx";
 import Accounts from "./Accounts.jsx";
 import { useAsyncError, useNavigate } from "react-router-dom";
 
-function GoalPage({ goalName, currentUser, goalsObjArray, subgoalsObjArray,goalRecord, setGoalAddedRef }) {
+function GoalPage({ goalName, currentUser, goalsObjArray, subgoalsObjArray,goalRecord, setGoalAddedRef, setNewEntry }) {
   //UseState to toggle whether window shown or not
   //Controls the Make a Subgoal window
   const [windowShown, setWindowShown] = useState(false);
@@ -77,6 +77,8 @@ function GoalPage({ goalName, currentUser, goalsObjArray, subgoalsObjArray,goalR
       <div className="goalHeader flexItems hideElement">
         {/* Displaying the goal name */}
         <span className="flexItems">{goalName}</span>
+        {/* Displaying the subgoal of code */}
+        {goalRecord.Subgoal == true? <p className="subgoalOf" onClick={() => navigator(`/Goals/${goalRecord.SubgoalOf}`)}> -- Subgoal of : {goalRecord.SubgoalOf} --</p> : <div style={{display:"none"}}></div>}
         {/* Displaying information about the goals */}
         <div className="goalHeaderLine flexItems">
           <p>Progress : </p>
@@ -132,7 +134,7 @@ function GoalPage({ goalName, currentUser, goalsObjArray, subgoalsObjArray,goalR
         })}
       </div>
       <div className="accounts flexItems">
-        <Accounts goalName={goalRecord.GoalName} goalUid={goalRecord.uid} entryIds={goalRecord.Entries} windowShown2={windowShown2} showWindow2={() => showWindow2()}/>
+        <Accounts goalName={goalRecord.GoalName} goalUid={goalRecord.uid} entryIds={goalRecord.Entries} windowShown2={windowShown2} showWindow2={() => showWindow2()} setNewEntry={setNewEntry} subgoalRecords={subgoalRecords} currentUser={currentUser}/>
       </div>
     </div>
   );
