@@ -60,6 +60,9 @@ function Goals({showOptions,currentUser}){
     const [subgoalsToMaingoals,setSubgoalsToMaingoals] = useState(false)
     const [subgoalsToMaingoalsConnector, setSubgoalsToMaingoalsConnector] = useState({})
 
+    //Usestate to determine whether a goal has been updated or not
+    const [updatedGoal, setUpdatedGoal] = useState(false)
+
     //Useeffect to collect all the goal information from the screen
     useEffect(() => {
         //Finding the users UserGoal record
@@ -135,7 +138,7 @@ function Goals({showOptions,currentUser}){
         }
 
         mainFunction()
-      }, [currentUser,goalAddedRef]);
+      }, [currentUser,goalAddedRef,updatedGoal]);
 
       useEffect(() => {
         const mainFunction = () => {
@@ -229,7 +232,7 @@ function Goals({showOptions,currentUser}){
             <div className="IndividualGoals flexItems hideElement">
                 {goalsObjArray.map((goalObj) =>
                     <div key={goalObj.uid}>
-                        <HomePageGoal goalObj={goalObj} subgoalToMaingoalConnector={subgoalsToMaingoalsConnector}/>
+                        <HomePageGoal goalObj={goalObj} subgoalToMaingoalConnector={subgoalsToMaingoalsConnector} setUpdatedGoal={() => setUpdatedGoal()} updatedGoal={updatedGoal}/>
                     </div>
                 )}
             </div>

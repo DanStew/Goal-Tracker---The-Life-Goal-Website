@@ -190,6 +190,12 @@ function MakeGoalForm({
       return;
     }
 
+    //Correctly formatting the DisplayHomepage variable
+    let formattedDisplayHomepage = false
+    if (displayHomepage == "yes"){
+      formattedDisplayHomepage = true
+    }
+
     //Keeping track of the unique id we are using
     let uniqueId = uuidv4();
 
@@ -205,7 +211,7 @@ function MakeGoalForm({
       CompletionDate: "",
       NmbGoals: 1,
       CompleteGoals: 0,
-      DisplayHomepage: displayHomepage,
+      DisplayHomepage: formattedDisplayHomepage,
       Subgoal: subgoal,
       SubgoalOf: subgoalOf,
     });

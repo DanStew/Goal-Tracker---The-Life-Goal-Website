@@ -1,6 +1,9 @@
+import { doc, updateDoc } from "firebase/firestore"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { db } from "../Config/firebase"
 
-function HomePageGoal({goalObj,subgoalToMaingoalConnector}){
+function HomePageGoal({goalObj,subgoalToMaingoalConnector,setUpdatedGoal,updatedGoal}){
 
     //The variable that will store the completedGoals / nmbGoals calculation
     var progressTotal = goalObj.CompleteGoals / goalObj.NmbGoals
@@ -10,6 +13,24 @@ function HomePageGoal({goalObj,subgoalToMaingoalConnector}){
 
     //Implementing the navigator
     const navigator = useNavigate()
+
+    //Usestate variable to display the options of the page
+    const [showOptions, setShowOptions] = useState(false)
+
+    //Function used to toggle the homepage behaviour of the goal
+    async function toggleHomepage(){
+        //Adding the entry to the goal doc
+        await updateDoc(doc(db, "Goals", goalObj.uid), {
+            DisplayHomepage : !goalObj.DisplayHomepage
+        });
+        
+        setUpdatedGoal(!updatedGoal)
+    }
+
+    //Function to delete the current goal
+    function deleteGoal(){
+
+    }
 
     return(
         <div className="homePageGoal flexItems">
@@ -51,8 +72,19 @@ function HomePageGoal({goalObj,subgoalToMaingoalConnector}){
             </div>
             <div className="hpgFooter flexItems">
                 <div className="hpgFooterEmpty flexItems"></div>
-                <div className="hpgFooterContent flexItems"></div>
+                <div className="hpgFooterContent flexItems" onClick={() => setShowOptions(!showOptions)}></div>
             </div>
+            {showOptions? 
+                <div className="options flexItems">
+                    <div className="optionsContent">
+                        {goalObj.DisplayHomepage? 
+                        <button className="hideHomepage" onClick={() => toggleHomepage()}>Hide From Homepage</button>
+                        : <button onClick={() => toggleHomepage()}>Show on Homepage</button>}
+                        <button className="delete" onClick={() => deleteGoal()}>Delete Goal</button>
+                    </div>
+                </div>
+                : <div style={{display:"none"}}></div>
+                }
         </div>
     )
 }

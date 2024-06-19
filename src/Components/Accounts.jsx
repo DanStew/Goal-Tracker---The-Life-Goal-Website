@@ -26,6 +26,9 @@ function Accounts({
   const [subgoalEntriesArray, setSubgoalEntriesArray] = useState([]);
   const [combinedEntriesArray, setCombinedEntriesArray] = useState([]);
 
+  //Usestate to control whether to show account options or not
+  const [showOptions,setShowOptions] = useState(false)
+
   //Function used to correctly format the given input
   function formatString(inputString) {
     //Copying the string without mutating and Making it formatted
@@ -303,6 +306,11 @@ function Accounts({
     mainFunction();
   }, [subgoalEntriesArray, entriesObjArray]);
 
+  //Function to delete the current account the user is selecting
+  function deleteAccount(entryObj){
+
+  }
+
   return (
     <div className="accounts">
       <div className="accountsHeader flexItems hideElement">
@@ -548,8 +556,17 @@ function Accounts({
               </div>
               <div className="entryFooter">
                 <div className="emptySpace flexItems"></div>
-                <div className="entryOptions flexItems"></div>
+                <div className="entryOptions flexItems" onClick={() => setShowOptions(!showOptions)}></div>
               </div>
+              {showOptions? 
+                <div className="options flexItems">
+                    <div className="optionsEmpty flexItems"></div>
+                    <div className="optionsContent">
+                        <button className="delete" onClick={() => deleteAccount()}>Delete Account</button>
+                    </div>
+                </div>
+                : <div style={{display:"none"}}></div>
+                }
             </div>
           );
         })}
