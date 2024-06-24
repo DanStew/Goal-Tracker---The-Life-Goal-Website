@@ -3,7 +3,7 @@ import MakeGoalForm from "./MakeGoalForm.jsx";
 import Accounts from "./Accounts.jsx";
 import { useAsyncError, useNavigate } from "react-router-dom";
 
-function GoalPage({ goalName, currentUser, goalsObjArray, subgoalsObjArray,goalRecord, setGoalAddedRef, setNewEntry }) {
+function GoalPage({ goalName, currentUser, goalsObjArray, subgoalsObjArray,goalRecord, setGoalAddedRef, setNewEntry, newEntry }) {
   //UseState to toggle whether window shown or not
   //Controls the Make a Subgoal window
   const [windowShown, setWindowShown] = useState(false);
@@ -134,7 +134,7 @@ function GoalPage({ goalName, currentUser, goalsObjArray, subgoalsObjArray,goalR
         })}
       </div>
       <div className="accounts flexItems">
-        <Accounts goalName={goalRecord.GoalName} goalUid={goalRecord.uid} entryIds={goalRecord.Entries} windowShown2={windowShown2} showWindow2={() => showWindow2()} setNewEntry={setNewEntry} subgoalRecords={subgoalRecords} currentUser={currentUser}/>
+        <Accounts goalName={goalRecord.GoalName} goalUid={goalRecord.uid} entryIds={goalRecord.Entries} windowShown2={windowShown2} showWindow2={() => showWindow2()} setNewEntry={setNewEntry} newEntry={newEntry} subgoalRecords={subgoalRecords} currentUser={currentUser}/>
       </div>
     </div>
   );

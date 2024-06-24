@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 import MakeGoalForm from "./MakeGoalForm"
 import { doc, getDoc } from "firebase/firestore"
 import { db } from "../Config/firebase"
+import { update } from "firebase/database"
 
 function Goals({showOptions,currentUser}){
 
@@ -88,6 +89,7 @@ function Goals({showOptions,currentUser}){
             if (currentUser.uid){
                 //Getting the userGoals record data
                 const userGoalsData = await getUserGoals()
+                console.log(userGoalsData)
                 //Resetting the goalsObj and goalNames array
                 setGoalsObjArray([])
                 setSubgoalsObjArray([])
@@ -96,44 +98,50 @@ function Goals({showOptions,currentUser}){
                 setGoalAddedRef(false)
                 //Looping through the different goal types and storing all the information
                 //Finding the goal data from all of the users goals
-                userGoalsData.goals.forEach( async (goalId) => {
-                    //Getting the goal information and putting it into an object
-                    const goalObj = await getGoalObj(goalId)
-                    //Adding the goal name to the goalnames array
-                    setGoalNames(prevNames => {
-                        return [
-                            ...prevNames,
-                            goalObj.GoalName
-                        ]
-                    }) 
-                    //Adding the goalInformation to the GoalsObjArray
-                    setGoalsObjArray(prevArr => {
-                        return [
-                            ...prevArr,
-                            goalObj
-                        ]
-                    })
-                })
-                //Finding the goal data from all of the users goals
-                userGoalsData.subgoals.forEach( async (subgoalId) => {
-                    //Getting the goal information and putting it into an object
-                    const subgoalObj = await getGoalObj(subgoalId)
-                    //Adding the subgoal name to the array
-                    setSubgoalNames(prevSubgoalNames => {
-                        return ([
-                            ...prevSubgoalNames,
-                            subgoalObj.GoalName
-                            ])
+                try{
+
+                    userGoalsData.goals.forEach( async (goalId) => {
+                        //Getting the goal information and putting it into an object
+                        const goalObj = await getGoalObj(goalId)
+                        //Adding the goal name to the goalnames array
+                        setGoalNames(prevNames => {
+                            return [
+                                ...prevNames,
+                                goalObj.GoalName
+                            ]
+                        }) 
+                        //Adding the goalInformation to the GoalsObjArray
+                        setGoalsObjArray(prevArr => {
+                            return [
+                                ...prevArr,
+                                goalObj
+                            ]
                         })
-                    //Adding the goalInformation to the GoalsObjArray
-                    setSubgoalsObjArray(prevArr => {
-                        return [
-                            ...prevArr,
-                            subgoalObj
-                        ]
                     })
+                    //Finding the goal data from all of the users goals
+                    userGoalsData.subgoals.forEach( async (subgoalId) => {
+                        //Getting the goal information and putting it into an object
+                        const subgoalObj = await getGoalObj(subgoalId)
+                        //Adding the subgoal name to the array
+                        setSubgoalNames(prevSubgoalNames => {
+                            return ([
+                                ...prevSubgoalNames,
+                                subgoalObj.GoalName
+                                ])
+                            })
+                        //Adding the goalInformation to the GoalsObjArray
+                        setSubgoalsObjArray(prevArr => {
+                            return [
+                                ...prevArr,
+                                subgoalObj
+                            ]
+                        })
+                    }
+                    )
                 }
-                )
+                catch{
+                    setUpdatedGoal(!updatedGoal)
+                }
             }
         }
 
@@ -232,7 +240,7 @@ function Goals({showOptions,currentUser}){
             <div className="IndividualGoals flexItems hideElement">
                 {goalsObjArray.map((goalObj) =>
                     <div key={goalObj.uid}>
-                        <HomePageGoal goalObj={goalObj} subgoalToMaingoalConnector={subgoalsToMaingoalsConnector} setUpdatedGoal={() => setUpdatedGoal()} updatedGoal={updatedGoal}/>
+                        <HomePageGoal goalObj={goalObj} subgoalToMaingoalConnector={subgoalsToMaingoalsConnector} setUpdatedGoal={() => setUpdatedGoal()} updatedGoal={updatedGoal} currentUser={currentUser}/>
                     </div>
                 )}
             </div>

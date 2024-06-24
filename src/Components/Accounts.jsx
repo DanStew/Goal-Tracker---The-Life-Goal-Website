@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import exitButton from "../Images/exitButton.jpg";
-import { arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { arrayRemove, arrayUnion, deleteDoc, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../Config/firebase";
 import { v4 as uuidv4 } from "uuid";
 
@@ -11,6 +11,7 @@ function Accounts({
   windowShown2,
   showWindow2,
   setNewEntry,
+  newEntry,
   subgoalRecords,
   currentUser,
 }) {
@@ -163,7 +164,7 @@ function Accounts({
     updateParentGoals(goalUid, currentDateString);
 
     //Telling system new entry made
-    setNewEntry(true);
+    setNewEntry(!newEntry);
 
     //To end the function, reset all the values of the inputs
     resetValues();
@@ -307,8 +308,18 @@ function Accounts({
   }, [subgoalEntriesArray, entriesObjArray]);
 
   //Function to delete the current account the user is selecting
-  function deleteAccount(entryObj){
+  async function deleteAccount(entryObj){
+    console.log(entryObj)
+    //Removing the id of the entry from the goal obj
+    await updateDoc(doc(db,"Goals",goalUid),{
+      Entries : arrayRemove(entryObj.uid)
+    })
+    //Deleting the entry from the database
+    await deleteDoc(doc(db,"Entries",entryObj.uid))
 
+    //Making the website reload, and recollect the goal obj
+    setNewEntry(!newEntry)
+    window.location.reload(false)
   }
 
   return (
@@ -562,7 +573,7 @@ function Accounts({
                 <div className="options flexItems">
                     <div className="optionsEmpty flexItems"></div>
                     <div className="optionsContent">
-                        <button className="delete" onClick={() => deleteAccount()}>Delete Account</button>
+                        <button className="delete" onClick={() => deleteAccount(entryObj)}>Delete Account</button>
                     </div>
                 </div>
                 : <div style={{display:"none"}}></div>
