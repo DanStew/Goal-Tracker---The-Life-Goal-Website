@@ -14,6 +14,7 @@ function Accounts({
   newEntry,
   subgoalRecords,
   currentUser,
+  goalRecord
 }) {
   //Usestate to store the inputs from the form
   const [entryName, setEntryName] = useState("");
@@ -309,7 +310,6 @@ function Accounts({
 
   //Function to delete the current account the user is selecting
   async function deleteAccount(entryObj){
-    console.log(entryObj)
     //Removing the id of the entry from the goal obj
     await updateDoc(doc(db,"Goals",goalUid),{
       Entries : arrayRemove(entryObj.uid)
@@ -326,7 +326,11 @@ function Accounts({
     <div className="accounts">
       <div className="accountsHeader flexItems hideElement">
         <p className="subheading">Goal Accounts</p>
-        <button onClick={() => showWindow2()}>Add Account</button>
+        {/* Conditionally rendering the button, depending on whehter the goal is complete or not */}
+        {!goalRecord.Completed ? 
+          <button onClick={() => showWindow2()}>Add Account</button>
+          : <div style={{display:"none"}}></div>
+        }
       </div>
       {windowShown2 ? (
         <div id="MakeForm">
@@ -565,10 +569,14 @@ function Accounts({
                   </p>
                 </div>
               </div>
-              <div className="entryFooter">
-                <div className="emptySpace flexItems"></div>
-                <div className="entryOptions flexItems" onClick={() => setShowOptions(!showOptions)}></div>
-              </div>
+              {/* Conditionally displaying the options button, depending on whether the goal has been completed or not */}
+              {!goalRecord.Completed ? 
+                <div className="entryFooter">
+                  <div className="emptySpace flexItems"></div>
+                  <div className="entryOptions flexItems" onClick={() => setShowOptions(!showOptions)}></div>
+                </div>
+                : <div style={{display:"none"}}></div>
+              }
               {showOptions? 
                 <div className="options flexItems">
                     <div className="optionsEmpty flexItems"></div>

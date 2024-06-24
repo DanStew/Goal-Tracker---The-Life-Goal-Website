@@ -607,6 +607,13 @@ img{
                 opacity: 0.1;
             }
         }
+
+        .completed{
+            width: 100%;
+            background-color: gold;
+            padding: 10px;
+            color : black;
+        }
     }
 
     .goalHeader{
@@ -819,6 +826,21 @@ img{
                     }
                 }
             }
+        }
+    }
+
+    .buttonArea{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 40px;
+
+        .delete{
+            background-color: red;
+        }
+
+        .complete{
+            background-color: gold;
         }
     }
 }
