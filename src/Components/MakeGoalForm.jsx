@@ -231,8 +231,11 @@ function MakeGoalForm({
         if (goalsObj.GoalName == subgoalOf) {
           goalObjUid = goalsObj.uid;
           const mainGoalRef = doc(db, "Goals", goalsObj.uid);
+          const mainGoalData = await getDoc(mainGoalRef)
+          const mainGoalRecord = mainGoalData.data()
           await updateDoc(mainGoalRef, {
             Subgoals: arrayUnion(uniqueId),
+            NmbGoals: mainGoalRecord.NmbGoals + 1
           });
         }
       });
@@ -247,6 +250,7 @@ function MakeGoalForm({
           const subgoalData = docSnap.data();
           await updateDoc(subGoalRef, {
             Subgoals: arrayUnion(uniqueId),
+            NmbGoals: subgoalData.NmbGoals + 1
           });
           //Moving the subgoal from the subgoals array to the goals array
           //This is because this goal should now be displayed on the home screen, as it has its own subgoals

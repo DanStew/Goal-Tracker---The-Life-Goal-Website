@@ -175,8 +175,45 @@ function GoalPage({
     navigator("/MyGoals");
   }
 
-  //Function to complete a goal
+  //Function to update the completeGoals variable of a parent goal, and then update all subgoals of the goal as well
   async function completeGoal(goalRecord){
+    
+    //Incrementing the completeGoals attribute of the parent goal by 1
+    const updateParentGoal = async (goalRecord) => {
+      //Getting the goal data, using a goal id
+      const getGoalData = async (goalId) => {
+        const goalRecord = await getDoc(doc(db,"Goals",goalId))
+        const goalData = goalRecord.data()
+        return goalData
+      }
+
+      //Getting the userGoals record
+      const userGoals = await getDoc(doc(db,"userGoals",currentUser.uid))
+      const userGoalsData = userGoals.data()
+      //Only looping through the main goals, as it is a parent goal
+      userGoalsData.goals.map( async (goalId) => {
+        //Getting the goal data of that goal
+        const goalData = await getGoalData(goalId)
+        if (goalData.GoalName == goalRecord.SubgoalOf){
+          //Updating the parent goal with information
+          await updateDoc(doc(db,"Goals",goalData.uid),{
+            CompleteGoals : goalData.CompleteGoals + 1,
+            LastUpdated: currentDateString
+          })
+        }
+      })
+   }
+
+    if (goalRecord.Subgoal == true){
+      //Updating the completeGoals attribute of a parent goal
+      updateParentGoal(goalRecord)
+    }
+    //Function to complete the goal itself, and all its subgoals
+    completeSubgoals(goalRecord)
+  }
+
+  //Function to complete a goal
+  async function completeSubgoals(goalRecord){
 
     //Getting a subgoal record
     const getSubgoalRecord = async(subgoalId) => {
@@ -204,7 +241,9 @@ function GoalPage({
         //Updating the goal record to announce it is completed
         await updateDoc(doc(db,"Goals",goalRecord.uid),{
           Completed : true,
-          CompletionDate : currentDateString
+          CompletionDate : currentDateString,
+          LastUpdated: currentDateString,
+          CompleteGoals : goalRecord.NmbGoals
         })
       }
     }
@@ -217,7 +256,7 @@ function GoalPage({
       //Getting the goal record of the subgoal
       let subgoalRecord = await getSubgoalRecord(subgoalId) 
       //Calling the complete goal function on the subgoal record
-      completeGoal(subgoalRecord) 
+      completeSubgoals(subgoalRecord) 
     })
 
     window.location.reload(false)
@@ -258,7 +297,7 @@ function GoalPage({
               style={{
                 width: `${
                   goalRecord.CompleteGoals / goalRecord.NmbGoals != 0
-                    ? goalRecord.CompleteGoals / goalRecord.NmbGoals
+                    ? (goalRecord.CompleteGoals / goalRecord.NmbGoals)*100
                     : 5
                 }%`,
               }}
@@ -328,7 +367,7 @@ function GoalPage({
                       width: `${
                         subgoalRecord.CompleteGoals / subgoalRecord.NmbGoals !=
                         0
-                          ? subgoalRecord.CompleteGoals / subgoalRecord.NmbGoals
+                          ? (subgoalRecord.CompleteGoals / subgoalRecord.NmbGoals)*100
                           : 5
                       }%`,
                     }}

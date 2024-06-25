@@ -1,16 +1,10 @@
 import { arrayRemove, deleteDoc, doc, getDoc, updateDoc } from "firebase/firestore"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { db } from "../Config/firebase"
 import { update } from "firebase/database"
 
 function HomePageGoal({goalObj,subgoalToMaingoalConnector,setUpdatedGoal,updatedGoal,currentUser}){
-
-    //The variable that will store the completedGoals / nmbGoals calculation
-    var progressTotal = goalObj.CompleteGoals / goalObj.NmbGoals
-
-    //Showing a little bit of green, to not demotivate the user
-    progressTotal == 0? progressTotal = 5 : progressTotal = progressTotal
 
     //Implementing the navigator
     const navigator = useNavigate()
@@ -117,31 +111,59 @@ function HomePageGoal({goalObj,subgoalToMaingoalConnector,setUpdatedGoal,updated
             window.location.reload(false)
             }
 
+    //UseState to store the class that the goal has
+    const [mainId, setMainId] = useState("")
+
+    //UseEffect function to decide what class the goal has
+    useEffect(() => {
+        if (goalObj.Completed == true){
+            setMainId("completed")
+        }
+    },[goalObj])
+
     return(
-        <div className="homePageGoal flexItems">
+        <div id={mainId} className="homePageGoal flexItems">
             {/* Making the header of the Goal Component */}
             <div className="hpgHeader flexItems">
                 <div>
                     {/* Displaying the GoalName of the Goal */}
                     <span onClick={() => navigator(`/Goals/${goalObj.GoalName}`)}>{goalObj.GoalName}</span>
                 </div>
+                {/* Displaying a completed banner, if completed */}
+                {goalObj.Completed? 
+                    <div className="completedBanner">
+                        <p>!! Completed !!</p>
+                    </div> : <div style={{display:"none"}}></div>
+                }
                 {/* Displaying information about the goals */}
                 <div className="hpgHeaderLine">
                     <p>Progress : </p>
                     {/* Making the progress bar for the system */}
                     <div className="container">
                         {/* This line of code fill in the bar the variable amount that has currently been complete */}
-                        <div style={{width: `${progressTotal}%`}} className="progress-bar">{goalObj.CompleteGoals}/{goalObj.NmbGoals}</div>
+                        <div style={{width: `${ goalObj.CompleteGoals / goalObj.NmbGoals !=0? (goalObj.CompleteGoals / goalObj.NmbGoals)*100: 5}%`}} className="progress-bar">{goalObj.CompleteGoals}/{goalObj.NmbGoals}</div>
                     </div>
                 </div>
                 {/* Displaying information about the goals */}
                 <div className="hpgHeaderLine">
-                    <div>
-                        <p>Last Updated : </p>
+                    {goalObj.Completed?
+                    <div className="hpgHeaderLine">
+                        <div>
+                            <p>Completion Date : </p>
+                        </div>
+                        <div>
+                            <p>{goalObj.CompletionDate}</p>
+                        </div>
+                    </div> : 
+                    <div className="hpgHeaderLine">
+                        <div>
+                            <p>Last Updated : </p>
+                        </div>
+                        <div>
+                            <p>{goalObj.LastUpdated}</p>
+                        </div>
                     </div>
-                    <div>
-                        <p>{goalObj.LastUpdated}</p>
-                    </div>
+                }
                 </div>
             </div>
             {/* Displaying the subgoals of the goal, allowing the user to be able to click on them */}

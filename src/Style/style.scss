@@ -139,6 +139,7 @@ p{
 
         .Goals{
             margin-top: 40px;
+            margin-bottom: 60px;
 
             &.hideGoals{
                 /* Hiding all elements that I have chosen to hide, so it focuses on the form*/
@@ -227,6 +228,8 @@ p{
                     background-color: rgb(188, 188, 188);
                     color: black;
 
+                    
+
                     .hpgHeader{
                         flex: 2 2;
                         border-bottom: 1px solid black;
@@ -254,6 +257,16 @@ p{
                             height : 30px;
 
                             /* The styling for the progress bar is below, outisde of any lines*/
+                        }
+
+                        .completedBanner{
+                            width: 100%;
+                            background-color: black;
+                            color: white;
+
+                            p{
+                                font-size: 32px;
+                            }
                         }
                     }
                     
@@ -321,6 +334,11 @@ p{
             }
         }
     }
+}
+
+#completed{
+    background-color: gold;
+    color: black;
 }
 
 /* Styling the header of pages on the website*/
