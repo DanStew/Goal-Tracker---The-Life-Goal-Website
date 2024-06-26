@@ -32,7 +32,7 @@ function MyGoals(){
             </div>
             <div className="content flexItems">
                 {/* The main content of the page */}
-                <Goals showOptions={true} currentUser={currentUser}/>
+                <Goals currentUser={currentUser}/>
             </div> 
         </div>
         {/* The content for the sidebar of the website */}

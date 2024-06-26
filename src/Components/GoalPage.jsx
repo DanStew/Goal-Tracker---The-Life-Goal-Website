@@ -4,6 +4,7 @@ import Accounts from "./Accounts.jsx";
 import { useAsyncError, useNavigate } from "react-router-dom";
 import {
   arrayRemove,
+  arrayUnion,
   deleteDoc,
   doc,
   getDoc,
@@ -11,6 +12,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../Config/firebase.js";
 import { update } from "firebase/database";
+import { reauthenticateWithCredential } from "firebase/auth";
 
 function GoalPage({
   goalName,
@@ -176,90 +178,169 @@ function GoalPage({
   }
 
   //Function to update the completeGoals variable of a parent goal, and then update all subgoals of the goal as well
-  async function completeGoal(goalRecord){
-    
+  async function completeGoal(goalRecord) {
     //Incrementing the completeGoals attribute of the parent goal by 1
     const updateParentGoal = async (goalRecord) => {
       //Getting the goal data, using a goal id
       const getGoalData = async (goalId) => {
-        const goalRecord = await getDoc(doc(db,"Goals",goalId))
-        const goalData = goalRecord.data()
-        return goalData
-      }
+        const goalRecord = await getDoc(doc(db, "Goals", goalId));
+        const goalData = goalRecord.data();
+        return goalData;
+      };
 
       //Getting the userGoals record
-      const userGoals = await getDoc(doc(db,"userGoals",currentUser.uid))
-      const userGoalsData = userGoals.data()
+      const userGoals = await getDoc(doc(db, "userGoals", currentUser.uid));
+      const userGoalsData = userGoals.data();
       //Only looping through the main goals, as it is a parent goal
-      userGoalsData.goals.map( async (goalId) => {
+      userGoalsData.goals.map(async (goalId) => {
         //Getting the goal data of that goal
-        const goalData = await getGoalData(goalId)
-        if (goalData.GoalName == goalRecord.SubgoalOf){
+        const goalData = await getGoalData(goalId);
+        if (goalData.GoalName == goalRecord.SubgoalOf) {
+          let currentDate = new Date();
+          let currentDateObj = {
+            year: currentDate.getFullYear(),
+            month:
+              currentDate.getMonth() + 1 < 10
+                ? "0" + (currentDate.getMonth() + 1)
+                : currentDate.getMonth() + 1,
+            day:
+              currentDate.getDate() < 10
+                ? "0" + currentDate.getDate()
+                : currentDate.getDate(),
+            hours:
+              currentDate.getHours() < 10
+                ? "0" + currentDate.getHours()
+                : currentDate.getHours(),
+            minutes:
+              currentDate.getMinutes() < 10
+                ? "0" + currentDate.getMinutes()
+                : currentDate.getMinutes(),
+          };
+          //Putting all this information into a single string, will be stored later
+          let currentDateString =
+            currentDateObj.year +
+            "/" +
+            currentDateObj.month +
+            "/" +
+            currentDateObj.day +
+            " " +
+            currentDateObj.hours +
+            ":" +
+            currentDateObj.minutes;
           //Updating the parent goal with information
-          await updateDoc(doc(db,"Goals",goalData.uid),{
-            CompleteGoals : goalData.CompleteGoals + 1,
-            LastUpdated: currentDateString
-          })
+          await updateDoc(doc(db, "Goals", goalData.uid), {
+            CompleteGoals: goalData.CompleteGoals + 1,
+            LastUpdated: currentDateString,
+          });
         }
-      })
-   }
+      });
+    };
 
-    if (goalRecord.Subgoal == true){
+    if (goalRecord.Subgoal == true) {
       //Updating the completeGoals attribute of a parent goal
-      updateParentGoal(goalRecord)
+      updateParentGoal(goalRecord);
     }
     //Function to complete the goal itself, and all its subgoals
-    completeSubgoals(goalRecord)
+    completeSubgoals(goalRecord);
   }
 
   //Function to complete a goal
-  async function completeSubgoals(goalRecord){
-
+  async function completeSubgoals(goalRecord) {
     //Getting a subgoal record
-    const getSubgoalRecord = async(subgoalId) => {
-      let subgoalRecord = await getDoc(doc(db,"Goals",subgoalId))
-      let subgoalData = subgoalRecord.data()
-      return subgoalData
-    }
+    const getSubgoalRecord = async (subgoalId) => {
+      let subgoalRecord = await getDoc(doc(db, "Goals", subgoalId));
+      let subgoalData = subgoalRecord.data();
+      return subgoalData;
+    };
 
     //Function to update the completed attribute of the goals
-    const updateCompletedGoal = async(goalRecord) => {
+    const updateCompletedGoal = async (goalRecord) => {
       //Checking that the goal isn't already completed
       //This needs to be checked as otherwise the date will be changed, which will be incorrect
-      if (goalRecord.Completed != true){
+      if (goalRecord.Completed != true) {
         //Getting the current date
         let currentDate = new Date();
         let currentDateObj = {
           year: currentDate.getFullYear(),
-          month: currentDate.getMonth() + 1 < 10? "0" + (currentDate.getMonth() + 1) : currentDate.getMonth() + 1,
-          day: currentDate.getDate() < 10 ? "0" + currentDate.getDate() : currentDate.getDate(),
-          hours: currentDate.getHours() < 10 ? "0" + currentDate.getHours() : currentDate.getHours(),
-          minutes: currentDate.getMinutes() < 10 ? "0" + currentDate.getMinutes() : currentDate.getMinutes(),
+          month:
+            currentDate.getMonth() + 1 < 10
+              ? "0" + (currentDate.getMonth() + 1)
+              : currentDate.getMonth() + 1,
+          day:
+            currentDate.getDate() < 10
+              ? "0" + currentDate.getDate()
+              : currentDate.getDate(),
+          hours:
+            currentDate.getHours() < 10
+              ? "0" + currentDate.getHours()
+              : currentDate.getHours(),
+          minutes:
+            currentDate.getMinutes() < 10
+              ? "0" + currentDate.getMinutes()
+              : currentDate.getMinutes(),
         };
         //Putting all this information into a single string, will be stored later
-        let currentDateString = currentDateObj.year + "/" + currentDateObj.month + "/" + currentDateObj.day + " " + currentDateObj.hours + ":" + currentDateObj.minutes;
+        let currentDateString =
+          currentDateObj.year +
+          "/" +
+          currentDateObj.month +
+          "/" +
+          currentDateObj.day +
+          " " +
+          currentDateObj.hours +
+          ":" +
+          currentDateObj.minutes;
         //Updating the goal record to announce it is completed
-        await updateDoc(doc(db,"Goals",goalRecord.uid),{
-          Completed : true,
-          CompletionDate : currentDateString,
+        await updateDoc(doc(db, "Goals", goalRecord.uid), {
+          Completed: true,
+          CompletionDate: currentDateString,
           LastUpdated: currentDateString,
-          CompleteGoals : goalRecord.NmbGoals
-        })
+          CompleteGoals: goalRecord.NmbGoals,
+        });
       }
-    }
+    };
 
     //The main part of this function
     //Updating the current goalRecord
-    updateCompletedGoal(goalRecord)
+    updateCompletedGoal(goalRecord);
     //Checking to see if the current record has any subgoals
-    goalRecord.Subgoals.map( async (subgoalId) => {
+    goalRecord.Subgoals.map(async (subgoalId) => {
       //Getting the goal record of the subgoal
-      let subgoalRecord = await getSubgoalRecord(subgoalId) 
+      let subgoalRecord = await getSubgoalRecord(subgoalId);
       //Calling the complete goal function on the subgoal record
-      completeSubgoals(subgoalRecord) 
-    })
+      completeSubgoals(subgoalRecord);
+    });
 
-    window.location.reload(false)
+    window.location.reload(false);
+  }
+
+  //Usestate to store the current skill
+  const [currentSkill,setCurrentSkill] = useState("")
+
+  //Function to add a skill to a goal
+  async function addSkill(){
+    //Ensuring that the skill isn't empty
+    if (currentSkill == ""){
+      return
+    }
+    //Adding the skill to the array
+    await updateDoc(doc(db,"Goals",goalRecord.uid),{
+      Skills: arrayUnion(currentSkill)
+    })
+    //Clearing the current skill value
+    setCurrentSkill("")
+    //Making the goal update
+    setNewEntry(!newEntry)
+  }
+
+  //Function to remove a skill from a goal
+  async function removeSkill(skillName){
+    //Updating the goal record, removing the skillName from the skills array
+    await updateDoc(doc(db,"Goals",goalRecord.uid),{
+      Skills : arrayRemove(skillName)
+    })
+    //Notifying the system to recollect the goal record
+    setNewEntry(!newEntry)
   }
 
   return (
@@ -280,13 +361,14 @@ function GoalPage({
           <div style={{ display: "none" }}></div>
         )}
         {/* Code displayed if the goal has been completed */}
-        {goalRecord.Completed ? 
+        {goalRecord.Completed ? (
           <div className="completed flexItems">
             <p>!! Completed !!</p>
             <p>-- Completion Date : {goalRecord.CompletionDate} --</p>
           </div>
-          : <div style={{display:"none"}}></div>
-        }
+        ) : (
+          <div style={{ display: "none" }}></div>
+        )}
         {/* Displaying information about the goals */}
         <div className="goalHeaderLine flexItems">
           <p>Progress : </p>
@@ -297,7 +379,7 @@ function GoalPage({
               style={{
                 width: `${
                   goalRecord.CompleteGoals / goalRecord.NmbGoals != 0
-                    ? (goalRecord.CompleteGoals / goalRecord.NmbGoals)*100
+                    ? (goalRecord.CompleteGoals / goalRecord.NmbGoals) * 100
                     : 5
                 }%`,
               }}
@@ -316,18 +398,94 @@ function GoalPage({
             <p>{goalRecord.LastUpdated}</p>
           </div>
         </div>
+        {goalRecord.DeadlineDate != "" ? (
+          <div className="goalHeaderLine flexItems">
+            <div>
+              <p>Deadline Date : </p>
+            </div>
+            <div>
+              <p>{goalRecord.DeadlineDate}</p>
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: "none" }}></div>
+        )}
+      </div>
+      <div className="skillsOutput flexItems">
+        <span>Goal Skills</span>
+        <div className="skillInputLine flexItems">
+          <input type="text" value={currentSkill} onChange={(e) => setCurrentSkill(e.target.value)} placeholder="Enter Skill Name..."/>
+          <button onClick={() => addSkill()}>Add Skill</button>
+        </div>
+        {/* For each item in the skills array, output them here */}
+        {/* NOTE : The skills are output in groups of two, that is why the code may be a bit funny */}
+        {goalRecord.Skills.map((skill, index) => {
+          return (
+            <div key={index}>
+              {index % 4 == 0 ? (
+                <div className="skillLine flexItem">
+                  <div className="individualSkill flexItem">
+                    <p>{goalRecord.Skills[index]}</p>
+                    {/* Button to enable the user to remvoe the skill from the array */}
+                    <button
+                      type="button"
+                      onClick={() => removeSkill(goalRecord.Skills[index])}>-</button>
+                  </div>
+                  {goalRecord.Skills[index + 1] ? (
+                    <div className="individualSkill flexItem">
+                      <p>{goalRecord.Skills[index + 1]}</p>
+                      <button type="button" onClick={() => removeSkill(goalRecord.Skills[index + 1])}>-</button>
+                    </div>
+                  ) : (
+                    <div className="individualSkill flexItem"> </div>
+                  )}
+                  {goalRecord.Skills[index + 2] ? (
+                    <div className="individualSkill flexItem">
+                      <p>{goalRecord.Skills[index + 2]}</p>
+                      <button
+                        type="button"
+                        onClick={() => removeSkill(goalRecord.Skills[index + 2])}
+                      >
+                        -
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="individualSkill flexItem"> </div>
+                  )}
+                  {goalRecord.Skills[index + 3] ? (
+                    <div className="individualSkill flexItem">
+                      <p>{goalRecord.Skills[index + 3]}</p>
+                      <button
+                        type="button"
+                        onClick={() => removeSkill(goalRecord.Skills[index + 3])}
+                      >
+                        -
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="individualSkill flexItem"> </div>
+                  )}
+                </div>
+              ) : (
+                <div style={{ display: "none" }}></div>
+              )}
+            </div>
+          );
+        })}
       </div>
       <div className="subgoals flexItems">
         <span className="subheading hideElement flexItems">Your Subgoals</span>
         {/* Conditionally rendering the button, if the goal hasn't been completed */}
-        {!goalRecord.Completed ? 
-        <button
-          className="AddGoalButton hideElement flexItems"
-          onClick={() => showWindow()}
-        >
-          Add Subgoal
-        </button> : <div style={{display:"none"}}></div>
-        }
+        {!goalRecord.Completed ? (
+          <button
+            className="AddGoalButton hideElement flexItems"
+            onClick={() => showWindow()}
+          >
+            Add Subgoal
+          </button>
+        ) : (
+          <div style={{ display: "none" }}></div>
+        )}
         {/* The code to conditionally render the form for the user to Make a Goal */}
         {windowShown ? (
           <MakeGoalForm
@@ -367,7 +525,9 @@ function GoalPage({
                       width: `${
                         subgoalRecord.CompleteGoals / subgoalRecord.NmbGoals !=
                         0
-                          ? (subgoalRecord.CompleteGoals / subgoalRecord.NmbGoals)*100
+                          ? (subgoalRecord.CompleteGoals /
+                              subgoalRecord.NmbGoals) *
+                            100
                           : 5
                       }%`,
                     }}
@@ -396,16 +556,18 @@ function GoalPage({
         />
       </div>
       {/* Conditionally rendering these buttons, if the goal hasn't been completed */}
-      {!goalRecord.Completed ? 
-      <div className="buttonArea flexItems">
-        <button onClick={() => deleteGoal()} className="delete">
-          Delete Goal
-        </button>
-        <button onClick={() => completeGoal(goalRecord)} className="complete">
-          Complete Goal
-        </button>
-      </div> : <div style={{display:"none"}}></div>
-      }
+      {!goalRecord.Completed ? (
+        <div className="buttonArea flexItems">
+          <button onClick={() => deleteGoal()} className="delete">
+            Delete Goal
+          </button>
+          <button onClick={() => completeGoal(goalRecord)} className="complete">
+            Complete Goal
+          </button>
+        </div>
+      ) : (
+        <div style={{ display: "none" }}></div>
+      )}
     </div>
   );
 }

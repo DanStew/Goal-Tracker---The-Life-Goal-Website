@@ -29,7 +29,6 @@ function MakeGoalForm({
   const [currentSkill, setCurrentSkill] = useState("");
   const [deadline, setDeadline] = useState("No");
   const [deadlineDate, setDeadlineDate] = useState(null);
-  const [displayHomepage, setDisplayHomepage] = useState("Yes");
   const [errorMsg, setErrorMsg] = useState("");
 
   //Function used to correctly format the given input
@@ -82,7 +81,6 @@ function MakeGoalForm({
     setCurrentSkill("");
     setDeadline("No");
     setDeadlineDate(null);
-    setDisplayHomepage("Yes");
   }
 
   //Function to process the information from the form, when the user submits
@@ -100,7 +98,7 @@ function MakeGoalForm({
     let subgoal = true;
     //Processing the empty input for the subGoalOf variable
     //NOTE : Being empty is an acceptable input for this variable, hence why no error will be occurring
-    if (subgoalOf == "") {
+    if (subgoalOf == "" || subgoalOf=="none") {
       if (showNone == true) {
         setSubgoalOf("None");
         subgoal = false; //By default, this variable is true, so you don't need to set it true
@@ -147,6 +145,9 @@ function MakeGoalForm({
       ":" +
       currentDateObj.minutes;
 
+    //Initialising the inputDateString
+    let inputDateString = ""; 
+      
     //Validating the deadline date
     if (deadline == "Yes") {
       //Ensuring deadlineDate isn't null
@@ -161,6 +162,8 @@ function MakeGoalForm({
         month: inputDateArr[1],
         day: inputDateArr[2],
       };
+      //Formatting the inputDate into a correct string
+      inputDateString = inputDateObj.year + "/" + inputDateObj.month + "/" + inputDateObj.day
       //Ensuring that the inputted date isn't less than the current date
       if (
         inputDateObj.year < currentDateObj.year ||
@@ -190,12 +193,6 @@ function MakeGoalForm({
       return;
     }
 
-    //Correctly formatting the DisplayHomepage variable
-    let formattedDisplayHomepage = false
-    if (displayHomepage == "yes"){
-      formattedDisplayHomepage = true
-    }
-
     //Keeping track of the unique id we are using
     let uniqueId = uuidv4();
 
@@ -211,9 +208,9 @@ function MakeGoalForm({
       CompletionDate: "",
       NmbGoals: 1,
       CompleteGoals: 0,
-      DisplayHomepage: formattedDisplayHomepage,
       Subgoal: subgoal,
       SubgoalOf: subgoalOf,
+      DeadlineDate: inputDateString
     });
 
     //Getting the reference to the userGoals record for the record, to be used later
@@ -327,7 +324,6 @@ function MakeGoalForm({
       //Looping through to find the non undefined output
       parentUids.map((parentUid) => {
         if (parentUid != undefined) {
-          console.log("Found correct uid");
           updateParentGoals(parentUid, currentDateString);
         }
       });
@@ -514,21 +510,6 @@ function MakeGoalForm({
           ) : (
             <div style={{ display: "none" }}></div>
           )}
-          <div className="formLine flexItems">
-            <div className="lineTitle flexItems">
-              <p>Display on Homepage : </p>
-            </div>
-            <div className="lineInput flexItems">
-              <select
-                onChange={(e) => setDisplayHomepage(e.target.value)}
-                name="DisplayHomepage"
-                id="DisplayHomepage"
-              >
-                <option value="Yes">Yes</option>
-                <option value="No">No</option>
-              </select>
-            </div>
-          </div>
           {/* Displaying the error msg to the screen, if there is one */}
           {errorMsg != "" ? (
             <div className="error">

@@ -33,7 +33,7 @@ function Home(){
                 <div className="content flexItems">
                     {/* The main content of the page */}
                     {/* Will have a Goals component and a Timetable component */}
-                    <Goals showOptions={false} currentUser={currentUser}/>
+                    <Goals currentUser={currentUser}/>
                     <TimeTableDisplay />
                 </div> 
             </div>
