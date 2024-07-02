@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import HomePageGoal from "./HomePageGoal";
 import { useEffect, useState } from "react";
 import MakeGoalForm from "./MakeGoalForm";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../Config/firebase";
 
 function Goals({currentUser}) {
@@ -134,7 +134,7 @@ function Goals({currentUser}) {
       setMainGoalArray([]);
       //Looping through all the main goals in the array
       //NOTE : You don't need to loop through the subgoals as no subgoals will have subgoals
-      goalsObjArray.forEach((goalObj) => {
+      goalsObjArray.forEach( async (goalObj) => {
         //Seeing if the goal has subgoals
         if (goalObj.Subgoals != []) {
           let subgoalsArr = [];
@@ -154,6 +154,20 @@ function Goals({currentUser}) {
           //Connecting the item temporarily
           tempObj[goalObj.GoalName] = subgoalsArr;
         }
+        //Checking to see if the entry streak needs to be reset
+      let currentDate = getCurrentDate()
+      //If no entry date has been set, ignore it
+      if (goalObj.lastEntryDate == ""){
+        return
+      }
+      //Checking if the dates aren't equal and are not consecutive
+      if (!(currentDate == goalObj.lastEntryDate) || !checkConsecutive(currentDate,goalObj.lastEntryDate)){
+        //If so, reset the streak
+        await updateDoc(doc(db,"Goals",goalObj.uid),{
+          entryStreak : 0
+        })
+        setGoalAddedRef(false)
+      }
       });
       //Permanently storing the changes made
       setSubgoalsToMaingoalsConnector(tempObj);
@@ -161,6 +175,83 @@ function Goals({currentUser}) {
 
     mainFunction();
   }, [goalsObjChanged]);
+
+  function getCurrentDate() {
+    //Getting the current date and time, and formatting it
+    let currentDate = new Date();
+    //Putting all the date information into an object
+    //The if statements are to ensure that the date is currently formatted, with 0s when needed
+    let currentDateObj = {
+      year: currentDate.getFullYear(),
+      month:
+        currentDate.getMonth() + 1 < 10
+          ? "0" + (currentDate.getMonth() + 1)
+          : currentDate.getMonth() + 1,
+      day:
+        currentDate.getDate() < 10
+          ? "0" + currentDate.getDate()
+          : currentDate.getDate(),
+      hours:
+        currentDate.getHours() < 10
+          ? "0" + currentDate.getHours()
+          : currentDate.getHours(),
+      minutes:
+        currentDate.getMinutes() < 10
+          ? "0" + currentDate.getMinutes()
+          : currentDate.getMinutes(),
+    };
+    //Returning a formatted string back to the function
+      return (
+        currentDateObj.year +
+        "/" +
+        currentDateObj.month +
+        "/" +
+        currentDateObj.day)
+  }
+
+  //Function which checks whether two dates are consecutive or not
+  function checkConsecutive(date1,date2){
+    function createDateObject(date){
+      let dateArr = date.split("/")
+      let dateObj = {
+        day: dateArr[2],
+        month: dateArr[1],
+        year : dateArr[0]
+      }
+      return dateObj
+    }
+
+    //Making the dates into objects, split into days, months and years
+    date1 = createDateObject(date1)
+    date2 = createDateObject(date2)
+
+    //Checking the different situations where you have consecutive days
+    //Situation 1 : Days are consectuive
+    if ((date1.year == date2.year) && (date1.month == date2.month) && (Math.abs(date1.day-date2.day) == 1)){
+      return true
+    }
+
+    //Situation 2 : Month changes
+    if ((date1.year == date2.year) && (Math.abs(date1.month-date2.month) == 1)){
+      //Finding out which date has the increased month
+      let increasedDate = date1.month > date2.month ? date1 : date2
+      if (increasedDate.day == 1){
+        return true
+      }
+    }
+
+    //Situation 3 : Year changes
+    if (Math.abs(date1.year-date2.year) == 1){
+      //Finding out which date has the higher year
+      let increasedDate = date1.year > date2.year ? date1 : date2
+      if ((increasedDate.month == 1) && (increasedDate.day == 1)){
+        return true
+      }
+    }
+
+    //If date fails all three conditions, return false
+    return false
+  }
 
   //Usestate to filter the goalObjsArray into different parts, and then display the parts the user wants
   //Array of all goals that will be displayed to the screen

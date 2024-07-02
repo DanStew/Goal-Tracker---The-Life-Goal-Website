@@ -64,6 +64,13 @@ function SignUp(){
                     lastName,
                     email,
                     photoURL: downloadURL,
+                    deadlineUpdates: "True",
+                    goalsMade : 0,
+                    goalsComplete : 0,
+                    entriesMade : 0,
+                    entryStreak : 0,
+                    highestEntryStreak : 0,
+                    lastEntryDate : ""
                 })
     
                 //Making the user record to store all of the users goals

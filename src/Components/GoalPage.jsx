@@ -38,7 +38,7 @@ function GoalPage({
 
   //Finding the subgoal records for the goal record we have
   useEffect(() => {
-    const mainFunction = () => {
+    const mainFunction = async () => {
       //Making sure the record has subgoals
       if (goalRecord.subgoals != []) {
         //Resetting the subgoals array
@@ -66,10 +66,109 @@ function GoalPage({
           });
         }
       }
+      //Checking to see if the entry streak needs to be reset
+      let currentDate = getCurrentDate();
+      //If no entry date has been set, ignore it
+      if (goalRecord.lastEntryDate == "") {
+        return;
+      }
+      //Checking if the dates aren't equal and are not consecutive
+      if (
+        !(currentDate == goalRecord.lastEntryDate) ||
+        !checkConsecutive(currentDate, goalRecord.lastEntryDate)
+      ) {
+        //If so, reset the streak
+        await updateDoc(doc(db, "Goals", goalRecord.uid), {
+          entryStreak: 0,
+        });
+        setGoalAddedRef(false);
+      }
     };
 
     mainFunction();
   }, [goalRecord]);
+
+  function getCurrentDate() {
+    //Getting the current date and time, and formatting it
+    let currentDate = new Date();
+    //Putting all the date information into an object
+    //The if statements are to ensure that the date is currently formatted, with 0s when needed
+    let currentDateObj = {
+      year: currentDate.getFullYear(),
+      month:
+        currentDate.getMonth() + 1 < 10
+          ? "0" + (currentDate.getMonth() + 1)
+          : currentDate.getMonth() + 1,
+      day:
+        currentDate.getDate() < 10
+          ? "0" + currentDate.getDate()
+          : currentDate.getDate(),
+      hours:
+        currentDate.getHours() < 10
+          ? "0" + currentDate.getHours()
+          : currentDate.getHours(),
+      minutes:
+        currentDate.getMinutes() < 10
+          ? "0" + currentDate.getMinutes()
+          : currentDate.getMinutes(),
+    };
+    //Returning a formatted string back to the function
+    return (
+      currentDateObj.year +
+      "/" +
+      currentDateObj.month +
+      "/" +
+      currentDateObj.day
+    );
+  }
+
+  //Function which checks whether two dates are consecutive or not
+  function checkConsecutive(date1, date2) {
+    function createDateObject(date) {
+      let dateArr = date.split("/");
+      let dateObj = {
+        day: dateArr[2],
+        month: dateArr[1],
+        year: dateArr[0],
+      };
+      return dateObj;
+    }
+
+    //Making the dates into objects, split into days, months and years
+    date1 = createDateObject(date1);
+    date2 = createDateObject(date2);
+
+    //Checking the different situations where you have consecutive days
+    //Situation 1 : Days are consectuive
+    if (
+      date1.year == date2.year &&
+      date1.month == date2.month &&
+      Math.abs(date1.day - date2.day) == 1
+    ) {
+      return true;
+    }
+
+    //Situation 2 : Month changes
+    if (date1.year == date2.year && Math.abs(date1.month - date2.month) == 1) {
+      //Finding out which date has the increased month
+      let increasedDate = date1.month > date2.month ? date1 : date2;
+      if (increasedDate.day == 1) {
+        return true;
+      }
+    }
+
+    //Situation 3 : Year changes
+    if (Math.abs(date1.year - date2.year) == 1) {
+      //Finding out which date has the higher year
+      let increasedDate = date1.year > date2.year ? date1 : date2;
+      if (increasedDate.month == 1 && increasedDate.day == 1) {
+        return true;
+      }
+    }
+
+    //If date fails all three conditions, return false
+    return false;
+  }
 
   //Function to toggle the showing of the Make A Goal form
   function showWindow() {
@@ -257,6 +356,7 @@ function GoalPage({
     const updateCompletedGoal = async (goalRecord) => {
       //Checking that the goal isn't already completed
       //This needs to be checked as otherwise the date will be changed, which will be incorrect
+      console.log(goalRecord.Completed);
       if (goalRecord.Completed != true) {
         //Getting the current date
         let currentDate = new Date();
@@ -297,50 +397,60 @@ function GoalPage({
           LastUpdated: currentDateString,
           CompleteGoals: goalRecord.NmbGoals,
         });
+        //Updating the goalsCompleted attribute of the users record
+        let userRecord = await getDoc(doc(db, "users", currentUser.uid));
+        let userData = userRecord.data();
+        console.log("Updating complete attribute");
+        console.log(userData);
+        await updateDoc(doc(db, "users", currentUser.uid), {
+          goalsComplete: userData.goalsComplete + 1,
+        });
+        setTimeout(2000);
       }
     };
 
     //The main part of this function
     //Updating the current goalRecord
-    updateCompletedGoal(goalRecord);
+    console.log("Calling updateCompletedGoal");
+    await updateCompletedGoal(goalRecord);
     //Checking to see if the current record has any subgoals
     goalRecord.Subgoals.map(async (subgoalId) => {
       //Getting the goal record of the subgoal
       let subgoalRecord = await getSubgoalRecord(subgoalId);
       //Calling the complete goal function on the subgoal record
-      completeSubgoals(subgoalRecord);
+      await completeSubgoals(subgoalRecord);
     });
 
     window.location.reload(false);
   }
 
   //Usestate to store the current skill
-  const [currentSkill,setCurrentSkill] = useState("")
+  const [currentSkill, setCurrentSkill] = useState("");
 
   //Function to add a skill to a goal
-  async function addSkill(){
+  async function addSkill() {
     //Ensuring that the skill isn't empty
-    if (currentSkill == ""){
-      return
+    if (currentSkill == "") {
+      return;
     }
     //Adding the skill to the array
-    await updateDoc(doc(db,"Goals",goalRecord.uid),{
-      Skills: arrayUnion(currentSkill)
-    })
+    await updateDoc(doc(db, "Goals", goalRecord.uid), {
+      Skills: arrayUnion(currentSkill),
+    });
     //Clearing the current skill value
-    setCurrentSkill("")
+    setCurrentSkill("");
     //Making the goal update
-    setNewEntry(!newEntry)
+    setNewEntry(!newEntry);
   }
 
   //Function to remove a skill from a goal
-  async function removeSkill(skillName){
+  async function removeSkill(skillName) {
     //Updating the goal record, removing the skillName from the skills array
-    await updateDoc(doc(db,"Goals",goalRecord.uid),{
-      Skills : arrayRemove(skillName)
-    })
+    await updateDoc(doc(db, "Goals", goalRecord.uid), {
+      Skills: arrayRemove(skillName),
+    });
     //Notifying the system to recollect the goal record
-    setNewEntry(!newEntry)
+    setNewEntry(!newEntry);
   }
 
   return (
@@ -411,10 +521,25 @@ function GoalPage({
           <div style={{ display: "none" }}></div>
         )}
       </div>
-      <div className="skillsOutput flexItems">
+      <div className="goalHeader">
+        <div className="goalHeaderLine flexItems">
+          <div>
+            <p>Entry Streak : </p>
+          </div>
+          <div>
+            <p>{goalRecord.entryStreak}</p>
+          </div>
+        </div>
+      </div>
+      <div className="skillsOutput flexItems hideElement">
         <span>Goal Skills</span>
         <div className="skillInputLine flexItems">
-          <input type="text" value={currentSkill} onChange={(e) => setCurrentSkill(e.target.value)} placeholder="Enter Skill Name..."/>
+          <input
+            type="text"
+            value={currentSkill}
+            onChange={(e) => setCurrentSkill(e.target.value)}
+            placeholder="Enter Skill Name..."
+          />
           <button onClick={() => addSkill()}>Add Skill</button>
         </div>
         {/* For each item in the skills array, output them here */}
@@ -429,12 +554,22 @@ function GoalPage({
                     {/* Button to enable the user to remvoe the skill from the array */}
                     <button
                       type="button"
-                      onClick={() => removeSkill(goalRecord.Skills[index])}>-</button>
+                      onClick={() => removeSkill(goalRecord.Skills[index])}
+                    >
+                      -
+                    </button>
                   </div>
                   {goalRecord.Skills[index + 1] ? (
                     <div className="individualSkill flexItem">
                       <p>{goalRecord.Skills[index + 1]}</p>
-                      <button type="button" onClick={() => removeSkill(goalRecord.Skills[index + 1])}>-</button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          removeSkill(goalRecord.Skills[index + 1])
+                        }
+                      >
+                        -
+                      </button>
                     </div>
                   ) : (
                     <div className="individualSkill flexItem"> </div>
@@ -444,7 +579,9 @@ function GoalPage({
                       <p>{goalRecord.Skills[index + 2]}</p>
                       <button
                         type="button"
-                        onClick={() => removeSkill(goalRecord.Skills[index + 2])}
+                        onClick={() =>
+                          removeSkill(goalRecord.Skills[index + 2])
+                        }
                       >
                         -
                       </button>
@@ -457,7 +594,9 @@ function GoalPage({
                       <p>{goalRecord.Skills[index + 3]}</p>
                       <button
                         type="button"
-                        onClick={() => removeSkill(goalRecord.Skills[index + 3])}
+                        onClick={() =>
+                          removeSkill(goalRecord.Skills[index + 3])
+                        }
                       >
                         -
                       </button>
@@ -557,7 +696,7 @@ function GoalPage({
       </div>
       {/* Conditionally rendering these buttons, if the goal hasn't been completed */}
       {!goalRecord.Completed ? (
-        <div className="buttonArea flexItems">
+        <div className="buttonArea flexItems hideElement">
           <button onClick={() => deleteGoal()} className="delete">
             Delete Goal
           </button>

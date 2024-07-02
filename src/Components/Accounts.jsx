@@ -3,6 +3,7 @@ import exitButton from "../Images/exitButton.jpg";
 import { arrayRemove, arrayUnion, deleteDoc, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../Config/firebase";
 import { v4 as uuidv4 } from "uuid";
+import { get } from "firebase/database";
 
 function Accounts({
   goalName,
@@ -85,7 +86,7 @@ function Accounts({
     setEntryDetails("");
   }
 
-  function getCurrentDate() {
+  function getCurrentDate(type) {
     //Getting the current date and time, and formatting it
     let currentDate = new Date();
     //Putting all the date information into an object
@@ -110,17 +111,28 @@ function Accounts({
           : currentDate.getMinutes(),
     };
     //Returning a formatted string back to the function
-    return (
-      currentDateObj.year +
-      "/" +
-      currentDateObj.month +
-      "/" +
-      currentDateObj.day +
-      " " +
-      currentDateObj.hours +
-      ":" +
-      currentDateObj.minutes
-    );
+    if (type == "full"){
+      return (
+        currentDateObj.year +
+        "/" +
+        currentDateObj.month +
+        "/" +
+        currentDateObj.day +
+        " " +
+        currentDateObj.hours +
+        ":" +
+        currentDateObj.minutes
+      );
+    }
+    else{
+      return (
+        currentDateObj.year +
+        "/" +
+        currentDateObj.month +
+        "/" +
+        currentDateObj.day
+      );
+    }
   }
 
   //Function to process and execute the function of the form
@@ -139,7 +151,7 @@ function Accounts({
     let formattedEntryName = formatString(entryName);
 
     //Getting the formatted current date string
-    let currentDateString = getCurrentDate();
+    let currentDateString = getCurrentDate("full");
 
     //Making the entry record
 
@@ -156,13 +168,71 @@ function Accounts({
       entryOf: goalName,
     });
 
+    //Getting the goal doc, to check entry streak
+    let goalDoc = await getDoc(doc(db,"Goals",goalUid))
+    let goalData = goalDoc.data()
+    //Getting the current date
+    let entryDate = getCurrentDate("")
+    //Keeping track of the entry streak returned
+    let entryStreak = 0
+    //Checking whether an entry date has been set or not
+    if (goalData.lastEntryDate == ""){
+      entryStreak = 1 //Starting the streak
+    }
+    else{
+      //Finding out whether the different in two dates is 1
+      let consecutiveDates = checkConsecutive(goalData.lastEntryDate,entryDate)
+      if (consecutiveDates){
+        entryStreak = goalData.currentEntryStreak + 1 //Incrementing the streak
+      }
+      else{
+        entryStreak = 1 //Resetting the streak
+      }
+    }
+    
+
     //Adding the entry to the goal doc
     await updateDoc(doc(db, "Goals", goalUid), {
       Entries: arrayUnion(uniqueId),
+      currentEntryStreak : entryStreak,
+      lastEntryDate : entryDate
     });
 
+    //Updating the entries made attribute of users record
+    let userRecord = await getDoc(doc(db,"users",currentUser.uid))
+    let userData = userRecord.data()
+    //Storing the value of the users entry date
+    let userEntryStreak = 0
+    //Checking whether the entry date has been set or not
+    if (userData.lastEntryDate == ""){
+      userEntryStreak = 1
+    }
+    else{
+      //Checking for consecutive dates
+      let consecutiveDates = checkConsecutive(userData.lastEntryDate,entryDate)
+      if (consecutiveDates){
+        userEntryStreak = userData.entryStreak + 1
+      }
+      else{
+        userEntryStreak = 1
+      }
+    }
+
+    //Checking for a new highest entry streak
+    let highestEntryStreak = userData.highestEntryStreak
+    if (userData.highestEntryStreak < userEntryStreak){
+      highestEntryStreak = userEntryStreak
+    }
+
+    await updateDoc(doc(db,"users",currentUser.uid),{
+      entriesMade : userData.entriesMade + 1,
+      lastEntryDate : entryDate,
+      entryStreak : userEntryStreak,
+      highestEntryStreak : highestEntryStreak
+    })
+
     //Function called to update all parent goals that this goal has been updated
-    updateParentGoals(goalUid, currentDateString);
+    updateParentGoals(goalRecord, currentDateString,entryDate);
 
     //Telling system new entry made
     setNewEntry(!newEntry);
@@ -175,7 +245,7 @@ function Accounts({
   }
 
   //Function to update the LastUpdated variable of parent goals
-  async function updateParentGoals(currentGoalUid, currentDateString) {
+  async function updateParentGoals(currentGoalRecord, currentDateString,entryDate) {
     //Function which uses the name of a goal to find its record
     async function getParentUid(goalName) {
       //Getting the userGoals record
@@ -186,7 +256,7 @@ function Accounts({
         userGoalsData.goals.map(async (goalUid) => {
           let goalRecord = await getGoalRecord(goalUid);
           if (goalRecord.GoalName == goalName) {
-            return goalRecord.uid;
+            return goalRecord;
           }
         })
       );
@@ -199,23 +269,31 @@ function Accounts({
       return goalData;
     }
 
+    //Processing the entry streak information
+    //Creating a variable to store information
+    let entryStreak = 0
+    if (currentGoalRecord.lastEntryDate == ""){
+      entryStreak = 1
+    }
+    else{
+      let consecutiveDates = checkConsecutive(currentGoalRecord.lastEntryDate,entryDate)
+      entryStreak = consecutiveDates ? currentGoalRecord.currentEntryStreak + 1 : 1
+    }
+
     //Updating the lastUpdated property for the current goal
-    await updateDoc(doc(db, "Goals", currentGoalUid), {
+    await updateDoc(doc(db, "Goals", currentGoalRecord.uid), {
       LastUpdated: currentDateString,
+      lastEntryDate: entryDate,
+      currentEntryStreak: entryStreak
     });
 
-    //Getting the record of the current goal
-    let goalRecord = await getDoc(doc(db, "Goals", currentGoalUid));
-    let goalData = goalRecord.data();
-
     //Seeing if the current goal is a subgoal
-    if (goalData.Subgoal == true) {
-      let parentUids = await getParentUid(goalData.SubgoalOf);
+    if (currentGoalRecord.Subgoal == true) {
+      let parentUids = await getParentUid(currentGoalRecord.SubgoalOf);
       //Looping through to find the non undefined output
-      parentUids.map((parentUid) => {
-        if (parentUid != undefined) {
-          console.log("Found correct uid");
-          updateParentGoals(parentUid, currentDateString);
+      parentUids.map( async(subgoalRecord) => {
+        if (subgoalRecord != undefined) {
+          updateParentGoals(subgoalRecord, currentDateString,entryDate);
         }
       });
     }
@@ -230,6 +308,50 @@ function Accounts({
     //Returning the goal data to the system
     return entryData;
   };
+
+  //Function which checks whether two dates are consecutive or not
+  function checkConsecutive(date1,date2){
+    function createDateObject(date){
+      let dateArr = date.split("/")
+      let dateObj = {
+        day: dateArr[2],
+        month: dateArr[1],
+        year : dateArr[0]
+      }
+      return dateObj
+    }
+
+    //Making the dates into objects, split into days, months and years
+    date1 = createDateObject(date1)
+    date2 = createDateObject(date2)
+
+    //Checking the different situations where you have consecutive days
+    //Situation 1 : Days are consectuive
+    if ((date1.year == date2.year) && (date1.month == date2.month) && (Math.abs(date1.day-date2.day) == 1)){
+      return true
+    }
+
+    //Situation 2 : Month changes
+    if ((date1.year == date2.year) && (Math.abs(date1.month-date2.month) == 1)){
+      //Finding out which date has the increased month
+      let increasedDate = date1.month > date2.month ? date1 : date2
+      if (increasedDate.day == 1){
+        return true
+      }
+    }
+
+    //Situation 3 : Year changes
+    if (Math.abs(date1.year-date2.year) == 1){
+      //Finding out which date has the higher year
+      let increasedDate = date1.year > date2.year ? date1 : date2
+      if ((increasedDate.month == 1) && (increasedDate.day == 1)){
+        return true
+      }
+    }
+
+    //If date fails all three conditions, return false
+    return false
+  }
 
   //Useeffect function to get the records of the entries, that need to be displayed to the screen
   useEffect(() => {

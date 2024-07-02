@@ -210,7 +210,9 @@ function MakeGoalForm({
       CompleteGoals: 0,
       Subgoal: subgoal,
       SubgoalOf: subgoalOf,
-      DeadlineDate: inputDateString
+      DeadlineDate: inputDateString,
+      lastEntryDate : "",
+      currentEntryStreak : 0
     });
 
     //Getting the reference to the userGoals record for the record, to be used later
@@ -273,6 +275,14 @@ function MakeGoalForm({
         goals: arrayUnion(uniqueId),
       });
     }
+
+    //Updating the goalsMade attribute within the users information
+    let userRecord = await getDoc(doc(db,"users",currentUser.uid))
+    let userData = userRecord.data()
+    //Updating the doc
+    await updateDoc(doc(db,"users",currentUser.uid),{
+      goalsMade : userData.goalsMade + 1
+    })
 
     //Telling goals that a goal has been added
     setGoalAddedRef(uniqueId);

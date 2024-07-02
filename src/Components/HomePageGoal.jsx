@@ -179,6 +179,19 @@ function HomePageGoal({
             </div>
           )}
         </div>
+        <div className="hpgHeaderLine">
+          {goalObj.Completed ? (
+            <div style={{display:"none"}}></div>) : (
+            <div className="hpgHeaderLine">
+              <div>
+                <p>Entry Streak : </p>
+              </div>
+              <div>
+                <p>{goalObj.entryStreak}</p>
+              </div>
+            </div>
+          )}
+        </div>
         {/* Displaying information about the goals */}
           {goalObj.DeadlineDate != "" ? (
             <div className="hpgHeaderLine">
