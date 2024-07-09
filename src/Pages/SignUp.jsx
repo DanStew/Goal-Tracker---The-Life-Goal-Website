@@ -8,8 +8,9 @@ import { createUserWithEmailAndPassword} from 'firebase/auth'
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
 import { doc, setDoc } from 'firebase/firestore'
 import { useNavigate, Link } from 'react-router-dom'
+import { updateProfile } from 'firebase/auth'
 
-function SignUp(){
+function SignUp({colourScheme}){
 
     //Making the useState variables to store the inputs from the user
     const [firstName,setFirstName] = useState("")
@@ -70,7 +71,8 @@ function SignUp(){
                     entriesMade : 0,
                     entryStreak : 0,
                     highestEntryStreak : 0,
-                    lastEntryDate : ""
+                    lastEntryDate : "",
+                    colourScheme : "default"
                 })
     
                 //Making the user record to store all of the users goals

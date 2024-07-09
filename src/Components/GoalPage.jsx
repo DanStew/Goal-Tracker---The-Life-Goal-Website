@@ -23,13 +23,14 @@ function GoalPage({
   setGoalAddedRef,
   setNewEntry,
   newEntry,
+  colourScheme
 }) {
   //UseState to toggle whether window shown or not
   //Controls the Make a Subgoal window
   const [windowShown, setWindowShown] = useState(false);
   //Controls the Make an Entry window
   const [windowShown2, setWindowShown2] = useState(false);
-  const [mainClass, setMainClass] = useState("goalPage");
+  const [mainClass, setMainClass] = useState("goalPage " + colourScheme);
 
   const [subgoalRecords, setSubgoalRecords] = useState([]);
 
@@ -74,12 +75,13 @@ function GoalPage({
       }
       //Checking if the dates aren't equal and are not consecutive
       if (
-        !(currentDate == goalRecord.lastEntryDate) ||
+        !(currentDate == goalRecord.lastEntryDate) &&
         !checkConsecutive(currentDate, goalRecord.lastEntryDate)
       ) {
+        console.log("Resetting the streak")
         //If so, reset the streak
         await updateDoc(doc(db, "Goals", goalRecord.uid), {
-          entryStreak: 0,
+          currentEntryStreak: 0,
         });
         setGoalAddedRef(false);
       }
@@ -173,7 +175,7 @@ function GoalPage({
   //Function to toggle the showing of the Make A Goal form
   function showWindow() {
     //Showing / Hiding goals depending on whether window shown or not
-    windowShown ? setMainClass("goalPage") : setMainClass("goalPage hideGoals");
+    windowShown ? setMainClass("goalPage " + colourScheme) : setMainClass("goalPage hideGoals " + colourScheme);
     //Hiding the showing of the make an entry form, if being shown
     setWindowShown2(false);
     //Toggling windowShown
@@ -184,8 +186,8 @@ function GoalPage({
   function showWindow2() {
     //Showing / Hiding goals depending on whether window shown or not
     windowShown2
-      ? setMainClass("goalPage")
-      : setMainClass("goalPage hideGoals");
+      ? setMainClass("goalPage " + colourScheme)
+      : setMainClass("goalPage hideGoals " + colourScheme);
     //Hiding the showing of the make an entry form, if being shown
     setWindowShown(false);
     //Toggling windowShown
@@ -522,12 +524,12 @@ function GoalPage({
         )}
       </div>
       <div className="goalHeader">
-        <div className="goalHeaderLine flexItems">
+        <div className="goalHeaderLine flexItems hideElement">
           <div>
             <p>Entry Streak : </p>
           </div>
           <div>
-            <p>{goalRecord.entryStreak}</p>
+            <p>{goalRecord.currentEntryStreak}</p>
           </div>
         </div>
       </div>
@@ -535,7 +537,8 @@ function GoalPage({
         <span>Goal Skills</span>
         <div className="skillInputLine flexItems">
           <input
-            type="text"
+            type="text" 
+            className={colourScheme}
             value={currentSkill}
             onChange={(e) => setCurrentSkill(e.target.value)}
             placeholder="Enter Skill Name..."
@@ -636,7 +639,8 @@ function GoalPage({
             goalsObjArray={goalsObjArray}
             subgoalNames={[]}
             subgoalsObjArray={subgoalsObjArray}
-            showNone={false}
+            showNone={false} 
+            colourScheme={colourScheme}
           />
         ) : (
           <div style={{ display: "none" }}></div>
@@ -691,7 +695,8 @@ function GoalPage({
           newEntry={newEntry}
           subgoalRecords={subgoalRecords}
           currentUser={currentUser}
-          goalRecord={goalRecord}
+          goalRecord={goalRecord} 
+          colourScheme={colourScheme}
         />
       </div>
       {/* Conditionally rendering these buttons, if the goal hasn't been completed */}

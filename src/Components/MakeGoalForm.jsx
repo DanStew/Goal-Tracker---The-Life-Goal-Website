@@ -21,6 +21,7 @@ function MakeGoalForm({
   subgoalNames,
   subgoalsObjArray,
   showNone,
+  colourScheme
 }) {
   //UseState variables to store information from the form
   const [goalName, setGoalName] = useState("");
@@ -341,19 +342,19 @@ function MakeGoalForm({
   }
 
   return (
-    <div id="MakeForm">
+    <div id="MakeForm" className={colourScheme}>
       {/* The title and button to exit the form */}
       <div className="formHeader flexItems">
         <p className="headerTitle flexItems">Make Goal</p>
       </div>
-      <div className="formContent flexItems">
+      <div className={"formContent flexItems " + colourScheme}>
         {/* The form, the main element of this window */}
         <form action="#">
-          <div className="formLine flexItems">
-            <div className="lineTitle flexItems">
+          <div className={"formLine flexItems " + colourScheme}>
+            <div className={"lineTitle flexItems " + colourScheme}>
               <p>Goal Name : </p>
             </div>
-            <div className="lineInput flexItems">
+            <div className={"lineInput flexItems " + colourScheme}>
               <input
                 type="text"
                 placeholder="Enter Goal Name..."
@@ -361,11 +362,11 @@ function MakeGoalForm({
               />
             </div>
           </div>
-          <div className="formLine flexItems">
-            <div className="lineTitle flexItems">
+          <div className={"formLine flexItems " + colourScheme}>
+            <div className={"lineTitle flexItems " + colourScheme}>
               <p>Subgoal of : </p>
             </div>
-            <div className="lineInput flexItems">
+            <div className={"lineInput flexItems " + colourScheme}>
               {/* Will output an option for every main goal that the website has */}
               <select
                 onChange={(e) => setSubgoalOf(e.target.value)}
@@ -393,11 +394,11 @@ function MakeGoalForm({
           </div>
           <div className="skillsArea">
             {/* Enables the user to individually type in each skill they have */}
-            <div className="formLine flexItems">
-              <div className="lineTitle flexItems">
+            <div className={"formLine flexItems " + colourScheme}>
+              <div className={"lineTitle flexItems " + colourScheme}>
                 <p>Skills :</p>
               </div>
-              <div className="lineInput flexItems">
+              <div className={"lineInput flexItems " + colourScheme}>
                 <input
                   id="skillInput"
                   type="text"
@@ -405,7 +406,7 @@ function MakeGoalForm({
                   onChange={(e) => setCurrentSkill(e.target.value)}
                 />
               </div>
-              <div className="lineInput flexItems">
+              <div className={"lineInput flexItems " + colourScheme}>
                 <button
                   type="button"
                   className="addSkill"
@@ -488,11 +489,11 @@ function MakeGoalForm({
             </div>
           </div>
           {/* Enables the user to choose if they want a deadline date or not */}
-          <div className="formLine flexItems">
-            <div className="lineTitle flexItems">
+          <div className={"formLine flexItems " + colourScheme}>
+            <div className={"lineTitle flexItems " + colourScheme}>
               <p>Deadline Date :</p>
             </div>
-            <div className="lineInput flexItems">
+            <div className={"lineInput flexItems " + colourScheme}>
               <select
                 onChange={(e) => setDeadline(e.target.value)}
                 name="DeadlineDate"
@@ -506,11 +507,11 @@ function MakeGoalForm({
           </div>
           {/* Allowing the user to pick a deadline date, if they have deadline selected yes */}
           {deadline == "Yes" ? (
-            <div className="formLine flexItems indent">
-              <div className="lineTitle flexItems">
+            <div className={"formLine flexItems indent " + colourScheme}>
+              <div className={"lineTitle flexItems " + colourScheme}>
                 <p>-- Pick Date :</p>
               </div>
-              <div className="lineInput flexItems">
+              <div className={"lineInput flexItems " + colourScheme}>
                 <input
                   type="date"
                   onChange={(e) => setDeadlineDate(e.target.value)}

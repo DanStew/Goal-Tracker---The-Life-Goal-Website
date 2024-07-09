@@ -2,7 +2,7 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../Config/firebase";
 import { useEffect, useState } from "react";
 
-function Header({currentUser}){
+function Header({currentUser,colourScheme}){
 
     //Defining the Users collection, to search for the User from
     const usersCollection = collection(db, "users");
@@ -33,7 +33,7 @@ function Header({currentUser}){
     }
 
     return(
-        <div>
+        <div className={colourScheme}>
            <img src={profileImgLocation} alt="" />
         </div>
     )

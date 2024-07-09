@@ -5,7 +5,7 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db, storage } from "../Config/firebase";
 import { deleteObject, ref, uploadBytes } from "firebase/storage";
 
-function MyAccount({ currentUser }) {
+function MyAccount({ currentUser,colourScheme }) {
   //Usestate to store the user record
   const [userRecord, setUserRecord] = useState(null);
 
@@ -39,19 +39,22 @@ function MyAccount({ currentUser }) {
       }
       //Checking if the dates aren't equal and are not consecutive
       if (
-        !(currentDate == userRecord.lastEntryDate) ||
+        !(currentDate == userRecord.lastEntryDate) &&
         !checkConsecutive(currentDate, userRecord.lastEntryDate)
       ) {
+        console.log("Resetting the streak")
         //If so, reset the streak
         await updateDoc(doc(db, "users", userRecord.uid), {
           entryStreak: 0,
         });
+        //Telling the system the record has been updated
+        setUpdatedRecord(updatedRecord + 1);
       }
-      //Telling the system the record has been updated
-      setUpdatedRecord(updatedRecord + 1);
     };
 
-    mainFunction();
+    if (userRecord){
+      mainFunction();
+    }
   }, [userRecord]);
 
   function getCurrentDate() {
@@ -151,12 +154,12 @@ function MyAccount({ currentUser }) {
   const [windowShown2, setWindowShown2] = useState(false);
 
   //Usestate to store the names of the classes of the main div in this page
-  const [mainClass, setMainClass] = useState("");
+  const [mainClass, setMainClass] = useState(colourScheme);
 
   //Function to ensure that the correct window is being shown
   function showWindow() {
     //Showing / Hiding page depending on whether window shown or not
-    windowShown ? setMainClass("") : setMainClass("hideGoals");
+    windowShown ? setMainClass(colourScheme) : setMainClass(colourScheme + "hideGoals");
     //Hiding the showing of the other window, if being shown
     setWindowShown2(false);
     //Toggling windowShown

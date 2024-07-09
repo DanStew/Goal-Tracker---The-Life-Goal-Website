@@ -1,13 +1,13 @@
 import SidebarElement from "./SidebarElement.jsx"
 
-function Sidebar(){
+function Sidebar({colourScheme}){
     return(
-        <div className="sideBarContent flexItems">
-            <SidebarElement elementName="Home" elementLink="/"/>
-            <SidebarElement elementName="My Goals" elementLink="/MyGoals"/>
-            <SidebarElement elementName="Timetable" elementLink="/Timetable"/>
-            <SidebarElement elementName="Account" elementLink="/Account"/>
-            <SidebarElement elementName="Settings" elementLink="/Settings"/>
+        <div className={"sideBarContent flexItems " + colourScheme}>
+            <SidebarElement elementName="Home" elementLink="/" colourScheme={colourScheme}/>
+            <SidebarElement elementName="My Goals" elementLink="/MyGoals" colourScheme={colourScheme}/>
+            <SidebarElement elementName="Timetable" elementLink="/Timetable" colourScheme={colourScheme}/>
+            <SidebarElement elementName="Account" elementLink="/Account" colourScheme={colourScheme}/>
+            <SidebarElement elementName="Settings" elementLink="/Settings" colourScheme={colourScheme}/>
         </div>
     )
 }

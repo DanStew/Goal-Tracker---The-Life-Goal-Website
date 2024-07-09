@@ -1,9 +1,9 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { auth } from "../Config/firebase"
 import { signInWithEmailAndPassword } from "firebase/auth"
 import { useNavigate, Link } from "react-router-dom";
 
-function SignIn(){
+function SignIn({colourScheme}){
     //Storing the inputs from the user
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
@@ -58,8 +58,15 @@ function SignIn(){
         return ""
     }
 
+      //Usestate to store the main class for this webpage
+  const [mainClass, setMainClass] = useState("")
+
+  useEffect(() => {
+    setMainClass("Login PageBody " + colourScheme)
+  },[colourScheme])
+
     return(
-        <div className="Login PageBody">
+        <div className={mainClass}>
             <div className='topBanner flexItems'>
                 <h1>GoalTracker</h1>
             </div>

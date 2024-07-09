@@ -7,7 +7,7 @@ import MakeGoalForm from "./MakeGoalForm";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../Config/firebase";
 
-function Goals({currentUser}) {
+function Goals({currentUser,colourScheme}) {
   //Creating the navigator for the website
   const navigator = useNavigate();
 
@@ -20,14 +20,14 @@ function Goals({currentUser}) {
   const [sortLastUpdated, setSortLastUpdated] = useState(true); //Sorts goals by Last Updated
 
   //Usestate the store what the mainClass of the page will be, used to trigger hiding screen or not
-  const [mainClass, setMainClass] = useState("Goals");
+  const [mainClass, setMainClass] = useState("Goals " + colourScheme);
   //Usestate to determine whether the Make A Goal window is currently being shown
   const [windowShown, setWindowShown] = useState(false);
 
   //Function to trigger the showing of the window on the screen
   function showWindow() {
     //Showing / Hiding goals depending on whether window shown or not
-    windowShown ? setMainClass("Goals") : setMainClass("Goals hideGoals");
+    windowShown ? setMainClass("Goals " + colourScheme) : setMainClass("Goals hideGoals " + colourScheme);
     //Hiding the options, as the user doesn't need to see them anymore
     setGoalOptions(false);
     //Toggling windowShown
@@ -161,10 +161,10 @@ function Goals({currentUser}) {
         return
       }
       //Checking if the dates aren't equal and are not consecutive
-      if (!(currentDate == goalObj.lastEntryDate) || !checkConsecutive(currentDate,goalObj.lastEntryDate)){
+      if (!(currentDate == goalObj.lastEntryDate) && !checkConsecutive(currentDate,goalObj.lastEntryDate)){
         //If so, reset the streak
         await updateDoc(doc(db,"Goals",goalObj.uid),{
-          entryStreak : 0
+          currentEntryStreak : 0
         })
         setGoalAddedRef(false)
       }
@@ -430,7 +430,8 @@ function Goals({currentUser}) {
                 goalsObjArray={goalsObjArray}
                 subgoalNames={subgoalNames}
                 subgoalsObjArray={subgoalsObjArray}
-                showNone={true}
+                showNone={true} 
+                colourScheme={colourScheme}
               />
             ) : (
               <div style={{ display: "none" }}></div>
@@ -517,7 +518,8 @@ function Goals({currentUser}) {
               subgoalToMaingoalConnector={subgoalsToMaingoalsConnector}
               setUpdatedGoal={() => setUpdatedGoal()}
               updatedGoal={updatedGoal}
-              currentUser={currentUser}
+              currentUser={currentUser} 
+              colourScheme={colourScheme}
             />
           </div>
         ))}

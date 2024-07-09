@@ -12,14 +12,36 @@ import Settings from './Pages/Settings';
 
 //Importing the needed functions for this file
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from './Context/AuthContext';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from './Config/firebase';
 
 
 function App() {
 
   //Finding the current user of the website
   const {currentUser} = useContext(AuthContext)
+
+  //Usestate to store the colourscheme the user has
+  const [colourScheme,setColourScheme] = useState("")
+
+  //Usestate variable to tell system that the userRecord has changed its colourscheme
+  const [changedColourScheme, setChangedColourScheme] = useState(false)
+
+  //Getting the colourscheme of the website, if there is a currentUser
+  useEffect(() => {
+    const mainFunction = async () => {
+      //Getting the user record
+      let userRecord = await getDoc(doc(db,"users",currentUser.uid))
+      let userData = userRecord.data()
+      //Finding the colourscheme and setting the variable
+      setColourScheme(userData.colourScheme)
+    }
+
+    //Ensuring that there is a current user
+    currentUser.uid ? mainFunction() : setColourScheme("default")
+  },[currentUser,changedColourScheme])
 
   //Creating the protected route for the website
   const ProtectedRoute = ({children}) =>{
@@ -29,19 +51,21 @@ function App() {
     return children
   }
 
+  console.log(changedColourScheme)
+
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/">
-          <Route path="SignUp" element={<SignUp/>} />
-          <Route path="SignIn" element={<SignIn/>} />
+          <Route path="SignUp" element={<SignUp colourScheme={colourScheme}/>} />
+          <Route path="SignIn" element={<SignIn colourScheme={colourScheme}/>} />
           {/* Implementing the protected route onto the home page */}
-          <Route index element={<ProtectedRoute ><Home /></ProtectedRoute>} />
-          <Route path="Account" element={<ProtectedRoute ><Account/></ProtectedRoute>} />
-          <Route path="MyGoals" element={<ProtectedRoute ><MyGoals/></ProtectedRoute>} />
-          <Route path="Goals/:goalName" element={<ProtectedRoute><Goal/></ProtectedRoute>} />
-          <Route path="Timetable" element={<ProtectedRoute ><Timetable /></ProtectedRoute>} />
-          <Route path="Settings" element={<ProtectedRoute ><Settings /></ProtectedRoute>} />
+          <Route index element={<ProtectedRoute ><Home colourScheme={colourScheme}/></ProtectedRoute>} />
+          <Route path="Account" element={<ProtectedRoute ><Account colourScheme={colourScheme}/></ProtectedRoute>} />
+          <Route path="MyGoals" element={<ProtectedRoute ><MyGoals colourScheme={colourScheme}/></ProtectedRoute>} />
+          <Route path="Goals/:goalName" element={<ProtectedRoute><Goal colourScheme={colourScheme}/></ProtectedRoute>} />
+          <Route path="Timetable" element={<ProtectedRoute ><Timetable colourScheme={colourScheme}/></ProtectedRoute>} />
+          <Route path="Settings" element={<ProtectedRoute ><Settings colourScheme={colourScheme} changedColourScheme={changedColourScheme} setChangedColourScheme={(e) => setChangedColourScheme(e)}/></ProtectedRoute>} />
         </Route>
       </Routes>
     </BrowserRouter>

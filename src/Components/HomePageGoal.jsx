@@ -16,6 +16,7 @@ function HomePageGoal({
   setUpdatedGoal,
   updatedGoal,
   currentUser,
+  colourScheme
 }) {
   //Implementing the navigator
   const navigator = useNavigate();
@@ -120,7 +121,7 @@ function HomePageGoal({
   }, [goalObj]);
 
   return (
-    <div id={mainId} className="homePageGoal flexItems">
+    <div id={mainId} className={"homePageGoal flexItems " + colourScheme}>
       {/* Making the header of the Goal Component */}
       <div className="hpgHeader flexItems">
         <div>
@@ -187,7 +188,7 @@ function HomePageGoal({
                 <p>Entry Streak : </p>
               </div>
               <div>
-                <p>{goalObj.entryStreak}</p>
+                <p>{goalObj.currentEntryStreak}</p>
               </div>
             </div>
           )}

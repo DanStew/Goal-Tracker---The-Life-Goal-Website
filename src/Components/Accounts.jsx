@@ -15,7 +15,8 @@ function Accounts({
   newEntry,
   subgoalRecords,
   currentUser,
-  goalRecord
+  goalRecord,
+  colourScheme
 }) {
   //Usestate to store the inputs from the form
   const [entryName, setEntryName] = useState("");
@@ -445,7 +446,7 @@ function Accounts({
   }
 
   return (
-    <div className="accounts">
+    <div className={"accounts " + colourScheme}>
       <div className="accountsHeader flexItems hideElement">
         <p className="subheading">Goal Accounts</p>
         {/* Conditionally rendering the button, depending on whehter the goal is complete or not */}
@@ -455,17 +456,17 @@ function Accounts({
         }
       </div>
       {windowShown2 ? (
-        <div id="MakeForm">
+        <div id="MakeForm" className={colourScheme}>
           <div className="formHeader flexItems">
             <p className="headerTitle flexItems">Make an Entry</p>
           </div>
-          <div className="formContent">
+          <div className={"formContent " + colourScheme}>
             <form action="#">
-              <div className="formLine flexItems">
-                <div className="lineTitle flexItems">
+              <div className={"formLine flexItems " + colourScheme }>
+                <div className={"lineTitle flexItems " + colourScheme}>
                   <p>Entry Name : </p>
                 </div>
-                <div className="lineInput flexItems">
+                <div className={"lineInput flexItems " + colourScheme}>
                   <input
                     type="text"
                     placeholder="Enter Entry Name..."
@@ -473,21 +474,21 @@ function Accounts({
                   />
                 </div>
               </div>
-              <div className="formLine flexItems">
-                <div className="lineTitle flexItems">
+              <div className={"formLine flexItems " + colourScheme }>
+                <div className={"lineTitle flexItems " + colourScheme}>
                   <p>Goal Name : </p>
                 </div>
-                <div className="lineInput flexItems">
+                <div className={"lineInput flexItems " + colourScheme}>
                   <p>{goalName}</p>
                 </div>
               </div>
               <div className="skillsArea">
                 {/* Enables the user to individually type in each skill they have */}
-                <div className="formLine flexItems">
-                  <div className="lineTitle flexItems">
+                <div className={"formLine flexItems " + colourScheme }>
+                  <div className={"lineTitle flexItems " + colourScheme}>
                     <p>Skills :</p>
                   </div>
-                  <div className="lineInput flexItems">
+                  <div className={"lineInput flexItems " + colourScheme}>
                     <input
                       id="skillInput"
                       type="text"
@@ -495,7 +496,7 @@ function Accounts({
                       onChange={(e) => setCurrentSkill(e.target.value)}
                     />
                   </div>
-                  <div className="lineInput flexItems">
+                  <div className={"lineInput flexItems " + colourScheme}>
                     <button
                       type="button"
                       className="addSkill"
@@ -619,22 +620,22 @@ function Accounts({
       <div className="accountsMain flexItems hideElement">
         {combinedEntriesArray.map((entryObj) => {
           return (
-            <div key={entryObj.uid} className="entry flexItems">
+            <div key={entryObj.uid} className={"entry flexItems " + colourScheme}>
               <div>
                 <div>
-                  <p className="title centered">{entryObj.EntryName}</p>
+                  <p className={"title centered " + colourScheme}>{entryObj.EntryName}</p>
                   {entryObj.entryOf != goalName ? (
-                    <p className="entryOf centered">
+                    <p className={"entryOf centered " + colourScheme}>
                       -- From {entryObj.entryOf} --{" "}
                     </p>
                   ) : (
                     <div style={{ display: "none" }}></div>
                   )}
-                  <p className="centered">{entryObj.Date}</p>
+                  <p className={"centered " + colourScheme}>{entryObj.Date}</p>
                 </div>
                 <div>
                   {entryObj.Skills[0] ? (
-                    <p>Skills Improved : </p>
+                    <p className={colourScheme}>Skills Improved : </p>
                   ) : (
                     <div display={{ display: "none" }}></div>
                   )}
@@ -645,13 +646,13 @@ function Accounts({
                         {index % 4 == 0 ? (
                           <div className="skillLine flexItem">
                             <div className="individualSkill flexItem">
-                              <p className="skill">
+                              <p className={"skill " + colourScheme}>
                                 {entryObj.Skills[index]} |
                               </p>
                             </div>
                             {entryObj.Skills[index + 1] ? (
                               <div className="individualSkill flexItem">
-                                <p className="skill">
+                                <p className={"skill " + colourScheme}>
                                   {entryObj.Skills[index + 1]} |
                                 </p>
                               </div>
@@ -660,7 +661,7 @@ function Accounts({
                             )}
                             {entryObj.Skills[index + 2] ? (
                               <div className="individualSkill flexItem">
-                                <p className="skill">
+                                <p className={"skill " + colourScheme}>
                                   {entryObj.Skills[index + 2]} |
                                 </p>
                               </div>
@@ -669,7 +670,7 @@ function Accounts({
                             )}
                             {entryObj.Skills[index + 3] ? (
                               <div className="individualSkill flexItem">
-                                <p className="skill">
+                                <p className={"skill " + colourScheme}>
                                   {entryObj.Skills[index + 3]} |
                                 </p>
                               </div>
@@ -685,8 +686,8 @@ function Accounts({
                   })}
                 </div>
                 <div>
-                  <p>Entry Details : </p>
-                  <p className="entryDetails centered">
+                  <p className={colourScheme}>Entry Details : </p>
+                  <p className={"entryDetails centered " + colourScheme}>
                     {entryObj.EntryDetails}
                   </p>
                 </div>

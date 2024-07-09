@@ -8,7 +8,7 @@ import GoalPage from "../Components/GoalPage";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../Config/firebase";
 
-function Goal() {
+function Goal({colourScheme}) {
   //Finding the current user of the website
   const { currentUser } = useContext(AuthContext);
 
@@ -97,14 +97,21 @@ function Goal() {
     mainFunction();
   }, [goalsObjArray,subgoalsObjArray]);
 
+    //Usestate to store the main class for this webpage
+    const [mainClass, setMainClass] = useState("")
+
+    useEffect(() => {
+      setMainClass("PageBody Goal flexItems " + colourScheme)
+    },[colourScheme])
+
   return (
-    <div className="PageBody Goal flexItems">
+    <div className={mainClass}>
       {/* The content for the main body of the website */}
       <div className="main flexItems">
         <div className="header flexItems">
           {/* The header of the page*/}
-          <Header currentUser={currentUser}></Header>
-          <p>{goalName}</p>
+          <Header currentUser={currentUser} colourScheme={colourScheme}></Header>
+          <p className={colourScheme}>{goalName}</p>
           {/* Button included to toggle and untoggle the sidebar */}
           {!sidebarShown ? (
             <img
@@ -122,7 +129,7 @@ function Goal() {
           {/* The main content of the page */}
           {/* Only displaying if there is a current goalrecord */}
           {goalRecord? 
-            <GoalPage goalName={goalName} currentUser={currentUser} goalsObjArray={goalsObjArray} subgoalsObjArray={subgoalsObjArray} goalRecord={goalRecord} setGoalAddedRef={() => setGoalAddedRef()} setNewEntry={() => setNewEntry()} newEntry={newEntry}/> 
+            <GoalPage goalName={goalName} currentUser={currentUser} goalsObjArray={goalsObjArray} subgoalsObjArray={subgoalsObjArray} goalRecord={goalRecord} setGoalAddedRef={() => setGoalAddedRef()} setNewEntry={() => setNewEntry()} newEntry={newEntry} colourScheme={colourScheme}/> 
             : 
             <div>
                 <p>You don't have a goal of the name : {goalName}</p>
@@ -144,12 +151,12 @@ function Goal() {
             />
           </div>
           <div className="sideBarContent flexItems">
-            <Sidebar />
+            <Sidebar colourScheme={colourScheme}/>
           </div>
         </div>
       ) : (
         <div style={{ display: "none" }} className="sideBar flexItems">
-          <Sidebar />
+          <Sidebar colourScheme={colourScheme}/>
         </div>
       )}
     </div>

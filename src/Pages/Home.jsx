@@ -1,4 +1,4 @@
-import { useContext, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { AuthContext } from '../Context/AuthContext';
 import Header from "../Components/Header"
 import Sidebar from "../Components/Sidebar";
@@ -6,23 +6,30 @@ import TimeTableDisplay from "../Components/TimeTableDisplay.jsx"
 import SettingsIcon from "../Images/settingsIcon.jpg"
 import Goals from "../Components/Goals";
 
-function Home(){
+function Home({colourScheme}){
 
     //Finding the current user of the website
     const {currentUser} = useContext(AuthContext)
+
+    //Usestate to store the main class for this webpage
+    const [mainClass, setMainClass] = useState("")
+
+    useEffect(() => {
+        setMainClass(colourScheme + " PageBody home flexItems")
+    },[colourScheme])
 
     //Variable to store the current state of the sidebar. By default, it isn't shown
     const [sidebarShown, setSidebarShown] = useState(false)
 
     return(
-        <div className="PageBody home flexItems">
+        <div className={mainClass}>
             {/* The content for the main body of the website */}
             <div className="main flexItems">
                 <div className="header flexItems">
                     {/* The header of the page*/}
                     {/* Passing the current user into the Header Component */}
-                    <Header currentUser={currentUser}></Header>
-                    <p>Home</p>
+                    <Header currentUser={currentUser} colourScheme={colourScheme}></Header>
+                    <p className={colourScheme}>Home</p>
                     {/* Button included to toggle and untoggle the sidebar */}
                     {/* This button is only shown when there is no sidebar currently being shown */}
                     {!sidebarShown ?
@@ -33,8 +40,8 @@ function Home(){
                 <div className="content flexItems">
                     {/* The main content of the page */}
                     {/* Will have a Goals component and a Timetable component */}
-                    <Goals currentUser={currentUser}/>
-                    <TimeTableDisplay />
+                    <Goals currentUser={currentUser} colourScheme={colourScheme}/>
+                    <TimeTableDisplay colourScheme={colourScheme}/>
                 </div> 
             </div>
             {/* The content for the sidebar of the website */}
@@ -45,10 +52,10 @@ function Home(){
                         <img onClick={() => sidebarShown ? setSidebarShown(false) : setSidebarShown(true)} src={SettingsIcon} alt="Toggle Sidebar" />
                     </div>
                     <div className="sideBarContent flexItems">
-                        <Sidebar/>
+                        <Sidebar colourScheme={colourScheme}/>
                     </div>
                 </div> : 
-                <div style={{display:"none"}}className="sideBar flexItems"><Sidebar/></div>
+                <div style={{display:"none"}}className="sideBar flexItems"><Sidebar colourScheme={colourScheme}/></div>
             }      
         </div>
     )
