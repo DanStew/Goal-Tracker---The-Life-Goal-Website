@@ -5,6 +5,7 @@ import Sidebar from "../Components/Sidebar";
 import TimeTableDisplay from "../Components/TimeTableDisplay.jsx"
 import SettingsIcon from "../Images/settingsIcon.jpg"
 import Goals from "../Components/Goals";
+import TimeTableComp from "../Components/TimetableComp.jsx"
 
 function Home({colourScheme}){
 
@@ -41,7 +42,7 @@ function Home({colourScheme}){
                     {/* The main content of the page */}
                     {/* Will have a Goals component and a Timetable component */}
                     <Goals currentUser={currentUser} colourScheme={colourScheme}/>
-                    <TimeTableDisplay colourScheme={colourScheme}/>
+                    <TimeTableComp colourScheme={colourScheme}/>
                 </div> 
             </div>
             {/* The content for the sidebar of the website */}

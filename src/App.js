@@ -51,8 +51,6 @@ function App() {
     return children
   }
 
-  console.log(changedColourScheme)
-
   return (
     <BrowserRouter>
       <Routes>

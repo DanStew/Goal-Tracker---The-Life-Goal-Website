@@ -153,10 +153,164 @@ p {
   .content {
     flex: 8 8;
 
-    .TimeTableDisplay {
-      background-color: red;
-      margin-top: 40px;
+    .timetable{
+      
+      .timetableHeader{
+        p{
+          font-weight: 600;
+          font-size: 72px;
+          padding: 40px;
+        }
+
+        button{
+          width: 40%;
+          padding: 20px;
+          font-size: 40px;
+          font-weight: 600;
+          background-color: orange;
+          border: none;
+          border-radius: 25px;
+
+          &:hover{
+            border: 2px solid white;
+          }
+        }
+      }
+
+      .TimeTableDisplay {
+        margin-top: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+
+        .TTDHeader{
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding-top: 10px;
+          padding-bottom: 10px;
+          width: 80%;
+          gap: 20px;
+          border: 4px solid black;
+          background-color: rgb(202, 202, 202);
+
+          img{
+            flex: 1 1;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+
+            &:hover{
+              border: 2px solid white;
+            }
+          }
+
+          p{
+            flex: 10;
+            font-size: 42px;
+            color: black;
+          }
+        }
+
+        .TTDMain{
+
+          .timetableDay{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+
+            .dayHeader{
+              font-size: 42px;
+              border: 4px solid black;
+              text-align: center;
+              width: 80%;
+              background-color: rgb(66, 66, 66);
+              padding-top: 10px;
+              padding-bottom: 10px;
+            }
+
+            .dayEvents{
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              flex-direction: column;
+              width: 80%;
+
+              .eventLine{
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                border-right: 4px solid black;
+                border-left: 4px solid black;
+                background-color: rgb(141, 141, 141);
+
+                .event{
+                  padding-top: 10px;
+                  padding-left: 10px;
+                  height: 100%;
+                  background-color: rgb(196, 196, 196);
+
+                  p{
+                    color: black;
+                    font-size: 32px;
+                  }
+
+                  &.left{
+                    border-bottom: 4px solid black;
+                    border-right: 4px solid black;
+                  }
+
+                  &.middle{
+                    border-bottom: 4px solid black;
+                    border-right: 4px solid black;
+                  }
+
+                  &.right{
+                    border-bottom: 4px solid black;
+                  }
+
+                  &.blank{
+                    background-color: transparent;
+                  }
+
+                  .eventFooter{
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    margin-top: 5px;
+
+                    .blank{
+                      flex: 4 4;
+                    }
+
+                    .button{
+                      height: 20px;
+                      border-radius: 10px;
+                      background-color: orange;
+
+                      &:hover{
+                        cursor: pointer;
+                        border: 2px solid white;
+                      }
+                    }
+                  }
+                }
+
+                .noEvents{
+                  width: 100%;
+                  padding: 20px;
+                  font-size: 42px;
+                  border: 4px solid black;
+                }
+              }
+            }
+          }
+        }
+      }
     }
+
 
     .Goals {
       margin-top: 40px;
