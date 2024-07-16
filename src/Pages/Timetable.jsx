@@ -46,7 +46,7 @@ function Timetable({ colourScheme }) {
         <div className="content flexItems">
           {/* The main content of the page */}
           {/* Only displaying if there is a current goalrecord */}
-          <TimetableComp />
+          <TimetableComp currentUser={currentUser} colourScheme={colourScheme}/>
         </div>
       </div>
       {/* The content for the sidebar of the website */}
