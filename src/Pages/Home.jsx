@@ -42,7 +42,7 @@ function Home({colourScheme}){
                     {/* The main content of the page */}
                     {/* Will have a Goals component and a Timetable component */}
                     <Goals currentUser={currentUser} colourScheme={colourScheme}/>
-                    <TimeTableComp colourScheme={colourScheme}/>
+                    <TimeTableComp currentUser={currentUser} colourScheme={colourScheme}/>
                 </div> 
             </div>
             {/* The content for the sidebar of the website */}

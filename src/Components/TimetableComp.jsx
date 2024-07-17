@@ -23,6 +23,9 @@ function TimetableComp({ currentUser,colourScheme }) {
   const [eventDetails, setEventDetails] = useState("");
   const [eventDate, setEventDate] = useState(null);
 
+  //Usestate variable to toggle when event added
+  const [eventAdded,setEventAdded] = useState(false)
+
   //Usestate variable to store the errorMsg on the system
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -67,6 +70,9 @@ function TimetableComp({ currentUser,colourScheme }) {
     setEventName("")
     setEventDetails("")
     setEventDate(null)
+
+    //Incrementing event added variable
+    setEventAdded(!eventAdded)
 
     //Closing out of the window
     toggleWindow()
@@ -145,7 +151,7 @@ function TimetableComp({ currentUser,colourScheme }) {
         <div style={{ display: "none" }}></div>
       )}
       <div className="timetableMain hideElement">
-        <TimetableDisplay colourScheme={colourScheme} />
+        <TimetableDisplay currentUser={currentUser} colourScheme={colourScheme} eventAdded={eventAdded}/>
       </div>
     </div>
   );

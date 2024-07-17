@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import leftArrowWhite from "../Images/leftArrowWhite.jpg";
 import rightArrowWhite from "../Images/rightArrowWhite.jpg";
+import {db} from "../Config/firebase.js"
+import { doc, getDoc } from "firebase/firestore";
 
-function TimeTableDisplay({ colourScheme }) {
+function TimeTableDisplay({ currentUser,colourScheme,eventAdded}) {
   //Object which says the number of days in each month
   //Singular value for every one other than February, where there may be multiple
   const daysInMonths = {
@@ -20,22 +22,106 @@ function TimeTableDisplay({ colourScheme }) {
     "12": 31,
   };
 
+  //Usestate variable to store the date of the start of the week (Monday)
+  const [mondayDate,setMondayDate] = useState(null)
+
+  //Usestate variable to store week variable, from the start to the end of the week
+  const [weekString, setWeekString] = useState("")
+
+  //Usestate variable to store all the dates within a week
+  const [weekDates, setWeekDates] = useState([])
+
+  //Usestate array to store all the events that are happening on each event
+  //The events on the same date share the same index as the weekDates array
+  const [weekDateEvents,setWeekDateEvents] = useState([[],[],[],[],[],[],[]])
+
   //Useeffect to find the current week we are on
   useEffect(() => {
     const mainFunction = () => {
       //Getting the current date as a recognisable string
-      let currentDateString = getDateString();
-      console.log(increaseDate("2024-12-29",3));
-      console.log(decreaseDate("2024-12-29",3))
+      let currentDate = new Date()
+      let currentDateString = getDateString(currentDate);
+      //Finding the date of Monday, the beginning of the week
+      if (currentDate.getDay() == 0){
+        //The day is sunday, so you need to go to the start of the previous week
+        setMondayDate(decreaseDate(currentDateString,6))
+      }
+      else{
+        setMondayDate(decreaseDate(currentDateString,currentDate.getDay()-1))
+      }
     };
 
     mainFunction();
   }, []);
 
+  //Useeffect to get ALL the dates within a week, until you get to Sunday
+  //Loops everytime the Monday date changes
+  useEffect(() => {
+    const mainFunction = () => {
+      //Resetting the weekDates array
+      setWeekDates([])
+      //Making a temporary array to store dates
+      let tempArr = [mondayDate]
+      //Looping through all the dates in the week, until we get to Sunday
+      //Keeping track of what the date it, outside the for loop as well
+      let currentDate = mondayDate
+      for (let i=0; i<=5;i++){
+        //Increasing the date by 1, storing it as the new date
+        currentDate = increaseDate(currentDate,1)
+        //Appending the date to the temp arr
+        tempArr.push(currentDate)
+      }
+      //Storing the tempArr as the actual WeekDates arr
+      setWeekDates(tempArr)
+      //Making the week string
+      setWeekString(mondayDate + " - " + currentDate)
+    }
+
+    //Ensuring that the mondayDate isn't currently empty
+    if (mondayDate != null){
+      mainFunction()
+    }
+  },[mondayDate])
+
+  //Useeffect function to get all the events from the weekDates in the current week
+  useEffect(() => {
+    const mainFunction = async () => {
+      //Function which gets the event record, using an event if
+      const getEventRecord = async (eventId) => {
+        let eventRecord = await getDoc(doc(db,"Events",eventId))
+        let eventData = eventRecord.data()
+        return eventData
+      }
+
+      //Making a temporary array for all the events to be stored within the week
+      //Each day has its own array, to store the events for that day
+      let tempArr = [[],[],[],[],[],[],[]]
+      //Getting the users userGoals record
+      let userGoals = await getDoc(doc(db,"userGoals",currentUser.uid))
+      let userGoalsData = userGoals.data()
+      //Mapping through all of the events
+      await userGoalsData.events.map(async (eventId) => {
+        //Getting the event record
+        let eventRecord = await getEventRecord(eventId)
+        if (weekDates.includes(eventRecord.eventDate)){
+          //Finding the index of this event, from the weekDates array
+          let index = weekDates.indexOf(eventRecord.eventDate)
+          //Appending the event at this index in the tempArr
+          tempArr[index].push(eventRecord)
+          //Storing the new array
+        }
+        setWeekDateEvents(tempArr)
+      })
+    }
+
+    //Ensuring that the weekdates have actually been collected
+    if (weekDates != [] && currentUser.uid != undefined){
+      mainFunction()
+    }
+  },[weekDates,eventAdded])
+  
   //Function to make the current date into a recognisable string
-  function getDateString() {
-    //Getting the current date and time (will be used later)
-    let currentDate = new Date();
+  function getDateString(currentDate) {
     //Putting all the date information into an object
     //The if statements are to ensure that the date is currently formatted, with 0s when needed
     let currentDateObj = {
@@ -177,9 +263,6 @@ function TimeTableDisplay({ colourScheme }) {
     return dateString
   }
 
-  //Usestate array to store all the information about the events happening in the week
-  const [weekArray, setWeekArray] = useState([]);
-
   //Usestate variable to store the index of the event which is currently open
   const [optionsId, setOptionsId] = useState(null);
 
@@ -203,188 +286,177 @@ function TimeTableDisplay({ colourScheme }) {
   //Function to delete the event selected
   function deleteEvent() {}
 
-  useEffect(() => {
-    setWeekArray([]);
-    let tempArray = [
-      [
-        "Monday",
-        [
-          ["Event 1", "Event Details"],
-          ["Event 2", "Event 2 Details"],
-          ["Event 3", "Event 3 Details"],
-          ["Event 4", "Event 4 Details"],
-        ],
-      ],
-      ["Tuesday", []],
-    ];
-
-    setWeekArray(tempArray);
-  }, [colourScheme]);
-
   return (
     <div className={"TimeTableDisplay " + colourScheme}>
       <div className="TTDHeader flexItems">
         {/* This is where the weekname and toggle week buttons will be displayed */}
         <img src={leftArrowWhite} alt="" />
-        <p>xx Feb - yy Feb</p>
+        <p>{weekString}</p>
         <img src={rightArrowWhite} alt="" />
       </div>
       <div className="TTDMain flexItems">
         {/* Looping through all the days in the week */}
-        {weekArray.map((dayInformation, index) => {
-          return (
-            <div key={index} className="timetableDay flexItems">
-              <div className="dayHeader flexItems">
-                <p>{dayInformation[0]}</p>
-              </div>
-              <div className="dayEvents flexItems">
-                {/* Looping through all the events the day has */}
-                {dayInformation[1].map((eventInfo, index) => {
-                  return (
-                    <div className="eventLine flexItems" key={index}>
-                      {/* Grouping the events into groups of 3 */}
-                      {/* This is done by displaying 3 at one time, and then skipping till we get to the next group of 3 */}
-                      {index % 3 == 0 ? (
-                        <div className="eventLine flexItems">
-                          {optionsId != index ? (
-                            <div className="event left flexItems">
-                              <div className="eventContent flexItems">
-                                <p>{eventInfo[0]}</p>
-                                <p>{eventInfo[1]}</p>
+        {weekDates ? 
+        <div>
+
+          {weekDates.map((dayDate, index) => {
+            return (
+              <div key={dayDate} className="timetableDay flexItems">
+                <div className="dayHeader flexItems">
+                  <p>{dayDate}</p>
+                </div>
+                <div className="dayEvents flexItems">
+                  {/* Looping through all the events the day has */}
+                  {weekDateEvents[index].map((eventInfo, index2) => {
+                    return (
+                      <div className="eventLine flexItems" key={eventInfo.uid}>
+                        {/* Grouping the events into groups of 3 */}
+                        {/* This is done by displaying 3 at one time, and then skipping till we get to the next group of 3 */}
+                        {index2 % 3 == 0 ? (
+                          <div className="eventLine flexItems">
+                            {optionsId != eventInfo.uid ? (
+                              <div className="event left flexItems">
+                                <div className="eventContent flexItems">
+                                  <p>{eventInfo.eventName}</p>
+                                  <p>{eventInfo.eventDetails}</p>
+                                </div>
+                                <div className="eventFooter flexItems">
+                                  <div className="blank flexItems"></div>
+                                  <div
+                                    onClick={() => toggleOptions(eventInfo.uid)}
+                                    className="button flexItems"
+                                  ></div>
+                                </div>
                               </div>
-                              <div className="eventFooter flexItems">
-                                <div className="blank flexItems"></div>
+                            ) : (
+                              <div className="event left flexItems">
                                 <div
-                                  onClick={() => toggleOptions(index)}
-                                  className="button flexItems"
-                                ></div>
+                                  onClick={() => toggleOptions(eventInfo.uid)}
+                                  className="option flexItems"
+                                >
+                                  <p>Close</p>
+                                </div>
+                                <div
+                                  onClick={() => completeEvent()}
+                                  className="option flexItems"
+                                >
+                                  <p>Complete Event</p>
+                                </div>
+                                <div
+                                  onClick={() => deleteEvent()}
+                                  className="option flexItems"
+                                >
+                                  <p>Delete Event</p>
+                                </div>
                               </div>
-                            </div>
-                          ) : (
-                            <div className="event left flexItems">
-                              <div
-                                onClick={() => toggleOptions(index)}
-                                className="option flexItems"
-                              >
-                                <p>Close</p>
-                              </div>
-                              <div
-                                onClick={() => completeEvent()}
-                                className="option flexItems"
-                              >
-                                <p>Complete Event</p>
-                              </div>
-                              <div
-                                onClick={() => deleteEvent()}
-                                className="option flexItems"
-                              >
-                                <p>Delete Event</p>
-                              </div>
-                            </div>
-                          )}
-                          {dayInformation[1][index + 1] ? (
-                            <div className="event middle flexItems">
-                              {optionsId != index + 1 ? (
-                                <div>
-                                  <div className="eventContent flexItems">
-                                    <p>{dayInformation[1][index + 1][0]}</p>
-                                    <p>{dayInformation[1][index + 1][1]}</p>
+                            )}
+                            {weekDateEvents[index][index2 + 1] ? (
+                              <div className="event middle flexItems">
+                                {optionsId != weekDateEvents[index][index2+1].uid ? (
+                                  <div>
+                                    <div className="eventContent flexItems">
+                                      <p>{weekDateEvents[index][index2 + 1].eventName}</p>
+                                      <p>{weekDateEvents[index][index2 + 1].eventDetails}</p>
+                                    </div>
+                                    <div className="eventFooter flexItems">
+                                      <div className="blank flexItems"></div>
+                                      <div
+                                        onClick={() => toggleOptions(weekDateEvents[index][index2+1].uid)}
+                                        className="button flexItems"
+                                      ></div>
+                                    </div>
                                   </div>
-                                  <div className="eventFooter flexItems">
-                                    <div className="blank flexItems"></div>
+                                ) : (
+                                  <div>
                                     <div
-                                      onClick={() => toggleOptions(index + 1)}
-                                      className="button flexItems"
-                                    ></div>
-                                  </div>
-                                </div>
-                              ) : (
-                                <div>
-                                  <div
-                                    onClick={() => toggleOptions(index + 1)}
-                                    className="option flexItems"
-                                  >
-                                    <p>Close</p>
-                                  </div>
-                                  <div
-                                    onClick={() => completeEvent()}
-                                    className="option flexItems"
-                                  >
-                                    <p>Complete Event</p>
-                                  </div>
-                                  <div
-                                    onClick={() => deleteEvent()}
-                                    className="option flexItems"
-                                  >
-                                    <p>Delete Event</p>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="event blank flexItems"></div>
-                          )}
-                          {dayInformation[1][index + 1] ? (
-                            <div className="event right flexItems">
-                              {optionsId != index + 2 ? (
-                                <div>
-                                  <div className="eventContent flexItems">
-                                    <p>{dayInformation[1][index + 2][0]}</p>
-                                    <p>{dayInformation[1][index + 2][1]}</p>
-                                  </div>
-                                  <div className="eventFooter flexItems">
-                                    <div className="blank flexItems"></div>
+                                      onClick={() => toggleOptions(weekDateEvents[index][index2+1].uid)}
+                                      className="option flexItems"
+                                    >
+                                      <p>Close</p>
+                                    </div>
                                     <div
-                                      onClick={() => toggleOptions(index + 2)}
-                                      className="button flexItems"
-                                    ></div>
+                                      onClick={() => completeEvent()}
+                                      className="option flexItems"
+                                    >
+                                      <p>Complete Event</p>
+                                    </div>
+                                    <div
+                                      onClick={() => deleteEvent()}
+                                      className="option flexItems"
+                                    >
+                                      <p>Delete Event</p>
+                                    </div>
                                   </div>
-                                </div>
-                              ) : (
-                                <div>
-                                  <div
-                                    onClick={() => toggleOptions(index + 2)}
-                                    className="option flexItems"
-                                  >
-                                    <p>Close</p>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="event blank flexItems"></div>
+                            )}
+                            {weekDateEvents[index][index2 + 2] ? (
+                              <div className="event right flexItems">
+                                {optionsId != weekDateEvents[index][index2+2].uid ? (
+                                  <div>
+                                    <div className="eventContent flexItems">
+                                      <p>{weekDateEvents[index][index2 + 2].eventName}</p>
+                                      <p>{weekDateEvents[index][index2 + 2].eventDetails}</p>
+                                    </div>
+                                    <div className="eventFooter flexItems">
+                                      <div className="blank flexItems"></div>
+                                      <div
+                                        onClick={() => toggleOptions(weekDateEvents[index][index2+2].uid)}
+                                        className="button flexItems"
+                                      ></div>
+                                    </div>
                                   </div>
-                                  <div
-                                    onClick={() => completeEvent()}
-                                    className="option flexItems"
-                                  >
-                                    <p>Complete Event</p>
+                                ) : (
+                                  <div>
+                                    <div
+                                      onClick={() => toggleOptions(weekDateEvents[index][index2+2].uid)}
+                                      className="option flexItems"
+                                    >
+                                      <p>Close</p>
+                                    </div>
+                                    <div
+                                      onClick={() => completeEvent()}
+                                      className="option flexItems"
+                                    >
+                                      <p>Complete Event</p>
+                                    </div>
+                                    <div
+                                      onClick={() => deleteEvent()}
+                                      className="option flexItems"
+                                    >
+                                      <p>Delete Event</p>
+                                    </div>
                                   </div>
-                                  <div
-                                    onClick={() => deleteEvent()}
-                                    className="option flexItems"
-                                  >
-                                    <p>Delete Event</p>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="event blank flexItems"></div>
-                          )}
-                        </div>
-                      ) : (
-                        <div style={{ display: "none" }}></div>
-                      )}
+                                )}
+                              </div>
+                            ) : (
+                              <div className="event blank flexItems"></div>
+                            )}
+                          </div>
+                        ) : (
+                          <div style={{ display: "none" }}></div>
+                        )}
+                      </div>
+                    );
+                  })}
+                  {/* Outputting text if there are no events on the current day */}
+                  {weekDateEvents[index][0] == undefined ? (
+                    <div className="eventLine flexItems">
+                      <p className="noEvents">No events on this day...</p>
                     </div>
-                  );
-                })}
-                {/* Outputting text if there are no events on the current day */}
-                {dayInformation[1][0] == undefined ? (
-                  <div className="eventLine flexItems">
-                    <p className="noEvents">No events on this day...</p>
-                  </div>
-                ) : (
-                  <div style={{ display: "none" }}></div>
-                )}
+                  ) : (
+                    <div style={{ display: "none" }}></div>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+        : <div style={{display:"none"}}></div>
+        }
+        
       </div>
     </div>
   );
