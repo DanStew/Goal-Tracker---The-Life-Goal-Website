@@ -1,20 +1,12 @@
-import { useEffect, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
+import { useState } from "react";
 import exitButton from "../Images/exitButton.jpg";
-import { db } from "../Config/firebase";
-import {
-  FieldValue,
-  arrayRemove,
-  arrayUnion,
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-} from "firebase/firestore";
+import { formatString } from "../Functions/strings";
+import { processMakeGoalForm } from "../Functions/processingForms";
 
 function MakeGoalForm({
   toggleWindow,
   currentUser,
+  goalAddedRef,
   setGoalAddedRef,
   goalNames,
   goalsObjArray,
@@ -31,20 +23,6 @@ function MakeGoalForm({
   const [deadline, setDeadline] = useState("No");
   const [deadlineDate, setDeadlineDate] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
-
-  //Function used to correctly format the given input
-  function formatString(inputString) {
-    //Copying the string without mutating and Making it formatted
-    let copyString = "";
-    for (let i = 0; i <= inputString.length; i++) {
-      if (i == 0) {
-        copyString += inputString.charAt(i).toUpperCase();
-        continue;
-      }
-      copyString += inputString.charAt(i).toLowerCase();
-    }
-    return copyString;
-  }
 
   //Function to add the current enterred skill to the skill array, and set the skill variable to null
   function addSkill() {
@@ -84,261 +62,17 @@ function MakeGoalForm({
     setDeadlineDate(null);
   }
 
-  //Function to process the information from the form, when the user submits
-  async function processForm() {
-    //Resetting the error msg
-    setErrorMsg("");
-
-    //Validating the inputs from the user
-    if (goalName == "") {
-      setErrorMsg("Goal Name must not be empty");
-      return;
-    }
-
-    //Boolean subgoal variable to see whether variable is a subgoal or not
-    let subgoal = true;
-    //Processing the empty input for the subGoalOf variable
-    //NOTE : Being empty is an acceptable input for this variable, hence why no error will be occurring
-    if (subgoalOf == "" || subgoalOf=="none") {
-      if (showNone == true) {
-        setSubgoalOf("None");
-        subgoal = false; //By default, this variable is true, so you don't need to set it true
-      }
-      //If none can't be shown, then the user needs to select
-      else {
-        setErrorMsg("No set subgoal");
-        return;
-      }
-    }
-
-    //Getting the current date and time (will be used later)
-    let currentDate = new Date();
-    //Putting all the date information into an object
-    //The if statements are to ensure that the date is currently formatted, with 0s when needed
-    let currentDateObj = {
-      year: currentDate.getFullYear(),
-      month:
-        currentDate.getMonth() + 1 < 10
-          ? "0" + (currentDate.getMonth() + 1)
-          : currentDate.getMonth() + 1,
-      day:
-        currentDate.getDate() < 10
-          ? "0" + currentDate.getDate()
-          : currentDate.getDate(),
-      hours:
-        currentDate.getHours() < 10
-          ? "0" + currentDate.getHours()
-          : currentDate.getHours(),
-      minutes:
-        currentDate.getMinutes() < 10
-          ? "0" + currentDate.getMinutes()
-          : currentDate.getMinutes(),
-    };
-    //Putting all this information into a single string, will be stored later
-    let currentDateString =
-      currentDateObj.year +
-      "/" +
-      currentDateObj.month +
-      "/" +
-      currentDateObj.day +
-      " " +
-      currentDateObj.hours +
-      ":" +
-      currentDateObj.minutes;
-
-    //Initialising the inputDateString
-    let inputDateString = ""; 
-      
-    //Validating the deadline date
-    if (deadline == "Yes") {
-      //Ensuring deadlineDate isn't null
-      if (deadlineDate == null) {
-        setErrorMsg("Deadline Date must not be empty");
-        return;
-      }
-      //Breaking down the inputted users date into the same format object
-      let inputDateArr = deadlineDate.split("-");
-      let inputDateObj = {
-        year: inputDateArr[0],
-        month: inputDateArr[1],
-        day: inputDateArr[2],
-      };
-      //Formatting the inputDate into a correct string
-      inputDateString = inputDateObj.year + "/" + inputDateObj.month + "/" + inputDateObj.day
-      //Ensuring that the inputted date isn't less than the current date
-      if (
-        inputDateObj.year < currentDateObj.year ||
-        (inputDateObj.year == currentDateObj.year &&
-          inputDateObj.month < currentDateObj.month) ||
-        (inputDateObj.year == currentDateObj.year &&
-          inputDateObj.month == currentDateObj.month &&
-          inputDateObj.day < currentDateObj.day)
-      ) {
-        setErrorMsg("Deadline Date has already passed, Invalid");
-        return;
-      }
-    }
-
-    //Formatting the strings recieved from the user
-    let formattedGoalName = formatString(goalName);
-
-    //Ensuring that the new goal name hasn't already been used
-    let duplicateName = false;
-    goalNames.map((goalName) => {
-      if (goalName == formattedGoalName) {
-        duplicateName = true;
-      }
-    });
-    if (duplicateName) {
-      setErrorMsg("Goal Name has already been used, Invalid");
-      return;
-    }
-
-    //Keeping track of the unique id we are using
-    let uniqueId = uuidv4();
-
-    //Making the Goals record with all the information
-    await setDoc(doc(db, "Goals", uniqueId), {
-      uid: uniqueId,
-      GoalName: formattedGoalName,
-      Skills: skillsArray,
-      Subgoals: [],
-      Entries: [],
-      LastUpdated: currentDateString,
-      Completed: false,
-      CompletionDate: "",
-      NmbGoals: 1,
-      CompleteGoals: 0,
-      Subgoal: subgoal,
-      SubgoalOf: subgoalOf,
-      DeadlineDate: inputDateString,
-      lastEntryDate : "",
-      currentEntryStreak : 0
-    });
-
-    //Getting the reference to the userGoals record for the record, to be used later
-    const userGoalsRef = doc(db, "userGoals", currentUser.uid);
-
-    //If the goal is a subgoal, finding the goal record for its main goal
-    if (subgoal) {
-      //Boolean test variable to see if the subgoal has been added or not
-      //Finding the goal object with the goal name selected
-      //First searching the main goals to see if it is there
-
-      //Getting the goalObjUid of the parent goal
-      let goalObjUid;
-      goalsObjArray.map(async (goalsObj) => {
-        if (goalsObj.GoalName == subgoalOf) {
-          goalObjUid = goalsObj.uid;
-          const mainGoalRef = doc(db, "Goals", goalsObj.uid);
-          const mainGoalData = await getDoc(mainGoalRef)
-          const mainGoalRecord = mainGoalData.data()
-          await updateDoc(mainGoalRef, {
-            Subgoals: arrayUnion(uniqueId),
-            NmbGoals: mainGoalRecord.NmbGoals + 1
-          });
-        }
-      });
-      //If it isn't there, check the subgoals to see if it is there
-      subgoalsObjArray.map(async (subgoalsObj) => {
-        if (subgoalsObj.GoalName == subgoalOf) {
-          goalObjUid = subgoalsObj.uid;
-          //Adding the new subgoal to the existing subgoal
-          const subGoalRef = doc(db, "Goals", subgoalsObj.uid);
-          //Getting the data from the subGoalRef
-          const docSnap = await getDoc(subGoalRef);
-          const subgoalData = docSnap.data();
-          await updateDoc(subGoalRef, {
-            Subgoals: arrayUnion(uniqueId),
-            NmbGoals: subgoalData.NmbGoals + 1
-          });
-          //Moving the subgoal from the subgoals array to the goals array
-          //This is because this goal should now be displayed on the home screen, as it has its own subgoals
-          await updateDoc(userGoalsRef, {
-            goals: arrayUnion(subgoalData.uid),
-            subgoals: arrayRemove(subgoalData.uid),
-          });
-        }
-      });
-
-      //Updating the lastUpdated property for all parent goals
-      await updateParentGoals(goalObjUid, currentDateString);
-
-      //Adding the new subgoal to the userGoals subgoal area
-      await updateDoc(userGoalsRef, {
-        subgoals: arrayUnion(uniqueId),
-      });
-    }
-    //If the goal added isn't a subgoal, it can be added directly to the goals array
-    else {
-      //Updating the userGoals record with the additional uuid
-      await updateDoc(userGoalsRef, {
-        goals: arrayUnion(uniqueId),
-      });
-    }
-
-    //Updating the goalsMade attribute within the users information
-    let userRecord = await getDoc(doc(db,"users",currentUser.uid))
-    let userData = userRecord.data()
-    //Updating the doc
-    await updateDoc(doc(db,"users",currentUser.uid),{
-      goalsMade : userData.goalsMade + 1
-    })
-
+  //Function used to call the function to process the form
+  function processForm(){
+    //Calling the main function to process the form
+    processMakeGoalForm(currentUser,{goalName: goalName,subgoalOf: subgoalOf,deadline:deadline,deadlineDate:deadlineDate,skillsArray:skillsArray},goalNames,() => setErrorMsg(),showNone,goalsObjArray,subgoalsObjArray)
+    //Running the code that couldn't run in the above function, webpage specific code
     //Telling goals that a goal has been added
-    setGoalAddedRef(uniqueId);
-
+    setGoalAddedRef(!goalAddedRef);
     //To end the function, reset all the values of the inputs
     resetValues();
-
     //Closing the window
     toggleWindow();
-  }
-
-  //Function to update the LastUpdated variable of parent goals
-  async function updateParentGoals(currentGoalUid, currentDateString) {
-    //Function which uses the name of a goal to find its record
-    async function getParentUid(goalName) {
-      //Getting the userGoals record
-      let userGoals = await getDoc(doc(db, "userGoals", currentUser.uid));
-      let userGoalsData = userGoals.data();
-      //Looping through all of the goals
-      return await Promise.all(
-        userGoalsData.goals.map(async (goalUid) => {
-          let goalRecord = await getGoalRecord(goalUid);
-          if (goalRecord.GoalName == goalName) {
-            return goalRecord.uid;
-          }
-        })
-      );
-    }
-
-    //Function which uses a goal record uid to find the goal record
-    async function getGoalRecord(goalUid) {
-      let goalRecord = await getDoc(doc(db, "Goals", goalUid));
-      let goalData = goalRecord.data();
-      return goalData;
-    }
-
-    //Updating the lastUpdated property for the current goal
-    await updateDoc(doc(db, "Goals", currentGoalUid), {
-      LastUpdated: currentDateString,
-    });
-
-    //Getting the record of the current goal
-    let goalRecord = await getDoc(doc(db, "Goals", currentGoalUid));
-    let goalData = goalRecord.data();
-
-    //Seeing if the current goal is a subgoal
-    if (goalData.Subgoal == true) {
-      let parentUids = await getParentUid(goalData.SubgoalOf);
-      //Looping through to find the non undefined output
-      parentUids.map((parentUid) => {
-        if (parentUid != undefined) {
-          updateParentGoals(parentUid, currentDateString);
-        }
-      });
-    }
   }
 
   return (

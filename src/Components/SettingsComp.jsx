@@ -11,14 +11,6 @@ function SettingsComp({currentUser,changedColourScheme,setChangedColourScheme,co
 
     //Function to delete the users account, and all the users information
     async function deleteAccount(){
-        //Get the usergoals record
-        //Loop through all the goals
-            //Delete the entries
-            //Then delete the goal records
-        //Then the delete the usergoals record
-        //Then delete the userRecord
-        //Then delete the storage itme
-        //Then delete from Auth
 
         //Function to delete all entries from a goal
         const deleteEntries = async (goalId) => {

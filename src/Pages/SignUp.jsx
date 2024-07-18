@@ -8,7 +8,7 @@ import { createUserWithEmailAndPassword} from 'firebase/auth'
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
 import { doc, setDoc } from 'firebase/firestore'
 import { useNavigate, Link } from 'react-router-dom'
-import { updateProfile } from 'firebase/auth'
+import {validateInputs} from '../Functions/validateInputs.js'
 
 function SignUp({colourScheme}){
 
@@ -32,7 +32,7 @@ function SignUp({colourScheme}){
 
         //Calling the validation function, which returns any error messages that could occur
         //If there are no error messages, it returns ""
-        setErrorMsg(validateInputs())
+        setErrorMsg(validateInputs({firstName : firstName,lastName : lastName,profilePic : profilePic,email : email,password : password}))
 
         //If the error message isn't empty, return to output the error message to the user
         if (errorMsg != ""){
@@ -85,54 +85,6 @@ function SignUp({colourScheme}){
             //Transporting the user to the homepage
             navigator("/")
         }
-    }
-
-    //Function to validate the user's inputs, to ensure they are correct
-    function validateInputs(){
-        //Making the regex test, to ensure all letters are alphabetical
-        let regex = /^[a-zA-Z]+$/;
-        
-        //Ensure firstname is valid
-        if (firstName == ""){
-            return "First Name must not be empty"
-        }
-        if (!regex.test(firstName)){
-            return "All characters in First Name must be alphabetical"
-        }
-
-        //Ensure lastname is valid
-        if (lastName == ""){
-            return "Last Name must not be empty"
-        }
-        if (!regex.test(lastName)){
-            return "All characters in Last Name must be alphabetical"
-        }
-
-        //Ensuring email is valid
-        if (email == ""){
-            return "Email input must not be empty"
-        }
-        //Ensuring that an @ occurs in the email
-        if (email.indexOf("@") == -1){
-            return "All email inputs must have an @"
-        }
-        //Ensuring that the email input ends in .com
-        if (email.indexOf(".com") == -1){
-            return "All emails must end with a .com"
-        }
-
-        //Ensuring that the password is valid
-        if (password == "" || password.length < 6){
-            return "Password inputs must be of atleast length 6"
-        }
-
-        //Ensuring that a profile picture is present
-        if (profilePic == null){
-            return "You must have enterred a profile picture"
-        }
-
-        //If all validations have passed, return nothing
-        return ""
     }
 
     return(

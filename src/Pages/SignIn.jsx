@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { auth } from "../Config/firebase"
 import { signInWithEmailAndPassword } from "firebase/auth"
 import { useNavigate, Link } from "react-router-dom";
+import {validateInputs} from "../Functions/validateInputs";
 
 function SignIn({colourScheme}){
     //Storing the inputs from the user
@@ -17,7 +18,7 @@ function SignIn({colourScheme}){
         e.preventDefault()
 
         //Validating the inputs, to ensure they are of the correct form
-        setErrorMsg(validateInputs())
+        setErrorMsg(validateInputs({email:email, password : password}))
 
         //Checking to see whether any errors occurred in the system
         if (errorMsg != ""){
@@ -31,31 +32,6 @@ function SignIn({colourScheme}){
         } catch(err){
             setErrorMsg("Email address or Password is incorrect, please try again")
         }
-    }
-
-    //Function to validate the email and password inputs, to ensure they are of the correct format
-    //Returns a string to be returned as the error, being "" if not errors occur
-    function validateInputs(){
-        //Ensuring email is valid
-        if (email == ""){
-            return "Email input must not be empty"
-        }
-        //Ensuring that an @ occurs in the email
-        if (email.indexOf("@") == -1){
-            return "All email inputs must have an @"
-        }
-        //Ensuring that the email input ends in .com
-        if (email.indexOf(".com") == -1){
-            return "All emails must end with a .com"
-        }
-
-        //Ensuring that the password is valid
-        if (password == "" || password.length < 6){
-            return "Password inputs must be of atleast length 6"
-        }
-
-        //If all validations have passed, return nothing
-        return ""
     }
 
       //Usestate to store the main class for this webpage

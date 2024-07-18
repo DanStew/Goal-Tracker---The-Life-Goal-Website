@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "../Config/firebase";
 import { update } from "firebase/database";
+import { deleteGoal } from "../Functions/deleteGoals";
 
 function HomePageGoal({
   goalObj,
@@ -23,92 +24,6 @@ function HomePageGoal({
 
   //Usestate variable to display the options of the page
   const [showOptions, setShowOptions] = useState(false);
-
-  //Function to delete the current goal
-  async function deleteGoal() {
-    //Function to get the goal record, using a goalUid
-    async function getGoalRecord(goalUid) {
-      let goalRecord = await getDoc(doc(db, "Goals", goalUid));
-      let goalData = goalRecord.data();
-      return goalData;
-    }
-
-    //Function to remove the uid from the parent goal
-    async function deleteGoalUid(goalName, deletedUid) {
-      //Finding the goal corresponding to the goal name
-      let userGoals = await getDoc(doc(db, "userGoals", currentUser.uid));
-      let userGoalsData = userGoals.data();
-      //Looping through all the goal uids
-      //You only have to loop through the goals, as the current goal is a subgoal
-      userGoalsData.goals.map(async (goalUid) => {
-        let goalRecord = await getGoalRecord(goalUid);
-        if (goalRecord != undefined) {
-          if (goalRecord.GoalName == goalName) {
-            //Deleting the uid from the current goal record
-            await updateDoc(doc(db, "Goals", goalRecord.uid), {
-              Subgoals: arrayRemove(deletedUid),
-            });
-          }
-        }
-      });
-    }
-
-    //Function used to delete all the subgoals of the current goal
-    async function deleteSubgoals(goalRecord) {
-      //If the goal you are removing has subgoals, delete the subgoals as well
-      if (goalRecord.Subgoals != []) {
-        //Looping through all the subgoals and deleting them
-        goalRecord.Subgoals.map(async (subgoalUid) => {
-          //Getting the goal record
-          let subgoalRecord = await getGoalRecord(subgoalUid);
-          //Deleting all subgoals of the subgoal
-          if (subgoalRecord.Subgoals[0]) {
-            await deleteSubgoals(subgoalRecord);
-          } else {
-            //Deleting it from userGoals aswell
-            await deleteDoc(doc(db, "Goals", subgoalUid));
-            //Removing the subgoal uid from the userGoals record
-            await updateDoc(doc(db, "userGoals", currentUser.uid), {
-              subgoals: arrayRemove(subgoalUid),
-            });
-          }
-        });
-
-        //Removing the goal uid from the userGoals record
-        //NOTE : This has to be done here as it is different if it doesn't have subgoals
-        await updateDoc(doc(db, "userGoals", currentUser.uid), {
-          goals: arrayRemove(goalRecord.uid),
-        });
-      } else {
-        //Removing the goal uid from the userGoals record
-        await updateDoc(doc(db, "userGoals", currentUser.uid), {
-          subgoals: arrayRemove(goalRecord.uid),
-        });
-      }
-
-      //Deleting the goal doc of the current goal
-      await deleteDoc(doc(db, "Goals", goalRecord.uid));
-    }
-
-    //The main function, which calls the other functions to run
-    const mainFunction = async (goalObj) => {
-      //Seeing if the goal you are removing is a subgoal
-      if (goalObj.Subgoal == true) {
-        //Removing this goals uid from the parent uid
-        await deleteGoalUid(goalObj.SubgoalOf, goalObj.uid);
-      }
-
-      //Function to delete all the subgoals, and the goal itself
-      await deleteSubgoals(goalObj);
-    };
-
-    //Calling the main function to delete the goal
-    await mainFunction(goalObj);
-    //Making sure the webpage refreshed
-    setTimeout(1000);
-    setUpdatedGoal(!updatedGoal);
-    window.location.reload(false);
-  }
 
   //UseState to store the class that the goal has
   const [mainId, setMainId] = useState("");
@@ -231,7 +146,7 @@ function HomePageGoal({
       {showOptions ? (
         <div className="options flexItems">
           <div className="optionsContent">
-            <button className="delete" onClick={() => deleteGoal()}>
+            <button className="delete" onClick={() => deleteGoal(currentUser,goalObj)}>
               Delete Goal
             </button>
           </div>

@@ -1,9 +1,20 @@
 import { useEffect, useState } from "react";
 import exitButton from "../Images/exitButton.jpg";
-import { arrayRemove, arrayUnion, deleteDoc, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import {
+  arrayRemove,
+  arrayUnion,
+  deleteDoc,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../Config/firebase";
 import { v4 as uuidv4 } from "uuid";
 import { get } from "firebase/database";
+import { checkConsecutive, getCurrentDate } from "../Functions/dates";
+import { formatString } from "../Functions/strings";
+import { sortEntriesByDate } from "../Functions/selectionSort";
 
 function Accounts({
   goalName,
@@ -16,7 +27,7 @@ function Accounts({
   subgoalRecords,
   currentUser,
   goalRecord,
-  colourScheme
+  colourScheme,
 }) {
   //Usestate to store the inputs from the form
   const [entryName, setEntryName] = useState("");
@@ -31,21 +42,7 @@ function Accounts({
   const [combinedEntriesArray, setCombinedEntriesArray] = useState([]);
 
   //Usestate to control whether to show account options or not
-  const [showOptions,setShowOptions] = useState(false)
-
-  //Function used to correctly format the given input
-  function formatString(inputString) {
-    //Copying the string without mutating and Making it formatted
-    let copyString = "";
-    for (let i = 0; i <= inputString.length; i++) {
-      if (i == 0) {
-        copyString += inputString.charAt(i).toUpperCase();
-        continue;
-      }
-      copyString += inputString.charAt(i).toLowerCase();
-    }
-    return copyString;
-  }
+  const [showOptions, setShowOptions] = useState(false);
 
   //Function to add the current enterred skill to the skill array, and set the skill variable to null
   function addSkill() {
@@ -87,55 +84,6 @@ function Accounts({
     setEntryDetails("");
   }
 
-  function getCurrentDate(type) {
-    //Getting the current date and time, and formatting it
-    let currentDate = new Date();
-    //Putting all the date information into an object
-    //The if statements are to ensure that the date is currently formatted, with 0s when needed
-    let currentDateObj = {
-      year: currentDate.getFullYear(),
-      month:
-        currentDate.getMonth() + 1 < 10
-          ? "0" + (currentDate.getMonth() + 1)
-          : currentDate.getMonth() + 1,
-      day:
-        currentDate.getDate() < 10
-          ? "0" + currentDate.getDate()
-          : currentDate.getDate(),
-      hours:
-        currentDate.getHours() < 10
-          ? "0" + currentDate.getHours()
-          : currentDate.getHours(),
-      minutes:
-        currentDate.getMinutes() < 10
-          ? "0" + currentDate.getMinutes()
-          : currentDate.getMinutes(),
-    };
-    //Returning a formatted string back to the function
-    if (type == "full"){
-      return (
-        currentDateObj.year +
-        "/" +
-        currentDateObj.month +
-        "/" +
-        currentDateObj.day +
-        " " +
-        currentDateObj.hours +
-        ":" +
-        currentDateObj.minutes
-      );
-    }
-    else{
-      return (
-        currentDateObj.year +
-        "/" +
-        currentDateObj.month +
-        "/" +
-        currentDateObj.day
-      );
-    }
-  }
-
   //Function to process and execute the function of the form
   async function processForm() {
     //Validating the inputs into the function
@@ -170,70 +118,71 @@ function Accounts({
     });
 
     //Getting the goal doc, to check entry streak
-    let goalDoc = await getDoc(doc(db,"Goals",goalUid))
-    let goalData = goalDoc.data()
+    let goalDoc = await getDoc(doc(db, "Goals", goalUid));
+    let goalData = goalDoc.data();
     //Getting the current date
-    let entryDate = getCurrentDate("")
+    let entryDate = getCurrentDate("");
     //Keeping track of the entry streak returned
-    let entryStreak = 0
+    let entryStreak = 0;
     //Checking whether an entry date has been set or not
-    if (goalData.lastEntryDate == ""){
-      entryStreak = 1 //Starting the streak
-    }
-    else{
+    if (goalData.lastEntryDate == "") {
+      entryStreak = 1; //Starting the streak
+    } else {
       //Finding out whether the different in two dates is 1
-      let consecutiveDates = checkConsecutive(goalData.lastEntryDate,entryDate)
-      if (consecutiveDates){
-        entryStreak = goalData.currentEntryStreak + 1 //Incrementing the streak
-      }
-      else{
-        entryStreak = 1 //Resetting the streak
+      let consecutiveDates = checkConsecutive(
+        goalData.lastEntryDate,
+        entryDate
+      );
+      if (consecutiveDates) {
+        entryStreak = goalData.currentEntryStreak + 1; //Incrementing the streak
+      } else {
+        entryStreak = 1; //Resetting the streak
       }
     }
-    
 
     //Adding the entry to the goal doc
     await updateDoc(doc(db, "Goals", goalUid), {
       Entries: arrayUnion(uniqueId),
-      currentEntryStreak : entryStreak,
-      lastEntryDate : entryDate
+      currentEntryStreak: entryStreak,
+      lastEntryDate: entryDate,
     });
 
     //Updating the entries made attribute of users record
-    let userRecord = await getDoc(doc(db,"users",currentUser.uid))
-    let userData = userRecord.data()
+    let userRecord = await getDoc(doc(db, "users", currentUser.uid));
+    let userData = userRecord.data();
     //Storing the value of the users entry date
-    let userEntryStreak = 0
+    let userEntryStreak = 0;
     //Checking whether the entry date has been set or not
-    if (userData.lastEntryDate == ""){
-      userEntryStreak = 1
-    }
-    else{
+    if (userData.lastEntryDate == "") {
+      userEntryStreak = 1;
+    } else {
       //Checking for consecutive dates
-      let consecutiveDates = checkConsecutive(userData.lastEntryDate,entryDate)
-      if (consecutiveDates){
-        userEntryStreak = userData.entryStreak + 1
-      }
-      else{
-        userEntryStreak = 1
+      let consecutiveDates = checkConsecutive(
+        userData.lastEntryDate,
+        entryDate
+      );
+      if (consecutiveDates) {
+        userEntryStreak = userData.entryStreak + 1;
+      } else {
+        userEntryStreak = 1;
       }
     }
 
     //Checking for a new highest entry streak
-    let highestEntryStreak = userData.highestEntryStreak
-    if (userData.highestEntryStreak < userEntryStreak){
-      highestEntryStreak = userEntryStreak
+    let highestEntryStreak = userData.highestEntryStreak;
+    if (userData.highestEntryStreak < userEntryStreak) {
+      highestEntryStreak = userEntryStreak;
     }
 
-    await updateDoc(doc(db,"users",currentUser.uid),{
-      entriesMade : userData.entriesMade + 1,
-      lastEntryDate : entryDate,
-      entryStreak : userEntryStreak,
-      highestEntryStreak : highestEntryStreak
-    })
+    await updateDoc(doc(db, "users", currentUser.uid), {
+      entriesMade: userData.entriesMade + 1,
+      lastEntryDate: entryDate,
+      entryStreak: userEntryStreak,
+      highestEntryStreak: highestEntryStreak,
+    });
 
     //Function called to update all parent goals that this goal has been updated
-    updateParentGoals(goalRecord, currentDateString,entryDate);
+    updateParentGoals(goalRecord, currentDateString, entryDate);
 
     //Telling system new entry made
     setNewEntry(!newEntry);
@@ -246,7 +195,11 @@ function Accounts({
   }
 
   //Function to update the LastUpdated variable of parent goals
-  async function updateParentGoals(currentGoalRecord, currentDateString,entryDate) {
+  async function updateParentGoals(
+    currentGoalRecord,
+    currentDateString,
+    entryDate
+  ) {
     //Function which uses the name of a goal to find its record
     async function getParentUid(goalName) {
       //Getting the userGoals record
@@ -272,29 +225,33 @@ function Accounts({
 
     //Processing the entry streak information
     //Creating a variable to store information
-    let entryStreak = 0
-    if (currentGoalRecord.lastEntryDate == ""){
-      entryStreak = 1
-    }
-    else{
-      let consecutiveDates = checkConsecutive(currentGoalRecord.lastEntryDate,entryDate)
-      entryStreak = consecutiveDates ? currentGoalRecord.currentEntryStreak + 1 : 1
+    let entryStreak = 0;
+    if (currentGoalRecord.lastEntryDate == "") {
+      entryStreak = 1;
+    } else {
+      let consecutiveDates = checkConsecutive(
+        currentGoalRecord.lastEntryDate,
+        entryDate
+      );
+      entryStreak = consecutiveDates
+        ? currentGoalRecord.currentEntryStreak + 1
+        : 1;
     }
 
     //Updating the lastUpdated property for the current goal
     await updateDoc(doc(db, "Goals", currentGoalRecord.uid), {
       LastUpdated: currentDateString,
       lastEntryDate: entryDate,
-      currentEntryStreak: entryStreak
+      currentEntryStreak: entryStreak,
     });
 
     //Seeing if the current goal is a subgoal
     if (currentGoalRecord.Subgoal == true) {
       let parentUids = await getParentUid(currentGoalRecord.SubgoalOf);
       //Looping through to find the non undefined output
-      parentUids.map( async(subgoalRecord) => {
+      parentUids.map(async (subgoalRecord) => {
         if (subgoalRecord != undefined) {
-          updateParentGoals(subgoalRecord, currentDateString,entryDate);
+          updateParentGoals(subgoalRecord, currentDateString, entryDate);
         }
       });
     }
@@ -309,50 +266,6 @@ function Accounts({
     //Returning the goal data to the system
     return entryData;
   };
-
-  //Function which checks whether two dates are consecutive or not
-  function checkConsecutive(date1,date2){
-    function createDateObject(date){
-      let dateArr = date.split("/")
-      let dateObj = {
-        day: dateArr[2],
-        month: dateArr[1],
-        year : dateArr[0]
-      }
-      return dateObj
-    }
-
-    //Making the dates into objects, split into days, months and years
-    date1 = createDateObject(date1)
-    date2 = createDateObject(date2)
-
-    //Checking the different situations where you have consecutive days
-    //Situation 1 : Days are consectuive
-    if ((date1.year == date2.year) && (date1.month == date2.month) && (Math.abs(date1.day-date2.day) == 1)){
-      return true
-    }
-
-    //Situation 2 : Month changes
-    if ((date1.year == date2.year) && (Math.abs(date1.month-date2.month) == 1)){
-      //Finding out which date has the increased month
-      let increasedDate = date1.month > date2.month ? date1 : date2
-      if (increasedDate.day == 1){
-        return true
-      }
-    }
-
-    //Situation 3 : Year changes
-    if (Math.abs(date1.year-date2.year) == 1){
-      //Finding out which date has the higher year
-      let increasedDate = date1.year > date2.year ? date1 : date2
-      if ((increasedDate.month == 1) && (increasedDate.day == 1)){
-        return true
-      }
-    }
-
-    //If date fails all three conditions, return false
-    return false
-  }
 
   //Useeffect function to get the records of the entries, that need to be displayed to the screen
   useEffect(() => {
@@ -394,36 +307,8 @@ function Accounts({
   //UseEffect function to sort all the entry records via date
   useEffect(() => {
     const mainFunction = () => {
-      //Function to find the minimum date
-      const findMinIndex = (arr, start) => {
-        let minValue = arr[start].Date;
-        let minIndex = start;
-        while (start < arr.length) {
-          if (arr[start].Date > minValue) {
-            minValue = arr[start].Date;
-            minIndex = start;
-          }
-          start = start + 1;
-        }
-        return minIndex;
-      };
-
-      //Function to swap two elements at different indexes
-      const swapElements = (arr, i, j) => {
-        let temp = arr[i];
-        arr[i] = arr[j];
-        arr[j] = temp;
-        return arr;
-      };
-
       let tempArr = [].concat(subgoalEntriesArray).concat(entriesObjArray);
-      //Performing an selection sort on the new array, to sort all the elements
-      for (let k = 0; k < tempArr.length; k++) {
-        //Finding the index with the lowest value
-        let minIndex = findMinIndex(tempArr, k);
-        //Swapping the current and smallest index
-        tempArr = swapElements(tempArr, k, minIndex);
-      }
+      tempArr = sortEntriesByDate(tempArr);
       //Storing the tempArr into the actual array to be used
       setCombinedEntriesArray(tempArr);
     };
@@ -432,17 +317,17 @@ function Accounts({
   }, [subgoalEntriesArray, entriesObjArray]);
 
   //Function to delete the current account the user is selecting
-  async function deleteAccount(entryObj){
+  async function deleteAccount(entryObj) {
     //Removing the id of the entry from the goal obj
-    await updateDoc(doc(db,"Goals",goalUid),{
-      Entries : arrayRemove(entryObj.uid)
-    })
+    await updateDoc(doc(db, "Goals", goalUid), {
+      Entries: arrayRemove(entryObj.uid),
+    });
     //Deleting the entry from the database
-    await deleteDoc(doc(db,"Entries",entryObj.uid))
+    await deleteDoc(doc(db, "Entries", entryObj.uid));
 
     //Making the website reload, and recollect the goal obj
-    setNewEntry(!newEntry)
-    window.location.reload(false)
+    setNewEntry(!newEntry);
+    window.location.reload(false);
   }
 
   return (
@@ -450,10 +335,11 @@ function Accounts({
       <div className="accountsHeader flexItems hideElement">
         <p className="subheading">Goal Accounts</p>
         {/* Conditionally rendering the button, depending on whehter the goal is complete or not */}
-        {!goalRecord.Completed ? 
+        {!goalRecord.Completed ? (
           <button onClick={() => showWindow2()}>Add Account</button>
-          : <div style={{display:"none"}}></div>
-        }
+        ) : (
+          <div style={{ display: "none" }}></div>
+        )}
       </div>
       {windowShown2 ? (
         <div id="MakeForm" className={colourScheme}>
@@ -462,7 +348,7 @@ function Accounts({
           </div>
           <div className={"formContent " + colourScheme}>
             <form action="#">
-              <div className={"formLine flexItems " + colourScheme }>
+              <div className={"formLine flexItems " + colourScheme}>
                 <div className={"lineTitle flexItems " + colourScheme}>
                   <p>Entry Name : </p>
                 </div>
@@ -474,7 +360,7 @@ function Accounts({
                   />
                 </div>
               </div>
-              <div className={"formLine flexItems " + colourScheme }>
+              <div className={"formLine flexItems " + colourScheme}>
                 <div className={"lineTitle flexItems " + colourScheme}>
                   <p>Goal Name : </p>
                 </div>
@@ -484,7 +370,7 @@ function Accounts({
               </div>
               <div className="skillsArea">
                 {/* Enables the user to individually type in each skill they have */}
-                <div className={"formLine flexItems " + colourScheme }>
+                <div className={"formLine flexItems " + colourScheme}>
                   <div className={"lineTitle flexItems " + colourScheme}>
                     <p>Skills :</p>
                   </div>
@@ -620,10 +506,15 @@ function Accounts({
       <div className="accountsMain flexItems hideElement">
         {combinedEntriesArray.map((entryObj) => {
           return (
-            <div key={entryObj.uid} className={"entry flexItems " + colourScheme}>
+            <div
+              key={entryObj.uid}
+              className={"entry flexItems " + colourScheme}
+            >
               <div>
                 <div>
-                  <p className={"title centered " + colourScheme}>{entryObj.EntryName}</p>
+                  <p className={"title centered " + colourScheme}>
+                    {entryObj.EntryName}
+                  </p>
                   {entryObj.entryOf != goalName ? (
                     <p className={"entryOf centered " + colourScheme}>
                       -- From {entryObj.entryOf} --{" "}
@@ -693,22 +584,32 @@ function Accounts({
                 </div>
               </div>
               {/* Conditionally displaying the options button, depending on whether the goal has been completed or not */}
-              {!goalRecord.Completed ? 
+              {!goalRecord.Completed ? (
                 <div className="entryFooter">
                   <div className="emptySpace flexItems"></div>
-                  <div className="entryOptions flexItems" onClick={() => setShowOptions(!showOptions)}></div>
+                  <div
+                    className="entryOptions flexItems"
+                    onClick={() => setShowOptions(!showOptions)}
+                  ></div>
                 </div>
-                : <div style={{display:"none"}}></div>
-              }
-              {showOptions? 
+              ) : (
+                <div style={{ display: "none" }}></div>
+              )}
+              {showOptions ? (
                 <div className="options flexItems">
-                    <div className="optionsEmpty flexItems"></div>
-                    <div className="optionsContent">
-                        <button className="delete" onClick={() => deleteAccount(entryObj)}>Delete Account</button>
-                    </div>
+                  <div className="optionsEmpty flexItems"></div>
+                  <div className="optionsContent">
+                    <button
+                      className="delete"
+                      onClick={() => deleteAccount(entryObj)}
+                    >
+                      Delete Account
+                    </button>
+                  </div>
                 </div>
-                : <div style={{display:"none"}}></div>
-                }
+              ) : (
+                <div style={{ display: "none" }}></div>
+              )}
             </div>
           );
         })}

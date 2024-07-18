@@ -4,8 +4,9 @@ import { useEffect } from "react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db, storage } from "../Config/firebase";
 import { deleteObject, ref, uploadBytes } from "firebase/storage";
+import { checkConsecutive, getCurrentDate } from "../Functions/dates";
 
-function MyAccount({ currentUser,colourScheme }) {
+function MyAccount({ currentUser, colourScheme }) {
   //Usestate to store the user record
   const [userRecord, setUserRecord] = useState(null);
 
@@ -28,12 +29,12 @@ function MyAccount({ currentUser,colourScheme }) {
     };
 
     mainFunction();
-  }, [currentUser, updatedRecord]);
+  }, [currentUser]);
 
   //Function to check if the users entry streak needs to be reset
   useEffect(() => {
     const mainFunction = async () => {
-      let currentDate = getCurrentDate();
+      let currentDate = getCurrentDate("short");
       if (userRecord.lastEntryDate == "") {
         return;
       }
@@ -42,102 +43,18 @@ function MyAccount({ currentUser,colourScheme }) {
         !(currentDate == userRecord.lastEntryDate) &&
         !checkConsecutive(currentDate, userRecord.lastEntryDate)
       ) {
-        console.log("Resetting the streak")
+        console.log("Resetting the streak");
         //If so, reset the streak
         await updateDoc(doc(db, "users", userRecord.uid), {
           entryStreak: 0,
         });
-        //Telling the system the record has been updated
-        setUpdatedRecord(updatedRecord + 1);
       }
     };
 
-    if (userRecord){
+    if (userRecord) {
       mainFunction();
     }
   }, [userRecord]);
-
-  function getCurrentDate() {
-    //Getting the current date and time, and formatting it
-    let currentDate = new Date();
-    //Putting all the date information into an object
-    //The if statements are to ensure that the date is currently formatted, with 0s when needed
-    let currentDateObj = {
-      year: currentDate.getFullYear(),
-      month:
-        currentDate.getMonth() + 1 < 10
-          ? "0" + (currentDate.getMonth() + 1)
-          : currentDate.getMonth() + 1,
-      day:
-        currentDate.getDate() < 10
-          ? "0" + currentDate.getDate()
-          : currentDate.getDate(),
-      hours:
-        currentDate.getHours() < 10
-          ? "0" + currentDate.getHours()
-          : currentDate.getHours(),
-      minutes:
-        currentDate.getMinutes() < 10
-          ? "0" + currentDate.getMinutes()
-          : currentDate.getMinutes(),
-    };
-    //Returning a formatted string back to the function
-    return (
-      currentDateObj.year +
-      "/" +
-      currentDateObj.month +
-      "/" +
-      currentDateObj.day
-    );
-  }
-
-  //Function which checks whether two dates are consecutive or not
-  function checkConsecutive(date1, date2) {
-    function createDateObject(date) {
-      let dateArr = date.split("/");
-      let dateObj = {
-        day: dateArr[2],
-        month: dateArr[1],
-        year: dateArr[0],
-      };
-      return dateObj;
-    }
-
-    //Making the dates into objects, split into days, months and years
-    date1 = createDateObject(date1);
-    date2 = createDateObject(date2);
-
-    //Checking the different situations where you have consecutive days
-    //Situation 1 : Days are consectuive
-    if (
-      date1.year == date2.year &&
-      date1.month == date2.month &&
-      Math.abs(date1.day - date2.day) == 1
-    ) {
-      return true;
-    }
-
-    //Situation 2 : Month changes
-    if (date1.year == date2.year && Math.abs(date1.month - date2.month) == 1) {
-      //Finding out which date has the increased month
-      let increasedDate = date1.month > date2.month ? date1 : date2;
-      if (increasedDate.day == 1) {
-        return true;
-      }
-    }
-
-    //Situation 3 : Year changes
-    if (Math.abs(date1.year - date2.year) == 1) {
-      //Finding out which date has the higher year
-      let increasedDate = date1.year > date2.year ? date1 : date2;
-      if (increasedDate.month == 1 && increasedDate.day == 1) {
-        return true;
-      }
-    }
-
-    //If date fails all three conditions, return false
-    return false;
-  }
 
   //Function to toggle the deadline updates attribute
   async function toggleOption() {
@@ -159,7 +76,9 @@ function MyAccount({ currentUser,colourScheme }) {
   //Function to ensure that the correct window is being shown
   function showWindow() {
     //Showing / Hiding page depending on whether window shown or not
-    windowShown ? setMainClass(colourScheme) : setMainClass(colourScheme + "hideGoals");
+    windowShown
+      ? setMainClass(colourScheme)
+      : setMainClass(colourScheme + "hideGoals");
     //Hiding the showing of the other window, if being shown
     setWindowShown2(false);
     //Toggling windowShown
