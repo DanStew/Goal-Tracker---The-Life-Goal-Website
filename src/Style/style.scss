@@ -252,9 +252,22 @@ p {
                   height: 100%;
                   background-color: rgb(196, 196, 196);
 
+                  &.complete{
+                    background-color: gold;
+                  }
+
                   p{
                     color: black;
                     font-size: 32px;
+
+                    &.eventName{
+                      font-size: 36px;
+                      font-weight: 700;
+                    }
+
+                    &.eventDetails{
+                      font-style: italic;
+                    }
                   }
 
                   &.left{
@@ -280,6 +293,7 @@ p {
                     justify-content: center;
                     align-items: center;
                     margin-top: 5px;
+                    height: 30px;
 
                     .blank{
                       flex: 4 4;
@@ -294,6 +308,11 @@ p {
                         cursor: pointer;
                         border: 2px solid white;
                       }
+                    }
+
+                    .completed{
+                      font-weight: 700;
+                      font-style: italic;
                     }
                   }
                 }

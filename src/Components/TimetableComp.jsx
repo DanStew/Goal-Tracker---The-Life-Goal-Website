@@ -58,7 +58,8 @@ function TimetableComp({ currentUser,colourScheme }) {
         uid : recordId,
         eventName : eventName,
         eventDetails : eventDetails,
-        eventDate: eventDate
+        eventDate: eventDate,
+        completed: false
     })
 
     //Appending the record id to the users list of events
