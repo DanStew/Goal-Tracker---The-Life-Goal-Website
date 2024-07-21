@@ -10,11 +10,10 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "../Config/firebase";
-import { v4 as uuidv4 } from "uuid";
-import { get } from "firebase/database";
-import { checkConsecutive, getCurrentDate } from "../Functions/dates";
 import { formatString } from "../Functions/strings";
 import { sortEntriesByDate } from "../Functions/selectionSort";
+import { processMakeAccountForm } from "../Functions/processingForms";
+import { getEntryObj } from "../Functions/records";
 
 function Accounts({
   goalName,
@@ -84,106 +83,11 @@ function Accounts({
     setEntryDetails("");
   }
 
-  //Function to process and execute the function of the form
+  //Function to process the inputs from the form
   async function processForm() {
-    //Validating the inputs into the function
-    if (entryName == "") {
-      setErrorMsg("Entry Name cannot be empty");
-      return;
-    }
-    if (entryDetails == "") {
-      setErrorMsg("Entry Details cannot be empty");
-      return;
-    }
-
-    //Getting the formatted entryName
-    let formattedEntryName = formatString(entryName);
-
-    //Getting the formatted current date string
-    let currentDateString = getCurrentDate("full");
-
-    //Making the entry record
-
-    //Keeping track of the unique id we are using
-    let uniqueId = uuidv4();
-
-    //Making the entry record
-    await setDoc(doc(db, "Entries", uniqueId), {
-      EntryName: formattedEntryName,
-      Date: currentDateString,
-      Skills: skillsArray,
-      EntryDetails: entryDetails,
-      uid: uniqueId,
-      entryOf: goalName,
-    });
-
-    //Getting the goal doc, to check entry streak
-    let goalDoc = await getDoc(doc(db, "Goals", goalUid));
-    let goalData = goalDoc.data();
-    //Getting the current date
-    let entryDate = getCurrentDate("");
-    //Keeping track of the entry streak returned
-    let entryStreak = 0;
-    //Checking whether an entry date has been set or not
-    if (goalData.lastEntryDate == "") {
-      entryStreak = 1; //Starting the streak
-    } else {
-      //Finding out whether the different in two dates is 1
-      let consecutiveDates = checkConsecutive(
-        goalData.lastEntryDate,
-        entryDate
-      );
-      if (consecutiveDates) {
-        entryStreak = goalData.currentEntryStreak + 1; //Incrementing the streak
-      } else {
-        entryStreak = 1; //Resetting the streak
-      }
-    }
-
-    //Adding the entry to the goal doc
-    await updateDoc(doc(db, "Goals", goalUid), {
-      Entries: arrayUnion(uniqueId),
-      currentEntryStreak: entryStreak,
-      lastEntryDate: entryDate,
-    });
-
-    //Updating the entries made attribute of users record
-    let userRecord = await getDoc(doc(db, "users", currentUser.uid));
-    let userData = userRecord.data();
-    //Storing the value of the users entry date
-    let userEntryStreak = 0;
-    //Checking whether the entry date has been set or not
-    if (userData.lastEntryDate == "") {
-      userEntryStreak = 1;
-    } else {
-      //Checking for consecutive dates
-      let consecutiveDates = checkConsecutive(
-        userData.lastEntryDate,
-        entryDate
-      );
-      if (consecutiveDates) {
-        userEntryStreak = userData.entryStreak + 1;
-      } else {
-        userEntryStreak = 1;
-      }
-    }
-
-    //Checking for a new highest entry streak
-    let highestEntryStreak = userData.highestEntryStreak;
-    if (userData.highestEntryStreak < userEntryStreak) {
-      highestEntryStreak = userEntryStreak;
-    }
-
-    await updateDoc(doc(db, "users", currentUser.uid), {
-      entriesMade: userData.entriesMade + 1,
-      lastEntryDate: entryDate,
-      entryStreak: userEntryStreak,
-      highestEntryStreak: highestEntryStreak,
-    });
-
-    //Function called to update all parent goals that this goal has been updated
-    updateParentGoals(goalRecord, currentDateString, entryDate);
-
+    //Calling the main function to process the form
+    processMakeAccountForm(currentUser,{entryName:entryName,entryDetails:entryDetails,skillsArray:skillsArray},goalName,goalUid,() => setErrorMsg());
+    //Applying other component specific code
     //Telling system new entry made
     setNewEntry(!newEntry);
 
@@ -193,79 +97,6 @@ function Accounts({
     //Closing the window
     showWindow2();
   }
-
-  //Function to update the LastUpdated variable of parent goals
-  async function updateParentGoals(
-    currentGoalRecord,
-    currentDateString,
-    entryDate
-  ) {
-    //Function which uses the name of a goal to find its record
-    async function getParentUid(goalName) {
-      //Getting the userGoals record
-      let userGoals = await getDoc(doc(db, "userGoals", currentUser.uid));
-      let userGoalsData = userGoals.data();
-      //Looping through all of the goals
-      return await Promise.all(
-        userGoalsData.goals.map(async (goalUid) => {
-          let goalRecord = await getGoalRecord(goalUid);
-          if (goalRecord.GoalName == goalName) {
-            return goalRecord;
-          }
-        })
-      );
-    }
-
-    //Function which uses a goal record uid to find the goal record
-    async function getGoalRecord(goalUid) {
-      let goalRecord = await getDoc(doc(db, "Goals", goalUid));
-      let goalData = goalRecord.data();
-      return goalData;
-    }
-
-    //Processing the entry streak information
-    //Creating a variable to store information
-    let entryStreak = 0;
-    if (currentGoalRecord.lastEntryDate == "") {
-      entryStreak = 1;
-    } else {
-      let consecutiveDates = checkConsecutive(
-        currentGoalRecord.lastEntryDate,
-        entryDate
-      );
-      entryStreak = consecutiveDates
-        ? currentGoalRecord.currentEntryStreak + 1
-        : 1;
-    }
-
-    //Updating the lastUpdated property for the current goal
-    await updateDoc(doc(db, "Goals", currentGoalRecord.uid), {
-      LastUpdated: currentDateString,
-      lastEntryDate: entryDate,
-      currentEntryStreak: entryStreak,
-    });
-
-    //Seeing if the current goal is a subgoal
-    if (currentGoalRecord.Subgoal == true) {
-      let parentUids = await getParentUid(currentGoalRecord.SubgoalOf);
-      //Looping through to find the non undefined output
-      parentUids.map(async (subgoalRecord) => {
-        if (subgoalRecord != undefined) {
-          updateParentGoals(subgoalRecord, currentDateString, entryDate);
-        }
-      });
-    }
-  }
-
-  //Finding the goal information from the goal ids
-  const getEntryObj = async (entryId) => {
-    //Getting the goal record data, using id
-    const entryRef = doc(db, "Entries", entryId);
-    const docSnap = await getDoc(entryRef);
-    const entryData = docSnap.data();
-    //Returning the goal data to the system
-    return entryData;
-  };
 
   //Useeffect function to get the records of the entries, that need to be displayed to the screen
   useEffect(() => {
@@ -286,7 +117,7 @@ function Accounts({
     mainFunction();
   }, [entryIds]);
 
-  //UseEffect to get all the goal records from the subgoals
+  //UseEffect to get all the entry records from the subgoals
   useEffect(() => {
     const mainFunction = () => {
       setSubgoalEntriesArray([]);
@@ -317,7 +148,7 @@ function Accounts({
   }, [subgoalEntriesArray, entriesObjArray]);
 
   //Function to delete the current account the user is selecting
-  async function deleteAccount(entryObj) {
+  async function deleteEntry(entryObj) {
     //Removing the id of the entry from the goal obj
     await updateDoc(doc(db, "Goals", goalUid), {
       Entries: arrayRemove(entryObj.uid),
@@ -601,7 +432,7 @@ function Accounts({
                   <div className="optionsContent">
                     <button
                       className="delete"
-                      onClick={() => deleteAccount(entryObj)}
+                      onClick={() => deleteEntry(entryObj)}
                     >
                       Delete Account
                     </button>

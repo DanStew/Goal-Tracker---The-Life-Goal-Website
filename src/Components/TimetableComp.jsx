@@ -4,8 +4,9 @@ import exitButton from "../Images/exitButton.jpg";
 import { v4 as uuidv4 } from "uuid";
 import { arrayUnion, doc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../Config/firebase.js";
+import { processTimetableForm } from "../Functions/processingForms.js";
 
-function TimetableComp({ currentUser,colourScheme }) {
+function TimetableComp({ currentUser, colourScheme }) {
   //Usestate to display whether the window is shown or not
   const [windowShown, setWindowShown] = useState(false);
   const [mainClass, setMainClass] = useState("timetable " + colourScheme);
@@ -24,59 +25,24 @@ function TimetableComp({ currentUser,colourScheme }) {
   const [eventDate, setEventDate] = useState(null);
 
   //Usestate variable to toggle when event added
-  const [eventAdded,setEventAdded] = useState(false)
+  const [eventAdded, setEventAdded] = useState(false);
 
   //Usestate variable to store the errorMsg on the system
   const [errorMsg, setErrorMsg] = useState("");
 
-  //Function to process the inputs from the user
-  async function processForm() {
-    //Resetting error message
-    setErrorMsg("")
-
-    //Validating the inputs
-    if (eventName == "") {
-        setErrorMsg("Event Name is empty, please retry...")
-        return
-    }
-
-    if (eventDetails == ""){
-        setErrorMsg("Event Details is empty, please retry...")
-        return
-    }
-
-    if (eventDate == null){
-        setErrorMsg("No Event Date set, please retry...")
-        return
-    }
-    
-    //Generating the random recordId
-    let recordId = uuidv4()
-
-    //Making the event record
-    await setDoc(doc(db,"Events",recordId),{
-        uid : recordId,
-        eventName : eventName,
-        eventDetails : eventDetails,
-        eventDate: eventDate,
-        completed: false
-    })
-
-    //Appending the record id to the users list of events
-    await updateDoc(doc(db,"userGoals",currentUser.uid),{
-        events : arrayUnion(recordId)
-    })
-
+  //Function to call the function to process the form
+  function processForm() {
+    //Calling the main function
+    processTimetableForm({eventName:eventName,eventDetails:eventDetails,eventDate:eventDate},currentUser,() => setErrorMsg());
+    //Implementing the other code
     //Resetting the values for next time
-    setEventName("")
-    setEventDetails("")
-    setEventDate(null)
-
+    setEventName("");
+    setEventDetails("");
+    setEventDate(null);
     //Incrementing event added variable
-    setEventAdded(!eventAdded)
-
+    setEventAdded(!eventAdded);
     //Closing out of the window
-    toggleWindow()
+    toggleWindow();
   }
 
   return (
@@ -152,7 +118,11 @@ function TimetableComp({ currentUser,colourScheme }) {
         <div style={{ display: "none" }}></div>
       )}
       <div className="timetableMain hideElement">
-        <TimetableDisplay currentUser={currentUser} colourScheme={colourScheme} eventAdded={eventAdded}/>
+        <TimetableDisplay
+          currentUser={currentUser}
+          colourScheme={colourScheme}
+          eventAdded={eventAdded}
+        />
       </div>
     </div>
   );

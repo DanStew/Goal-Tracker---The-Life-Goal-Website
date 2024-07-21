@@ -5,6 +5,8 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db, storage } from "../Config/firebase";
 import { deleteObject, ref, uploadBytes } from "firebase/storage";
 import { checkConsecutive, getCurrentDate } from "../Functions/dates";
+import { getUserData } from "../Functions/records";
+import { formatString } from "../Functions/strings";
 
 function MyAccount({ currentUser, colourScheme }) {
   //Usestate to store the user record
@@ -16,15 +18,9 @@ function MyAccount({ currentUser, colourScheme }) {
   //Getting the user record for the system
   useEffect(() => {
     const mainFunction = async () => {
-      const getUserRec = async () => {
-        //Getting the user record
-        const userRec = await getDoc(doc(db, "users", currentUser.uid));
-        setUserRecord(userRec.data());
-      };
-
       //Ensuring there is a current user
       if (currentUser.uid) {
-        getUserRec();
+        setUserRecord(await getUserData(currentUser.uid))
       }
     };
 
@@ -117,19 +113,6 @@ function MyAccount({ currentUser, colourScheme }) {
 
   //Function to process the first and last name inputs
   async function updateName() {
-    const formatString = (inputString) => {
-      //Copying the string without mutating and Making it formatted
-      let copyString = "";
-      for (let i = 0; i <= inputString.length; i++) {
-        if (i == 0) {
-          copyString += inputString.charAt(i).toUpperCase();
-          continue;
-        }
-        copyString += inputString.charAt(i).toLowerCase();
-      }
-      return copyString;
-    };
-
     //Validating the name inputs
     if (firstName == "") {
       setErrorMsg("First Name input must not be empty");
@@ -139,6 +122,7 @@ function MyAccount({ currentUser, colourScheme }) {
       setErrorMsg("Last Name input must not be empty");
       return;
     }
+
     //Formatting the two strings
     let formattedFirstName = formatString(firstName);
     let formattedLastName = formatString(lastName);
@@ -172,6 +156,8 @@ function MyAccount({ currentUser, colourScheme }) {
     //Closing the window out
     window.location.reload(false);
   }
+
+  console.log("Displaying page")
 
   return (
     <div className={mainClass}>

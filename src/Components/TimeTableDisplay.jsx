@@ -4,6 +4,8 @@ import rightArrowWhite from "../Images/rightArrowWhite.jpg";
 import { db } from "../Config/firebase.js";
 import { arrayRemove, deleteDoc, doc, getDoc, updateDoc } from "firebase/firestore";
 import { decreaseDate, increaseDate } from "../Functions/changingDates.js";
+import { getCurrentDate, getCurrentDateObj } from "../Functions/dates.js";
+import { getEventRecord, getUserGoalsData } from "../Functions/records.js";
 
 function TimeTableDisplay({ currentUser, colourScheme, eventAdded }) {
 
@@ -55,7 +57,7 @@ function TimeTableDisplay({ currentUser, colourScheme, eventAdded }) {
     const mainFunction = () => {
       //Getting the current date as a recognisable string
       let currentDate = new Date();
-      let currentDateString = getDateString(currentDate);
+      let currentDateString = getDateString();
       //Finding the date of Monday, the beginning of the week
       if (currentDate.getDay() == 0) {
         //The day is sunday, so you need to go to the start of the previous week
@@ -100,15 +102,8 @@ function TimeTableDisplay({ currentUser, colourScheme, eventAdded }) {
   //Useeffect function to get all the events from the weekDates in the current week
   useEffect(() => {
     const mainFunction = async () => {
-      //Function which gets the event record, using an event if
-      const getEventRecord = async (eventId) => {
-        let eventRecord = await getDoc(doc(db, "Events", eventId));
-        let eventData = eventRecord.data();
-        return eventData;
-      };
-
       //Formatting date strings to make them more readable
-      const formatDate = (date, year) => {
+      const formatDate = (date,year) => {
         let dateElements = date.split("-");
         //Finding what the ending of the days part is
         let day = parseInt(dateElements[2], 10); //Parseint removes the 0s from the fron tof the day
@@ -134,8 +129,7 @@ function TimeTableDisplay({ currentUser, colourScheme, eventAdded }) {
       //Each day has its own array, to store the events for that day
       let tempArr = [[], [], [], [], [], [], []];
       //Getting the users userGoals record
-      let userGoals = await getDoc(doc(db, "userGoals", currentUser.uid));
-      let userGoalsData = userGoals.data();
+      let userGoalsData = await getUserGoalsData(currentUser.uid)
       //Mapping through all of the events
       await userGoalsData.events.map(async (eventId) => {
         //Getting the event record
@@ -172,28 +166,8 @@ function TimeTableDisplay({ currentUser, colourScheme, eventAdded }) {
   }, [weekDates, eventAdded, eventChanged]);
 
   //Function to make the current date into a recognisable string
-  function getDateString(currentDate) {
-    //Putting all the date information into an object
-    //The if statements are to ensure that the date is currently formatted, with 0s when needed
-    let currentDateObj = {
-      year: currentDate.getFullYear(),
-      month:
-        currentDate.getMonth() + 1 < 10
-          ? "0" + (currentDate.getMonth() + 1)
-          : currentDate.getMonth() + 1,
-      day:
-        currentDate.getDate() < 10
-          ? "0" + currentDate.getDate()
-          : currentDate.getDate(),
-      hours:
-        currentDate.getHours() < 10
-          ? "0" + currentDate.getHours()
-          : currentDate.getHours(),
-      minutes:
-        currentDate.getMinutes() < 10
-          ? "0" + currentDate.getMinutes()
-          : currentDate.getMinutes(),
-    };
+  function getDateString() {
+    let currentDateObj = getCurrentDateObj()
     //Putting all this information into a single string, will be stored later
     let currentDateString =
       currentDateObj.year +

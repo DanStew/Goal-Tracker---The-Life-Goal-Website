@@ -1,7 +1,19 @@
-import { arrayRemove, arrayUnion, doc, setDoc, updateDoc } from "firebase/firestore";
-import { createDateObj, getCurrentDate, getCurrentDateObj, getDateString } from "./dates";
+import {
+  arrayRemove,
+  arrayUnion,
+  doc,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
+import {
+  checkConsecutive,
+  createDateObj,
+  getCurrentDate,
+  getCurrentDateObj,
+  getDateString,
+} from "./dates";
 import { formatString } from "./strings";
-import { updateParentGoals } from "./updatingGoals";
+import { updateParentGoals, updateParentGoalsAccounts } from "./updatingGoals";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "../Config/firebase";
 import { getGoalRecord, getUserData } from "./records";
@@ -41,9 +53,9 @@ export const processMakeGoalForm = async (
   }
 
   //Putting all the date information into an object
-  let currentDateObj = getCurrentDateObj()
+  let currentDateObj = getCurrentDateObj();
   //Putting all this information into a single string, will be stored later
-  let currentDateString = getCurrentDate("full")
+  let currentDateString = getCurrentDate("full");
 
   //Initialising the inputDateString
   let inputDateString = "";
@@ -56,9 +68,9 @@ export const processMakeGoalForm = async (
       return;
     }
     //Breaking down the inputted users date into the same format object
-    let inputDateObj = createDateObj(formInputsObj.deadlineDate)
+    let inputDateObj = createDateObj(formInputsObj.deadlineDate);
     //Formatting the inputDate into a correct string
-    inputDateString = getDateString(inputDateObj,"short")
+    inputDateString = getDateString(inputDateObj, "short");
     //Ensuring that the inputted date isn't less than the current date
     if (
       inputDateObj.year < currentDateObj.year ||
@@ -124,8 +136,8 @@ export const processMakeGoalForm = async (
     goalsObjArray.map(async (goalsObj) => {
       if (goalsObj.GoalName == formInputsObj.subgoalOf) {
         goalObjUid = goalsObj.uid;
-        let mainGoalRecord = getGoalRecord(goalObjUid)
-        await updateDoc(doc(db,"Goals",goalObjUid), {
+        let mainGoalRecord = getGoalRecord(goalObjUid);
+        await updateDoc(doc(db, "Goals", goalObjUid), {
           Subgoals: arrayUnion(uniqueId),
           NmbGoals: mainGoalRecord.NmbGoals + 1,
         });
@@ -135,8 +147,8 @@ export const processMakeGoalForm = async (
     subgoalsObjArray.map(async (subgoalsObj) => {
       if (subgoalsObj.GoalName == formInputsObj.subgoalOf) {
         goalObjUid = subgoalsObj.uid;
-        let subgoalData = getGoalRecord(goalObjUid)
-        await updateDoc(doc(db,"Goals",goalObjUid), {
+        let subgoalData = getGoalRecord(goalObjUid);
+        await updateDoc(doc(db, "Goals", goalObjUid), {
           Subgoals: arrayUnion(uniqueId),
           NmbGoals: subgoalData.NmbGoals + 1,
         });
@@ -166,9 +178,151 @@ export const processMakeGoalForm = async (
   }
 
   //Updating the goalsMade attribute within the users information
-  let userData = getUserData(currentUser.uid)
+  let userData = getUserData(currentUser.uid);
   //Updating the doc
   await updateDoc(doc(db, "users", currentUser.uid), {
     goalsMade: userData.goalsMade + 1,
   });
 };
+
+//Function to process and execute the function of the form
+export const processMakeAccountForm = async (
+  currentUser,
+  formInputsObj,
+  goalName,
+  goalUid,
+  setErrorMsg
+) => {
+  //Validating the inputs into the function
+  if (formInputsObj.entryName == "") {
+    setErrorMsg("Entry Name cannot be empty");
+    return;
+  }
+  if (formInputsObj.entryDetails == "") {
+    setErrorMsg("Entry Details cannot be empty");
+    return;
+  }
+
+  //Getting the formatted entryName
+  let formattedEntryName = formatString(formInputsObj.entryName);
+
+  //Getting the formatted current date string
+  let currentDateString = getCurrentDate("full");
+
+  //Making the entry record
+  //Keeping track of the unique id we are using
+  let uniqueId = uuidv4();
+
+  //Making the entry record
+  await setDoc(doc(db, "Entries", uniqueId), {
+    EntryName: formattedEntryName,
+    Date: currentDateString,
+    Skills: formInputsObj.skillsArray,
+    EntryDetails: formInputsObj.entryDetails,
+    uid: uniqueId,
+    entryOf: goalName,
+  });
+
+  //Getting the goal doc, to check entry streak
+  let goalData = getGoalRecord(goalUid);
+  //Getting the current date
+  let entryDate = getCurrentDate("");
+  //Keeping track of the entry streak returned
+  let entryStreak = 0;
+  //Checking whether an entry date has been set or not
+  if (goalData.lastEntryDate == "") {
+    entryStreak = 1; //Starting the streak
+  } else {
+    //Finding out whether the different in two dates is 1
+    let consecutiveDates = checkConsecutive(goalData.lastEntryDate, entryDate);
+    if (consecutiveDates) {
+      entryStreak = goalData.currentEntryStreak + 1; //Incrementing the streak
+    } else {
+      entryStreak = 1; //Resetting the streak
+    }
+  }
+
+  //Adding the entry to the goal doc
+  await updateDoc(doc(db, "Goals", goalUid), {
+    Entries: arrayUnion(uniqueId),
+    currentEntryStreak: entryStreak,
+    lastEntryDate: entryDate,
+  });
+
+  //Updating the entries made attribute of users record
+  let userData = getUserData(currentUser.uid);
+  //Storing the value of the users entry date
+  let userEntryStreak = 0;
+  //Checking whether the entry date has been set or not
+  if (userData.lastEntryDate == "") {
+    userEntryStreak = 1;
+  } else {
+    //Checking for consecutive dates
+    let consecutiveDates = checkConsecutive(userData.lastEntryDate, entryDate);
+    if (consecutiveDates) {
+      userEntryStreak = userData.entryStreak + 1;
+    } else {
+      userEntryStreak = 1;
+    }
+  }
+
+  //Checking for a new highest entry streak
+  let highestEntryStreak = userData.highestEntryStreak;
+  if (userData.highestEntryStreak < userEntryStreak) {
+    highestEntryStreak = userEntryStreak;
+  }
+
+  await updateDoc(doc(db, "users", currentUser.uid), {
+    entriesMade: userData.entriesMade + 1,
+    lastEntryDate: entryDate,
+    entryStreak: userEntryStreak,
+    highestEntryStreak: highestEntryStreak,
+  });
+
+  //Function called to update all parent goals that this goal has been updated
+  updateParentGoalsAccounts(
+    currentUser,
+    goalData,
+    currentDateString,
+    entryDate
+  );
+};
+
+//Function to process the Timetable form
+export const processTimetableForm = async (formInputsObj,currentUser,setErrorMsg) => {
+  //Resetting error message
+  setErrorMsg("");
+
+  //Validating the inputs
+  if (formInputsObj.eventName == "") {
+    setErrorMsg("Event Name is empty, please retry...");
+    return;
+  }
+
+  if (formInputsObj.eventDetails == "") {
+    setErrorMsg("Event Details is empty, please retry...");
+    return;
+  }
+
+  if (formInputsObj.eventDate == null) {
+    setErrorMsg("No Event Date set, please retry...");
+    return;
+  }
+
+  //Generating the random recordId
+  let recordId = uuidv4();
+
+  //Making the event record
+  await setDoc(doc(db, "Events", recordId), {
+    uid: recordId,
+    eventName: formInputsObj.eventName,
+    eventDetails: formInputsObj.eventDetails,
+    eventDate: formInputsObj.eventDate,
+    completed: false,
+  });
+
+  //Appending the record id to the users list of events
+  await updateDoc(doc(db, "userGoals", currentUser.uid), {
+    events: arrayUnion(recordId),
+  });
+}

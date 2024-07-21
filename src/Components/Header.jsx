@@ -1,42 +1,31 @@
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../Config/firebase";
 import { useEffect, useState } from "react";
+import { getUserData } from "../Functions/records";
 
-function Header({currentUser,colourScheme}){
+function Header({ currentUser, colourScheme }) {
+  //Making a variable to store the location of the user's profile image
+  const [profileImgLocation, setProfileImgLocation] = useState("");
 
-    //Defining the Users collection, to search for the User from
-    const usersCollection = collection(db, "users");
+  //Use effect function to call the correct function needed for the page that the user is on
+  useEffect(() => {
+    const returnFunction = async () => {
+      console.log("Reading from firestore")
+      //Getting the record of the currentUser
+      let userData = await getUserData(currentUser.uid);
+      //Setting profile img to be the photoURL
+      setProfileImgLocation(userData.photoURL);
+    };
 
-    //Making a variable to store the location of the user's profile image
-    const [profileImgLocation, setProfileImgLocation] = useState("");
-
-    //Use effect function to call the correct function needed for the page that the user is on
-    useEffect(() => {
-        const returnFunction = () => {
-            collectUserProfileDoc()
-        }
-    
-        //Ensuring that there is an active user on the website
-        if (currentUser.email != null){
-            returnFunction()
-        }
-    },[currentUser]) //This means this code repeats every time the currentUser changes
-    
-    async function collectUserProfileDoc(){
-        //Performing the search query
-        //Finding the record of the currrent user
-        const q = query(usersCollection, where("email", "==", currentUser.email));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-            setProfileImgLocation(doc.data().photoURL)
-        });
+    //Ensuring that there is an active user on the website
+    if (currentUser.uid != null) {
+      returnFunction();
     }
+  }, [currentUser]); //This means this code repeats every time the currentUser changes
 
-    return(
-        <div className={colourScheme}>
-           <img src={profileImgLocation} alt="" />
-        </div>
-    )
+  return (
+    <div className={colourScheme}>
+      <img src={profileImgLocation} alt="" />
+    </div>
+  );
 }
 
-export default Header
+export default Header;

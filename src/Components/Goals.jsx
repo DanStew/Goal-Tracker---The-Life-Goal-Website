@@ -7,10 +7,13 @@ import MakeGoalForm from "./MakeGoalForm";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../Config/firebase";
 import { checkConsecutive, getCurrentDate } from "../Functions/dates";
-import { sortByDeadlineDate, sortByLastUpdated } from "../Functions/selectionSort";
+import {
+  sortByDeadlineDate,
+  sortByLastUpdated,
+} from "../Functions/selectionSort";
 import { getGoalRecord, getUserGoalsData } from "../Functions/records";
 
-function Goals({currentUser,colourScheme}) {
+function Goals({ currentUser, colourScheme }) {
   //Creating the navigator for the website
   const navigator = useNavigate();
 
@@ -30,7 +33,9 @@ function Goals({currentUser,colourScheme}) {
   //Function to trigger the showing of the window on the screen
   function showWindow() {
     //Showing / Hiding goals depending on whether window shown or not
-    windowShown ? setMainClass("Goals " + colourScheme) : setMainClass("Goals hideGoals " + colourScheme);
+    windowShown
+      ? setMainClass("Goals " + colourScheme)
+      : setMainClass("Goals hideGoals " + colourScheme);
     //Hiding the options, as the user doesn't need to see them anymore
     setGoalOptions(false);
     //Toggling windowShown
@@ -74,38 +79,34 @@ function Goals({currentUser,colourScheme}) {
         setSubgoalsObjArray([]);
         setGoalNames([]);
         setSubgoalNames([]);
-        setGoalAddedRef(!goalAddedRef);
+        setGoalAddedRef(false);
         //Looping through the different goal types and storing all the information
         //Finding the goal data from all of the users goals
-        try {
-          userGoalsData.goals.forEach(async (goalId) => {
-            //Getting the goal information and putting it into an object
-            const goalObj = await getGoalRecord(goalId);
-            //Adding the goal name to the goalnames array
-            setGoalNames((prevNames) => {
-              return [...prevNames, goalObj.GoalName];
-            });
-            //Adding the goalInformation to the GoalsObjArray
-            setGoalsObjArray((prevArr) => {
-              return [...prevArr, goalObj];
-            });
+        userGoalsData.goals.forEach(async (goalId) => {
+          //Getting the goal information and putting it into an object
+          const goalObj = await getGoalRecord(goalId);
+          //Adding the goal name to the goalnames array
+          setGoalNames((prevNames) => {
+            return [...prevNames, goalObj.GoalName];
           });
-          //Finding the goal data from all of the users goals
-          userGoalsData.subgoals.forEach(async (subgoalId) => {
-            //Getting the goal information and putting it into an object
-            const subgoalObj = await getGoalRecord(subgoalId);
-            //Adding the subgoal name to the array
-            setSubgoalNames((prevSubgoalNames) => {
-              return [...prevSubgoalNames, subgoalObj.GoalName];
-            });
-            //Adding the goalInformation to the GoalsObjArray
-            setSubgoalsObjArray((prevArr) => {
-              return [...prevArr, subgoalObj];
-            });
+          //Adding the goalInformation to the GoalsObjArray
+          setGoalsObjArray((prevArr) => {
+            return [...prevArr, goalObj];
           });
-        } catch {
-          setUpdatedGoal(!updatedGoal);
-        }
+        });
+        //Finding the goal data from all of the users goals
+        userGoalsData.subgoals.forEach(async (subgoalId) => {
+          //Getting the goal information and putting it into an object
+          const subgoalObj = await getGoalRecord(subgoalId);
+          //Adding the subgoal name to the array
+          setSubgoalNames((prevSubgoalNames) => {
+            return [...prevSubgoalNames, subgoalObj.GoalName];
+          });
+          //Adding the goalInformation to the GoalsObjArray
+          setSubgoalsObjArray((prevArr) => {
+            return [...prevArr, subgoalObj];
+          });
+        });
         setGoalsObjChanged(!goalsObjChanged);
       }
     };
@@ -120,7 +121,7 @@ function Goals({currentUser,colourScheme}) {
       setMainGoalArray([]);
       //Looping through all the main goals in the array
       //NOTE : You don't need to loop through the subgoals as no subgoals will have subgoals
-      goalsObjArray.forEach( async (goalObj) => {
+      goalsObjArray.forEach(async (goalObj) => {
         //Seeing if the goal has subgoals
         if (goalObj.Subgoals != []) {
           let subgoalsArr = [];
@@ -141,19 +142,22 @@ function Goals({currentUser,colourScheme}) {
           tempObj[goalObj.GoalName] = subgoalsArr;
         }
         //Checking to see if the entry streak needs to be reset
-      let currentDate = getCurrentDate("short")
-      //If no entry date has been set, ignore it
-      if (goalObj.lastEntryDate == ""){
-        return
-      }
-      //Checking if the dates aren't equal and are not consecutive
-      if (!(currentDate == goalObj.lastEntryDate) && !checkConsecutive(currentDate,goalObj.lastEntryDate)){
-        //If so, reset the streak
-        await updateDoc(doc(db,"Goals",goalObj.uid),{
-          currentEntryStreak : 0
-        })
-        setGoalAddedRef(!goalAddedRef)
-      }
+        let currentDate = getCurrentDate("short");
+        //If no entry date has been set, ignore it
+        if (goalObj.lastEntryDate == "") {
+          return;
+        }
+        //Checking if the dates aren't equal and are not consecutive
+        if (
+          !(currentDate == goalObj.lastEntryDate) &&
+          !checkConsecutive(currentDate, goalObj.lastEntryDate)
+        ) {
+          //If so, reset the streak
+          await updateDoc(doc(db, "Goals", goalObj.uid), {
+            currentEntryStreak: 0,
+          });
+          setGoalAddedRef(!goalAddedRef);
+        }
       });
       //Permanently storing the changes made
       setSubgoalsToMaingoalsConnector(tempObj);
@@ -267,14 +271,14 @@ function Goals({currentUser,colourScheme}) {
             {windowShown ? (
               <MakeGoalForm
                 toggleWindow={() => showWindow()}
-                currentUser={currentUser} 
-                goalAddedRef = {goalAddedRef}
+                currentUser={currentUser}
+                goalAddedRef={goalAddedRef}
                 setGoalAddedRef={() => setGoalAddedRef()}
                 goalNames={goalNames}
                 goalsObjArray={goalsObjArray}
                 subgoalNames={subgoalNames}
                 subgoalsObjArray={subgoalsObjArray}
-                showNone={true} 
+                showNone={true}
                 colourScheme={colourScheme}
               />
             ) : (
@@ -362,7 +366,7 @@ function Goals({currentUser,colourScheme}) {
               subgoalToMaingoalConnector={subgoalsToMaingoalsConnector}
               setUpdatedGoal={() => setUpdatedGoal()}
               updatedGoal={updatedGoal}
-              currentUser={currentUser} 
+              currentUser={currentUser}
               colourScheme={colourScheme}
             />
           </div>
