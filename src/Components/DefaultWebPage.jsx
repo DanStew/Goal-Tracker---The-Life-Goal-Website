@@ -13,7 +13,7 @@ function DefaultWebPage({ colourScheme, webpage, changedColourScheme, setChanged
   const [mainClass, setMainClass] = useState("");
 
   useEffect(() => {
-    setMainClass("PageBody home flexItems " + colourScheme);
+    setMainClass("PageBody flexItems " + colourScheme);
   }, [colourScheme]);
 
   //Variable to store the current state of the sidebar. By default, it isn't shown
@@ -26,18 +26,13 @@ function DefaultWebPage({ colourScheme, webpage, changedColourScheme, setChanged
         <div className="header flexItems">
           {/* The header of the page*/}
           {/* Passing the current user into the Header Component */}
-          <Header
-            currentUser={currentUser}
-            colourScheme={colourScheme}
-          ></Header>
+          <Header currentUser={currentUser} colourScheme={colourScheme}></Header>
           <p className={colourScheme}>{webpage}</p>
           {/* Button included to toggle and untoggle the sidebar */}
           {/* This button is only shown when there is no sidebar currently being shown */}
           {!sidebarShown ? (
             <img
-              onClick={() =>
-                sidebarShown ? setSidebarShown(false) : setSidebarShown(true)
-              }
+              onClick={() => sidebarShown ? setSidebarShown(false) : setSidebarShown(true)}
               src={SettingsIcon}
               alt="Toggle Sidebar"
             />
@@ -54,10 +49,7 @@ function DefaultWebPage({ colourScheme, webpage, changedColourScheme, setChanged
       {sidebarShown ? (
         <div className="sideBar flexItems">
           <div className="sideBarHeader flexItems">
-            <img
-              onClick={() =>
-                sidebarShown ? setSidebarShown(false) : setSidebarShown(true)
-              }
+            <img onClick={() => sidebarShown ? setSidebarShown(false) : setSidebarShown(true)}
               src={SettingsIcon}
               alt="Toggle Sidebar"
             />

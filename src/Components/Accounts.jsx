@@ -1,33 +1,13 @@
 import { useEffect, useState } from "react";
 import exitButton from "../Images/exitButton.jpg";
-import {
-  arrayRemove,
-  arrayUnion,
-  deleteDoc,
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-} from "firebase/firestore";
+import {arrayRemove,deleteDoc,doc,updateDoc,} from "firebase/firestore";
 import { db } from "../Config/firebase";
 import { formatString } from "../Functions/strings";
 import { sortEntriesByDate } from "../Functions/selectionSort";
 import { processMakeAccountForm } from "../Functions/processingForms";
 import { getEntryObj } from "../Functions/records";
 
-function Accounts({
-  goalName,
-  goalUid,
-  entryIds,
-  windowShown2,
-  showWindow2,
-  setNewEntry,
-  newEntry,
-  subgoalRecords,
-  currentUser,
-  goalRecord,
-  colourScheme,
-}) {
+function Accounts({goalName,goalUid,entryIds,windowShown2,showWindow2,setNewEntry,newEntry,subgoalRecords,currentUser,goalRecord,colourScheme,}) {
   //Usestate to store the inputs from the form
   const [entryName, setEntryName] = useState("");
   const [currentSkill, setCurrentSkill] = useState("");
@@ -162,7 +142,7 @@ function Accounts({
   }
 
   return (
-    <div className={"accounts " + colourScheme}>
+    <div className={"accounts flexSetup column " + colourScheme}>
       <div className="accountsHeader flexItems hideElement">
         <p className="subheading">Goal Accounts</p>
         {/* Conditionally rendering the button, depending on whehter the goal is complete or not */}
@@ -173,25 +153,21 @@ function Accounts({
         )}
       </div>
       {windowShown2 ? (
-        <div id="MakeForm" className={colourScheme}>
-          <div className="formHeader flexItems">
+        <div id="MakeForm" className={"accounts flexSetup column flexItems " + colourScheme}>
+          <div className="formHeader flexSetup column flexItems">
             <p className="headerTitle flexItems">Make an Entry</p>
           </div>
-          <div className={"formContent " + colourScheme}>
-            <form action="#">
-              <div className={"formLine flexItems " + colourScheme}>
+          <div className={"formContent flexSetup column " + colourScheme}>
+            <form className="flexSetup column noGap flexItems" action="#">
+              <div className={"formLine flexSetup flexItems " + colourScheme}>
                 <div className={"lineTitle flexItems " + colourScheme}>
                   <p>Entry Name : </p>
                 </div>
                 <div className={"lineInput flexItems " + colourScheme}>
-                  <input
-                    type="text"
-                    placeholder="Enter Entry Name..."
-                    onChange={(e) => setEntryName(e.target.value)}
-                  />
+                  <input type="text" placeholder="Enter Entry Name..." onChange={(e) => setEntryName(e.target.value)}/>
                 </div>
               </div>
-              <div className={"formLine flexItems " + colourScheme}>
+              <div className={"formLine flexSetup flexItems " + colourScheme}>
                 <div className={"lineTitle flexItems " + colourScheme}>
                   <p>Goal Name : </p>
                 </div>
@@ -201,90 +177,53 @@ function Accounts({
               </div>
               <div className="skillsArea">
                 {/* Enables the user to individually type in each skill they have */}
-                <div className={"formLine flexItems " + colourScheme}>
+                <div className={"formLine flexSetup flexItems " + colourScheme}>
                   <div className={"lineTitle flexItems " + colourScheme}>
                     <p>Skills :</p>
                   </div>
                   <div className={"lineInput flexItems " + colourScheme}>
-                    <input
-                      id="skillInput"
-                      type="text"
-                      placeholder="Enter Skill..."
-                      onChange={(e) => setCurrentSkill(e.target.value)}
-                    />
+                    <input id="skillInput" type="text" placeholder="Enter Skill..." onChange={(e) => setCurrentSkill(e.target.value)}/>
                   </div>
                   <div className={"lineInput flexItems " + colourScheme}>
-                    <button
-                      type="button"
-                      className="addSkill"
-                      onClick={() => addSkill()}
-                    >
-                      Add Skill
-                    </button>
+                    <button type="button" className="submit addSkill" onClick={() => addSkill()}>Add Skill</button>
                   </div>
                 </div>
-                <div className="skillsOutput">
+                <div className="skillsOutput flexSetup column">
                   {/* For each item in the skills array, output them here */}
                   {/* NOTE : The skills are output in groups of two, that is why the code may be a bit funny */}
                   {skillsArray.map((skill, index) => {
                     return (
                       <div key={index}>
                         {index % 4 == 0 ? (
-                          <div className="skillLine flexItem">
-                            <div className="individualSkill flexItem">
+                          <div className="skillLine flexSetup flexItems">
+                            <div className="individualSkill flexItems">
                               <p>{skillsArray[index]}</p>
                               {/* Button to enable the user to remvoe the skill from the array */}
-                              <button
-                                type="button"
-                                onClick={() => removeSkill(skillsArray[index])}
-                              >
-                                -
-                              </button>
+                              <button type="button" onClick={() => removeSkill(skillsArray[index])}>-</button>
                             </div>
                             {skillsArray[index + 1] ? (
-                              <div className="individualSkill flexItem">
+                              <div className="individualSkill flexItems">
                                 <p>{skillsArray[index + 1]}</p>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    removeSkill(skillsArray[index + 1])
-                                  }
-                                >
-                                  -
-                                </button>
+                                <button type="button" onClick={() => removeSkill(skillsArray[index + 1])}>-</button>
                               </div>
                             ) : (
-                              <div className="individualSkill flexItem"> </div>
+                              <div className="individualSkill flexItems"> </div>
                             )}
                             {skillsArray[index + 2] ? (
-                              <div className="individualSkill flexItem">
+                              <div className="individualSkill flexItems">
                                 <p>{skillsArray[index + 2]}</p>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    removeSkill(skillsArray[index + 2])
-                                  }
-                                >
-                                  -
-                                </button>
+                                <button type="button" onClick={() => removeSkill(skillsArray[index + 2])}>-</button>
                               </div>
                             ) : (
-                              <div className="individualSkill flexItem"> </div>
+                              <div className="individualSkill flexItems"> </div>
                             )}
                             {skillsArray[index + 3] ? (
-                              <div className="individualSkill flexItem">
+                              <div className="individualSkill flexItems">
                                 <p>{skillsArray[index + 3]}</p>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    removeSkill(skillsArray[index + 3])
-                                  }
-                                >
-                                  -
-                                </button>
+                                <button type="button" onClick={() => removeSkill(skillsArray[index + 3])}>-</button>
                               </div>
                             ) : (
-                              <div className="individualSkill flexItem"> </div>
+                              <div className="individualSkill flexItems"> </div>
                             )}
                           </div>
                         ) : (
@@ -297,11 +236,7 @@ function Accounts({
               </div>
               <div className="EntryDetails flexItems">
                 <p>Entry Details : </p>
-                <textarea
-                  type="text"
-                  placeholder="Enter Entry Details..."
-                  onChange={(e) => setEntryDetails(e.target.value)}
-                />
+                <textarea type="text" placeholder="Enter Entry Details..." onChange={(e) => setEntryDetails(e.target.value)}/>
               </div>
               {/* Displaying the error msg to the screen, if there is one */}
               {errorMsg != "" ? (
@@ -314,18 +249,11 @@ function Accounts({
               <div className="buttonLine">
                 <div>
                   {/* Allowing the user to submit the information they have enterred on the form */}
-                  <button type="button" onClick={() => processForm()}>
-                    Make Goal
-                  </button>
+                  <button className="submit" type="button" onClick={() => processForm()}>Make Goal</button>
                 </div>
                 <div>
                   {/* Exiting the user from the window */}
-                  <img
-                    src={exitButton}
-                    alt="Exit Button"
-                    className="exitImg"
-                    onClick={showWindow2}
-                  />
+                  <img src={exitButton} alt="Exit Button" className="exitImg" onClick={showWindow2}/>
                 </div>
               </div>
             </form>
@@ -334,13 +262,10 @@ function Accounts({
       ) : (
         <div style={{ display: "none" }}></div>
       )}
-      <div className="accountsMain flexItems hideElement">
+      <div className="accountsMain flexSetup column flexItems hideElement">
         {combinedEntriesArray.map((entryObj) => {
           return (
-            <div
-              key={entryObj.uid}
-              className={"entry flexItems " + colourScheme}
-            >
+            <div key={entryObj.uid} className={"entry flexItems " + colourScheme}>
               <div>
                 <div>
                   <p className={"title centered " + colourScheme}>
@@ -366,38 +291,38 @@ function Accounts({
                     return (
                       <div key={index}>
                         {index % 4 == 0 ? (
-                          <div className="skillLine flexItem">
-                            <div className="individualSkill flexItem">
+                          <div className="skillLine flexSetup noGap flexItems">
+                            <div className="individualSkill">
                               <p className={"skill " + colourScheme}>
                                 {entryObj.Skills[index]} |
                               </p>
                             </div>
                             {entryObj.Skills[index + 1] ? (
-                              <div className="individualSkill flexItem">
+                              <div className="individualSkill">
                                 <p className={"skill " + colourScheme}>
                                   {entryObj.Skills[index + 1]} |
                                 </p>
                               </div>
                             ) : (
-                              <div className="individualSkill flexItem"> </div>
+                              <div className="individualSkill"> </div>
                             )}
                             {entryObj.Skills[index + 2] ? (
-                              <div className="individualSkill flexItem">
+                              <div className="individualSkill">
                                 <p className={"skill " + colourScheme}>
                                   {entryObj.Skills[index + 2]} |
                                 </p>
                               </div>
                             ) : (
-                              <div className="individualSkill flexItem"> </div>
+                              <div className="individualSkill"> </div>
                             )}
                             {entryObj.Skills[index + 3] ? (
-                              <div className="individualSkill flexItem">
+                              <div className="individualSkill">
                                 <p className={"skill " + colourScheme}>
                                   {entryObj.Skills[index + 3]} |
                                 </p>
                               </div>
                             ) : (
-                              <div className="individualSkill flexItem"> </div>
+                              <div className="individualSkill"> </div>
                             )}
                           </div>
                         ) : (
@@ -416,12 +341,9 @@ function Accounts({
               </div>
               {/* Conditionally displaying the options button, depending on whether the goal has been completed or not */}
               {!goalRecord.Completed ? (
-                <div className="entryFooter">
+                <div className="entryFooter flexSetup flexItems">
                   <div className="emptySpace flexItems"></div>
-                  <div
-                    className="entryOptions flexItems"
-                    onClick={() => setShowOptions(!showOptions)}
-                  ></div>
+                  <div className="entryOptions flexItems" onClick={() => setShowOptions(!showOptions)}></div>
                 </div>
               ) : (
                 <div style={{ display: "none" }}></div>
@@ -430,12 +352,7 @@ function Accounts({
                 <div className="options flexItems">
                   <div className="optionsEmpty flexItems"></div>
                   <div className="optionsContent">
-                    <button
-                      className="delete"
-                      onClick={() => deleteEntry(entryObj)}
-                    >
-                      Delete Account
-                    </button>
+                    <button className="delete" onClick={() => deleteEntry(entryObj)}>Delete Account</button>
                   </div>
                 </div>
               ) : (

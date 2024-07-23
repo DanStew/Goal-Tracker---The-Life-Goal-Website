@@ -88,14 +88,14 @@ function SignUp({colourScheme}){
     }
 
     return(
-        <div className="SignUp PageBody">
+        <div className="SignUp PageBody flexSetup column flexItems">
             {/* Creating the header for the page */}
             <div className='topBanner flexItems'>
                 <h1>GoalTracker</h1>
             </div>
             <div className="mainBody formBackground flexItems">
                 <h1>Sign Up</h1>
-                <form>
+                <form className='flexSetup column noGap'>
                     {/* Collecting the inputs from the users */}
                     {/* Whenever a change is made to the inputs, the UseState update function is called */}
                     <input type="text" placeholder="First Name..." onChange={(e) => setFirstName(e.target.value)}/>
@@ -107,7 +107,7 @@ function SignUp({colourScheme}){
                     <input type="file" style={{display:"none"}} id="file" onChange={(e) => setProfilePic(e.target.files[0])}/>
                     <label htmlFor="file">
                                 <img src={imgIcon} alt=""/>
-                                <span>Add Profile Image</span>
+                                <span className='transfer'>Add Profile Image</span>
                     </label>
                 </form>
                 {/* Submit Button, to make the new user on the website */}
@@ -117,7 +117,7 @@ function SignUp({colourScheme}){
                 <div></div>
                 {errorMsg != "" ? <span className="error">{errorMsg}</span> : <span></span>}
                 {/* Allowing the user to go to the Login Page */}
-                <p>Already have an account? <Link to="/SignIn">Login</Link></p>
+                <p className='transfer'>Already have an account? <Link to="/SignIn">Login</Link></p>
             </div>
         </div>
     )

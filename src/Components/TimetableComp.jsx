@@ -52,13 +52,13 @@ function TimetableComp({ currentUser, colourScheme }) {
         <button onClick={() => toggleWindow()}>Add Event</button>
       </div>
       {windowShown ? (
-        <div id="MakeForm" className={colourScheme}>
-          <div className="formHeader">
+        <div id="MakeForm" className={"flexSetup column flexItems " + colourScheme}>
+          <div className="formHeader flexSetup column">
             <p className="headerTitle">Make An Event</p>
           </div>
-          <div className="formContent">
-            <form action="#">
-              <div className="formLine">
+          <div className="formContent flexSetup column">
+            <form className="flexsetup column formLine noGap flexItems" action="#">
+              <div className=" flexSetup">
                 <span>Event Name : </span>
                 <div className="lineInput">
                   <input
@@ -69,7 +69,7 @@ function TimetableComp({ currentUser, colourScheme }) {
                   />
                 </div>
               </div>
-              <div className="formLine">
+              <div className="formLine flexSetup">
                 <span>Event Details : </span>
                 <div className="lineInput">
                   <input
@@ -80,7 +80,7 @@ function TimetableComp({ currentUser, colourScheme }) {
                   />
                 </div>
               </div>
-              <div className="formLine">
+              <div className="formLine flexSetup">
                 <span>Event Date : </span>
                 <div className="lineInput">
                   <input
@@ -98,7 +98,7 @@ function TimetableComp({ currentUser, colourScheme }) {
                 <div style={{ display: "none" }}></div>
               )}
               <div className="buttonLine">
-                <button type="button" onClick={() => processForm()}>
+                <button className="submit" type="button" onClick={() => processForm()}>
                   Make Event
                 </button>
                 <div>

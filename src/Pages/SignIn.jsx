@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react"
+import {useState} from "react"
 import { auth } from "../Config/firebase"
 import { signInWithEmailAndPassword } from "firebase/auth"
 import { useNavigate, Link } from "react-router-dom";
 import {validateInputs} from "../Functions/validateInputs";
 
-function SignIn({colourScheme}){
+function SignIn(){
     //Storing the inputs from the user
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
@@ -34,21 +34,14 @@ function SignIn({colourScheme}){
         }
     }
 
-      //Usestate to store the main class for this webpage
-  const [mainClass, setMainClass] = useState("")
-
-  useEffect(() => {
-    setMainClass("Login PageBody " + colourScheme)
-  },[colourScheme])
-
     return(
-        <div className={mainClass}>
+        <div className={"Login PageBody flexSetup column flexItems"}>
             <div className='topBanner flexItems'>
                 <h1>GoalTracker</h1>
             </div>
             <div className="mainBody formBackground flexItems">
                 <h1>Sign In</h1>
-                <form>
+                <form className="flexSetup column noGap">
                     <input type="email" placeholder="Email Address..." onChange={(e) => setEmail(e.target.value)}/>
                     <input type="password" placeholder="Password..." onChange={(e) => setPassword(e.target.value)}/>
                     <button className="formButton" onClick={(e) => handleSelect(e)}>Sign In</button>
@@ -57,8 +50,8 @@ function SignIn({colourScheme}){
                 <div></div>
                 {errorMsg != "" ? <span className="error">{errorMsg}</span> : <span></span>}
                 {/* NOTE : This doesn't actually have any functionality yet */}
-                <p>Can't remember you password? Change Password</p>
-                <p>Don't have an account? <Link to="/SignUp">Sign Up</Link></p>
+                <p className="transfer">Can't remember you password? Change Password</p>
+                <p className="transfer">Don't have an account? <Link to="/SignUp">Sign Up</Link></p>
                 {/* Space below here will be used to display the other sign in methods that the user could use */}
                 {/* This functionality has not been introduced yet */}
             </div>

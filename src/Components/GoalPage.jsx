@@ -1,15 +1,8 @@
 import { useEffect, useState } from "react";
 import MakeGoalForm from "./MakeGoalForm.jsx";
 import Accounts from "./Accounts.jsx";
-import { useAsyncError, useNavigate } from "react-router-dom";
-import {
-  arrayRemove,
-  arrayUnion,
-  deleteDoc,
-  doc,
-  getDoc,
-  updateDoc,
-} from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
+import { arrayRemove, arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { db } from "../Config/firebase.js";
 import { checkConsecutive, getCurrentDate } from "../Functions/dates.js";
 import { completeGoal } from "../Functions/completeGoals.js";
@@ -24,7 +17,7 @@ function GoalPage({
   setGoalAddedRef,
   setNewEntry,
   newEntry,
-  colourScheme
+  colourScheme,
 }) {
   //UseState to toggle whether window shown or not
   //Controls the Make a Subgoal window
@@ -79,7 +72,7 @@ function GoalPage({
         !(currentDate == goalRecord.lastEntryDate) &&
         !checkConsecutive(currentDate, goalRecord.lastEntryDate)
       ) {
-        console.log("Resetting the streak")
+        console.log("Resetting the streak");
         //If so, reset the streak
         await updateDoc(doc(db, "Goals", goalRecord.uid), {
           currentEntryStreak: 0,
@@ -94,7 +87,9 @@ function GoalPage({
   //Function to toggle the showing of the Make A Goal form
   function showWindow() {
     //Showing / Hiding goals depending on whether window shown or not
-    windowShown ? setMainClass("goalPage " + colourScheme) : setMainClass("goalPage hideGoals " + colourScheme);
+    windowShown
+      ? setMainClass("goalPage " + colourScheme)
+      : setMainClass("goalPage hideGoals " + colourScheme);
     //Hiding the showing of the make an entry form, if being shown
     setWindowShown2(false);
     //Toggling windowShown
@@ -105,8 +100,8 @@ function GoalPage({
   function showWindow2() {
     //Showing / Hiding goals depending on whether window shown or not
     windowShown2
-      ? setMainClass("goalPage " + colourScheme)
-      : setMainClass("goalPage hideGoals " + colourScheme);
+      ? setMainClass("goalPage flexSetup column noGap " + colourScheme)
+      : setMainClass("goalPage flexSetup column noGap hideGoals " + colourScheme);
     //Hiding the showing of the make an entry form, if being shown
     setWindowShown(false);
     //Toggling windowShown
@@ -144,7 +139,7 @@ function GoalPage({
 
   return (
     <div className={mainClass}>
-      <div className="goalHeader flexItems hideElement">
+      <div className="goalHeader flexSetup column flexItems hideElement">
         {/* Displaying the goal name */}
         <span className="flexItems">{goalName}</span>
         {/* Displaying the subgoal of code */}
@@ -153,7 +148,6 @@ function GoalPage({
             className="subgoalOf"
             onClick={() => navigator(`/Goals/${goalRecord.SubgoalOf}`)}
           >
-            {" "}
             -- Subgoal of : {goalRecord.SubgoalOf} --
           </p>
         ) : (
@@ -169,7 +163,7 @@ function GoalPage({
           <div style={{ display: "none" }}></div>
         )}
         {/* Displaying information about the goals */}
-        <div className="goalHeaderLine flexItems">
+        <div className="goalHeaderLine flexSetup flexItems">
           <p>Progress : </p>
           {/* Making the progress bar for the system */}
           <div className="container">
@@ -189,7 +183,7 @@ function GoalPage({
           </div>
         </div>
         {/* Displaying information about the goals */}
-        <div className="goalHeaderLine flexItems">
+        <div className="goalHeaderLine flexSetup flexItems">
           <div>
             <p>Last Updated : </p>
           </div>
@@ -198,7 +192,7 @@ function GoalPage({
           </div>
         </div>
         {goalRecord.DeadlineDate != "" ? (
-          <div className="goalHeaderLine flexItems">
+          <div className="goalHeaderLine flexSetup flexItems">
             <div>
               <p>Deadline Date : </p>
             </div>
@@ -210,8 +204,8 @@ function GoalPage({
           <div style={{ display: "none" }}></div>
         )}
       </div>
-      <div className="goalHeader">
-        <div className="goalHeaderLine flexItems hideElement">
+      <div className="goalHeader flexSetup">
+        <div className="goalHeaderLine flexSetup flexItems hideElement">
           <div>
             <p>Entry Streak : </p>
           </div>
@@ -220,17 +214,25 @@ function GoalPage({
           </div>
         </div>
       </div>
-      <div className="skillsOutput flexItems hideElement">
+      <div className="skillsOutput flexSetup column noGap flexItems hideElement">
         <span>Goal Skills</span>
-        <div className="skillInputLine flexItems">
-          <input
-            type="text" 
-            className={colourScheme}
-            value={currentSkill}
-            onChange={(e) => setCurrentSkill(e.target.value)}
-            placeholder="Enter Skill Name..."
-          />
-          <button onClick={() => addSkill()}>Add Skill</button>
+        <div className="skillInputLine flexSetup flexItems">
+          <form className="flexSetup flexItems" action="#">
+              <input
+                type="text"
+                className={"light flexItems " + colourScheme}
+                value={currentSkill}
+                onChange={(e) => setCurrentSkill(e.target.value)}
+                placeholder="Enter Skill Name..."
+              />
+              <button
+                className="flexItems"
+                type="button"
+                onClick={() => addSkill()}
+              >
+                Add Skill
+              </button>
+          </form>
         </div>
         {/* For each item in the skills array, output them here */}
         {/* NOTE : The skills are output in groups of two, that is why the code may be a bit funny */}
@@ -238,11 +240,12 @@ function GoalPage({
           return (
             <div key={index}>
               {index % 4 == 0 ? (
-                <div className="skillLine flexItem">
-                  <div className="individualSkill flexItem">
+                <div className="skillLine flexSetup smallGap flexItems">
+                  <div className="individualSkill flexSetup flexItems">
                     <p>{goalRecord.Skills[index]}</p>
                     {/* Button to enable the user to remvoe the skill from the array */}
                     <button
+                      className="delete"
                       type="button"
                       onClick={() => removeSkill(goalRecord.Skills[index])}
                     >
@@ -250,7 +253,7 @@ function GoalPage({
                     </button>
                   </div>
                   {goalRecord.Skills[index + 1] ? (
-                    <div className="individualSkill flexItem">
+                    <div className="individualSkill flexSetup flexItems">
                       <p>{goalRecord.Skills[index + 1]}</p>
                       <button
                         type="button"
@@ -262,10 +265,10 @@ function GoalPage({
                       </button>
                     </div>
                   ) : (
-                    <div className="individualSkill flexItem"> </div>
+                    <div className="individualSkill flexSetup flexItems"> </div>
                   )}
                   {goalRecord.Skills[index + 2] ? (
-                    <div className="individualSkill flexItem">
+                    <div className="individualSkill flexSetup flexItems">
                       <p>{goalRecord.Skills[index + 2]}</p>
                       <button
                         type="button"
@@ -277,10 +280,10 @@ function GoalPage({
                       </button>
                     </div>
                   ) : (
-                    <div className="individualSkill flexItem"> </div>
+                    <div className="individualSkill flexSetup flexItems"> </div>
                   )}
                   {goalRecord.Skills[index + 3] ? (
-                    <div className="individualSkill flexItem">
+                    <div className="individualSkill flexSetup flexItems">
                       <p>{goalRecord.Skills[index + 3]}</p>
                       <button
                         type="button"
@@ -292,7 +295,7 @@ function GoalPage({
                       </button>
                     </div>
                   ) : (
-                    <div className="individualSkill flexItem"> </div>
+                    <div className="individualSkill flexSetup flexItems"> </div>
                   )}
                 </div>
               ) : (
@@ -326,7 +329,7 @@ function GoalPage({
             goalsObjArray={goalsObjArray}
             subgoalNames={[]}
             subgoalsObjArray={subgoalsObjArray}
-            showNone={false} 
+            showNone={false}
             colourScheme={colourScheme}
           />
         ) : (
@@ -337,7 +340,7 @@ function GoalPage({
           return (
             <div
               key={subgoalRecord.uid}
-              className="subgoalLine flexItems hideElement"
+              className="subgoalLine flexSetup flexItems hideElement"
             >
               <p
                 className="subgoalName"
@@ -345,7 +348,7 @@ function GoalPage({
               >
                 {subgoalRecord.GoalName}
               </p>
-              <div className="subgoalLine flexItems">
+              <div className="subgoalLine flexSetup flexItems">
                 <p>Progress : </p>
                 {/* Making the progress bar for the system */}
                 <div className="container">
@@ -382,17 +385,23 @@ function GoalPage({
           newEntry={newEntry}
           subgoalRecords={subgoalRecords}
           currentUser={currentUser}
-          goalRecord={goalRecord} 
+          goalRecord={goalRecord}
           colourScheme={colourScheme}
         />
       </div>
       {/* Conditionally rendering these buttons, if the goal hasn't been completed */}
       {!goalRecord.Completed ? (
-        <div className="buttonArea flexItems hideElement">
-          <button onClick={() => deleteGoal(currentUser,goalRecord)} className="delete">
+        <div className="buttonArea flexSetup flexItems hideElement">
+          <button
+            onClick={() => deleteGoal(currentUser, goalRecord)}
+            className="delete"
+          >
             Delete Goal
           </button>
-          <button onClick={() => completeGoal(currentUser,goalRecord)} className="complete">
+          <button
+            onClick={() => completeGoal(currentUser, goalRecord)}
+            className="complete"
+          >
             Complete Goal
           </button>
         </div>

@@ -6,7 +6,7 @@ function SidebarElement({elementName,elementLink,colourScheme}){
    const navigator = useNavigate()
 
    return(
-        <div onClick={() => navigator(elementLink)} className={"sideBarElement flexItems " + colourScheme}>
+        <div onClick={() => navigator(elementLink)} className={"sideBarElement flexSetup flexItems " + colourScheme}>
             <span>{elementName}</span>
         </div>
    )

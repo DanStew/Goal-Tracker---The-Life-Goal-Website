@@ -20,12 +20,13 @@ function MyAccount({ currentUser, colourScheme }) {
     const mainFunction = async () => {
       //Ensuring there is a current user
       if (currentUser.uid) {
-        setUserRecord(await getUserData(currentUser.uid))
+        console.log("Running function");
+        setUserRecord(await getUserData(currentUser.uid));
       }
     };
 
     mainFunction();
-  }, [currentUser]);
+  }, [currentUser, updatedRecord]);
 
   //Function to check if the users entry streak needs to be reset
   useEffect(() => {
@@ -157,13 +158,13 @@ function MyAccount({ currentUser, colourScheme }) {
     window.location.reload(false);
   }
 
-  console.log("Displaying page")
+  console.log("Displaying page");
 
   return (
     <div className={mainClass}>
       {userRecord ? (
-        <div className="MyAccount flexItems">
-          <div className="Account flexItems">
+        <div className="MyAccount flexSetup column flexItems">
+          <div className="Account flexSetup column flexItems">
             <p className="subheading hideElement">Account</p>
             <div className="infoLine flexItems hideElement">
               <p className="title flexItems">Account Name : </p>
@@ -181,22 +182,24 @@ function MyAccount({ currentUser, colourScheme }) {
                   <p>Change Name</p>
                 </div>
                 <div className="popupMain">
-                  <div className="popupLine">
-                    <p>First Name : </p>
-                    <input
-                      type="text"
-                      placeholder="First Name..."
-                      onChange={(e) => setFirstName(e.target.value)}
-                    />
-                  </div>
-                  <div className="popupLine">
-                    <p>Last Name : </p>
-                    <input
-                      type="text"
-                      placeholder="Last Name..."
-                      onChange={(e) => setLastName(e.target.value)}
-                    />
-                  </div>
+                  <form className="flexSetup column noGap"action="#">
+                    <div className="popupLine flexSetup flexItems">
+                      <p>First Name : </p>
+                      <input
+                        type="text"
+                        placeholder="First Name..."
+                        onChange={(e) => setFirstName(e.target.value)}
+                      />
+                    </div>
+                    <div className="popupLine flexSetup flexItems">
+                      <p>Last Name : </p>
+                      <input
+                        type="text"
+                        placeholder="Last Name..."
+                        onChange={(e) => setLastName(e.target.value)}
+                      />
+                    </div>
+                  </form>
                 </div>
                 {errorMsg != "" ? (
                   <div>
@@ -205,11 +208,19 @@ function MyAccount({ currentUser, colourScheme }) {
                 ) : (
                   <div style={{ display: "none" }}></div>
                 )}
-                <div className="popupFooter">
-                  <button className="submit" onClick={() => updateName()}>
+                <div className="popupFooter flexSetup flexItems">
+                  <button
+                    type="button"
+                    className="submit"
+                    onClick={() => updateName()}
+                  >
                     Change Name
                   </button>
-                  <button className="exit" onClick={() => closeWindow()}>
+                  <button
+                    type="button"
+                    className="exit"
+                    onClick={() => closeWindow()}
+                  >
                     X
                   </button>
                 </div>
@@ -224,7 +235,7 @@ function MyAccount({ currentUser, colourScheme }) {
             </div>
             <div className="infoLine flexItems hideElement">
               <p className="title flexItems">Profile Picture : </p>
-              <div className="info imgLocation flexItems">
+              <div className="info imgLocation flexSetup column flexItems">
                 <img
                   id="displayImg"
                   src={userRecord.photoURL}
@@ -237,12 +248,12 @@ function MyAccount({ currentUser, colourScheme }) {
             </div>
             {/* Popup conditonally rendered when user presses button */}
             {windowShown2 ? (
-              <div className="changeInfoPopup flexItems">
+              <div className="changeInfoPopup flexSetup column noGap flexItems">
                 <div className="popupHeader">
                   <p>Change Profile Image</p>
                 </div>
-                <div className="popupMain">
-                  <div className="popupLine">
+                <div className="popupMain flexSetup column">
+                  <div className="popupLine flexSetup flexItems">
                     <p>Profile Image : </p>
                     {/* Display custom HTML for the input, rather than the basic file input */}
                     <input
@@ -251,7 +262,7 @@ function MyAccount({ currentUser, colourScheme }) {
                       id="file"
                       onChange={(e) => setProfileImg(e.target.files[0])}
                     />
-                    <label className="file" htmlFor="file">
+                    <label className="file flexSetup" htmlFor="file">
                       <img src={imgIcon} alt="" />
                       <span>Add Profile Image</span>
                     </label>
@@ -269,7 +280,7 @@ function MyAccount({ currentUser, colourScheme }) {
                 ) : (
                   <div style={{ display: "none" }}></div>
                 )}
-                <div className="popupFooter">
+                <div className="popupFooter flexSetup flexItems">
                   <button className="submit" onClick={() => updateProfileImg()}>
                     Change Profile Image
                   </button>

@@ -76,15 +76,15 @@ function MakeGoalForm({
   }
 
   return (
-    <div id="MakeForm" className={colourScheme}>
+    <div id="MakeForm" className={"flexSetup column flexItems " + colourScheme}>
       {/* The title and button to exit the form */}
-      <div className="formHeader flexItems">
+      <div className="formHeader flexSetup column flexItems">
         <p className="headerTitle flexItems">Make Goal</p>
       </div>
-      <div className={"formContent flexItems " + colourScheme}>
+      <div className={"formContent flexSetup column flexItems " + colourScheme}>
         {/* The form, the main element of this window */}
-        <form action="#">
-          <div className={"formLine flexItems " + colourScheme}>
+        <form className="flexSetup column noGap flexItems" action="#">
+          <div className={"formLine flexSetup flexItems " + colourScheme}>
             <div className={"lineTitle flexItems " + colourScheme}>
               <p>Goal Name : </p>
             </div>
@@ -96,7 +96,7 @@ function MakeGoalForm({
               />
             </div>
           </div>
-          <div className={"formLine flexItems " + colourScheme}>
+          <div className={"formLine flexSetup flexItems " + colourScheme}>
             <div className={"lineTitle flexItems " + colourScheme}>
               <p>Subgoal of : </p>
             </div>
@@ -128,7 +128,7 @@ function MakeGoalForm({
           </div>
           <div className="skillsArea">
             {/* Enables the user to individually type in each skill they have */}
-            <div className={"formLine flexItems " + colourScheme}>
+            <div className={"formLine flexSetup flexItems " + colourScheme}>
               <div className={"lineTitle flexItems " + colourScheme}>
                 <p>Skills :</p>
               </div>
@@ -150,15 +150,15 @@ function MakeGoalForm({
                 </button>
               </div>
             </div>
-            <div className="skillsOutput">
+            <div className="skillsOutput flexSetup column">
               {/* For each item in the skills array, output them here */}
               {/* NOTE : The skills are output in groups of two, that is why the code may be a bit funny */}
               {skillsArray.map((skill, index) => {
                 return (
                   <div key={index}>
                     {index % 4 == 0 ? (
-                      <div className="skillLine flexItem">
-                        <div className="individualSkill flexItem">
+                      <div className="skillLine flexSetup flexItem">
+                        <div className="individualSkill flexSetup flexItem">
                           <p>{skillsArray[index]}</p>
                           {/* Button to enable the user to remvoe the skill from the array */}
                           <button
@@ -169,7 +169,7 @@ function MakeGoalForm({
                           </button>
                         </div>
                         {skillsArray[index + 1] ? (
-                          <div className="individualSkill flexItem">
+                          <div className="individualSkill flexSetup flexItem">
                             <p>{skillsArray[index + 1]}</p>
                             <button
                               type="button"
@@ -181,10 +181,10 @@ function MakeGoalForm({
                             </button>
                           </div>
                         ) : (
-                          <div className="individualSkill flexItem"> </div>
+                          <div className="individualSkill flexSetup flexItem"> </div>
                         )}
                         {skillsArray[index + 2] ? (
-                          <div className="individualSkill flexItem">
+                          <div className="individualSkill flexSetup flexItem">
                             <p>{skillsArray[index + 2]}</p>
                             <button
                               type="button"
@@ -196,10 +196,10 @@ function MakeGoalForm({
                             </button>
                           </div>
                         ) : (
-                          <div className="individualSkill flexItem"> </div>
+                          <div className="individualSkill flexSetup flexItem"> </div>
                         )}
                         {skillsArray[index + 3] ? (
-                          <div className="individualSkill flexItem">
+                          <div className="individualSkill flexSetup flexItem">
                             <p>{skillsArray[index + 3]}</p>
                             <button
                               type="button"
@@ -211,7 +211,7 @@ function MakeGoalForm({
                             </button>
                           </div>
                         ) : (
-                          <div className="individualSkill flexItem"> </div>
+                          <div className="individualSkill flexSetup flexItem"> </div>
                         )}
                       </div>
                     ) : (
@@ -223,7 +223,7 @@ function MakeGoalForm({
             </div>
           </div>
           {/* Enables the user to choose if they want a deadline date or not */}
-          <div className={"formLine flexItems " + colourScheme}>
+          <div className={"formLine flexSetup flexItems " + colourScheme}>
             <div className={"lineTitle flexItems " + colourScheme}>
               <p>Deadline Date :</p>
             </div>
@@ -241,7 +241,7 @@ function MakeGoalForm({
           </div>
           {/* Allowing the user to pick a deadline date, if they have deadline selected yes */}
           {deadline == "Yes" ? (
-            <div className={"formLine flexItems indent " + colourScheme}>
+            <div className={"formLine flexSetup flexItems indent " + colourScheme}>
               <div className={"lineTitle flexItems " + colourScheme}>
                 <p>-- Pick Date :</p>
               </div>
@@ -266,7 +266,7 @@ function MakeGoalForm({
           <div className="buttonLine">
             <div>
               {/* Allowing the user to submit the information they have enterred on the form */}
-              <button type="button" onClick={() => processForm()}>
+              <button className="submit" type="button" onClick={() => processForm()}>
                 Make Goal
               </button>
             </div>

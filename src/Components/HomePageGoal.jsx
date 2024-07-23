@@ -1,24 +1,8 @@
-import {
-  arrayRemove,
-  deleteDoc,
-  doc,
-  getDoc,
-  updateDoc,
-} from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { db } from "../Config/firebase";
-import { update } from "firebase/database";
 import { deleteGoal } from "../Functions/deleteGoals";
 
-function HomePageGoal({
-  goalObj,
-  subgoalToMaingoalConnector,
-  setUpdatedGoal,
-  updatedGoal,
-  currentUser,
-  colourScheme
-}) {
+function HomePageGoal({goalObj,subgoalToMaingoalConnector,setUpdatedGoal,updatedGoal,currentUser,colourScheme}) {
   //Implementing the navigator
   const navigator = useNavigate();
 
@@ -36,9 +20,9 @@ function HomePageGoal({
   }, [goalObj]);
 
   return (
-    <div id={mainId} className={"homePageGoal flexItems " + colourScheme}>
+    <div id={mainId} className={"homePageGoal flexSetup column flexItems " + colourScheme}>
       {/* Making the header of the Goal Component */}
-      <div className="hpgHeader flexItems">
+      <div className="hpgHeader flexSetup column flexItems">
         <div>
           {/* Displaying the GoalName of the Goal */}
           <span onClick={() => navigator(`/Goals/${goalObj.GoalName}`)}>
@@ -47,36 +31,30 @@ function HomePageGoal({
         </div>
         {/* Displaying a completed banner, if completed */}
         {goalObj.Completed ? (
-          <div className="completedBanner">
+          <div className="completedBanner flexItems">
             <p>!! Completed !!</p>
           </div>
         ) : (
           <div style={{ display: "none" }}></div>
         )}
         {/* Displaying information about the goals */}
-        <div className="hpgHeaderLine">
+        <div className="hpgHeaderLine progress flexSetup flexItems">
           <p>Progress : </p>
           {/* Making the progress bar for the system */}
-          <div className="container">
+          <div className="container flexItems">
             {/* This line of code fill in the bar the variable amount that has currently been complete */}
             <div
-              style={{
-                width: `${
-                  goalObj.CompleteGoals / goalObj.NmbGoals != 0
-                    ? (goalObj.CompleteGoals / goalObj.NmbGoals) * 100
-                    : 5
-                }%`,
-              }}
-              className="progress-bar"
+              style={{width: `${goalObj.CompleteGoals / goalObj.NmbGoals != 0? (goalObj.CompleteGoals / goalObj.NmbGoals) * 100: 5}%`}}
+              className="progress-bar flexItems"
             >
               {goalObj.CompleteGoals}/{goalObj.NmbGoals}
             </div>
           </div>
         </div>
         {/* Displaying information about the goals */}
-        <div className="hpgHeaderLine">
+        <div className="hpgHeaderLine flexSetup flexItems">
           {goalObj.Completed ? (
-            <div className="hpgHeaderLine">
+            <div className="hpgHeaderLine flexSetup flexItems">
               <div>
                 <p>Completion Date : </p>
               </div>
@@ -85,7 +63,7 @@ function HomePageGoal({
               </div>
             </div>
           ) : (
-            <div className="hpgHeaderLine">
+            <div className="hpgHeaderLine flexSetup flexItems">
               <div>
                 <p>Last Updated : </p>
               </div>
@@ -95,10 +73,10 @@ function HomePageGoal({
             </div>
           )}
         </div>
-        <div className="hpgHeaderLine">
+        <div className="hpgHeaderLine flexSetup flexItems">
           {goalObj.Completed ? (
             <div style={{display:"none"}}></div>) : (
-            <div className="hpgHeaderLine">
+            <div className="hpgHeaderLine flexSetup flexItems">
               <div>
                 <p>Entry Streak : </p>
               </div>
@@ -110,7 +88,7 @@ function HomePageGoal({
         </div>
         {/* Displaying information about the goals */}
           {goalObj.DeadlineDate != "" ? (
-            <div className="hpgHeaderLine">
+            <div className="hpgHeaderLine flexSetup flexItems">
               <div>
                 <p>Deadline Date : </p>
               </div>
@@ -138,13 +116,10 @@ function HomePageGoal({
       </div>
       <div className="hpgFooter flexItems">
         <div className="hpgFooterEmpty flexItems"></div>
-        <div
-          className="hpgFooterContent flexItems"
-          onClick={() => setShowOptions(!showOptions)}
-        ></div>
+        <div className="hpgFooterContent flexItems" onClick={() => setShowOptions(!showOptions)}></div>
       </div>
       {showOptions ? (
-        <div className="options flexItems">
+        <div className="options flexSetup column flexItems">
           <div className="optionsContent">
             <button className="delete" onClick={() => deleteGoal(currentUser,goalObj)}>
               Delete Goal

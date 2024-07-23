@@ -34,8 +34,8 @@ function Goals({ currentUser, colourScheme }) {
   function showWindow() {
     //Showing / Hiding goals depending on whether window shown or not
     windowShown
-      ? setMainClass("Goals " + colourScheme)
-      : setMainClass("Goals hideGoals " + colourScheme);
+      ? setMainClass("Goals flexSetup column " + colourScheme)
+      : setMainClass("Goals flexSetup column hideGoals " + colourScheme);
     //Hiding the options, as the user doesn't need to see them anymore
     setGoalOptions(false);
     //Toggling windowShown
@@ -244,7 +244,7 @@ function Goals({ currentUser, colourScheme }) {
       {/* Will have the Your Goal Title and the square for the Goals to go in */}
       {/* Then, for each goal the user has, it will then display within this square */}
       {/* If there are no goals, then another message will pop up */}
-      <div className="GoalsHeader flexItems">
+      <div className="GoalsHeader flexSetup column flexItems">
         <div className="titleArea flexItems hideElement">
           <span onClick={() => navigator("/MyGoals")}>My Goals</span>
         </div>
@@ -252,7 +252,7 @@ function Goals({ currentUser, colourScheme }) {
         <div className="optionsArea flexItems">
           <div>
             {/* The Buttons to be displayed to the website, in its own level */}
-            <div className="buttonArea flexItems hideElement">
+            <div className="buttonArea flexItems flexSetup hideElement">
               <button className="AddGoalButton" onClick={() => showWindow()}>
                 Add Goal
               </button>
@@ -286,10 +286,10 @@ function Goals({ currentUser, colourScheme }) {
             )}
             {/* The goalOptions, conditionally rendered below the buttons */}
             {goalOptions ? (
-              <div className="goalOptionsArea flexItems hideElement">
+              <div className="goalOptionsArea flexSetup column smallGap flexItems hideElement">
                 {/* First level of goal options */}
                 <div className="optionsLevel flexItems">
-                  <div className="option flexItems">
+                  <div className="option flexSetup flexItems">
                     <span>Show Subgoals</span>
                     <div>
                       <label className="switch">
@@ -309,7 +309,7 @@ function Goals({ currentUser, colourScheme }) {
                       </label>
                     </div>
                   </div>
-                  <div className="option flexItems">
+                  <div className="option flexSetup flexItems">
                     <span>Show Completed Goals</span>
                     <div>
                       <label className="switch">
@@ -358,7 +358,7 @@ function Goals({ currentUser, colourScheme }) {
           </div>
         </div>
       </div>
-      <div className="IndividualGoals flexItems hideElement">
+      <div className="IndividualGoals flexSetup column flexItems hideElement">
         {displayObjsArray.map((goalObj) => (
           <div key={goalObj.uid}>
             <HomePageGoal

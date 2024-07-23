@@ -229,12 +229,12 @@ function TimeTableDisplay({ currentUser, colourScheme, eventAdded }) {
   }
 
   return (
-    <div className={"TimeTableDisplay " + colourScheme}>
-      <div className="TTDHeader flexItems">
+    <div className={"TimeTableDisplay flexSetup column noGap " + colourScheme}>
+      <div className="TTDHeader flexSetup noGap flexItems">
         {/* This is where the weekname and toggle week buttons will be displayed */}
-        <img onClick={() => previousWeek()} src={leftArrowWhite} alt="" />
+        <img className="corners" onClick={() => previousWeek()} src={leftArrowWhite} alt="" />
         <p>{weekString}</p>
-        <img onClick={() => futureWeek()} src={rightArrowWhite} alt="" />
+        <img className="corners" onClick={() => futureWeek()} src={rightArrowWhite} alt="" />
       </div>
       <div className="TTDMain flexItems">
         {/* Looping through all the days in the week */}
@@ -242,22 +242,22 @@ function TimeTableDisplay({ currentUser, colourScheme, eventAdded }) {
           <div>
             {formattedDates.map((dayDate, index) => {
               return (
-                <div key={dayDate} className="timetableDay flexItems">
+                <div key={dayDate} className="timetableDay flexSetup column noGap flexItems">
                   <div className="dayHeader flexItems">
                     <p>{dayDate}</p>
                   </div>
-                  <div className="dayEvents flexItems">
+                  <div className="dayEvents flexSetup column noGap flexItems">
                     {/* Looping through all the events the day has */}
                     {weekDateEvents[index].map((eventInfo, index2) => {
                       return (
                         <div
-                          className="eventLine flexItems"
+                          className="eventLine flexSetup noGap flexItems"
                           key={eventInfo.uid}
                         >
                           {/* Grouping the events into groups of 3 */}
                           {/* This is done by displaying 3 at one time, and then skipping till we get to the next group of 3 */}
                           {index2 % 3 == 0 ? (
-                            <div className="eventLine flexItems">
+                            <div className="eventLine flexSetup noGap flexItems">
                               {eventInfo.completed != true ? (
                                 <div className="event left flexItems">
                                   {optionsId != eventInfo.uid ? (
@@ -270,7 +270,7 @@ function TimeTableDisplay({ currentUser, colourScheme, eventAdded }) {
                                           {eventInfo.eventDetails}
                                         </p>
                                       </div>
-                                      <div className="eventFooter flexItems">
+                                      <div className="eventFooter flexSetup noGap flexItems">
                                         <div className="blank flexItems"></div>
                                         <div
                                           onClick={() =>
@@ -348,7 +348,7 @@ function TimeTableDisplay({ currentUser, colourScheme, eventAdded }) {
                                               }
                                             </p>
                                           </div>
-                                          <div className="eventFooter flexItems">
+                                          <div className="eventFooter flexSetup noGap flexItems">
                                             <div className="blank flexItems"></div>
                                             <div
                                               onClick={() =>
@@ -454,7 +454,7 @@ function TimeTableDisplay({ currentUser, colourScheme, eventAdded }) {
                                               }
                                             </p>
                                           </div>
-                                          <div className="eventFooter flexItems">
+                                          <div className="eventFooter flexSetup noGap flexItems">
                                             <div className="blank flexItems"></div>
                                             <div
                                               onClick={() =>
@@ -545,7 +545,7 @@ function TimeTableDisplay({ currentUser, colourScheme, eventAdded }) {
                     })}
                     {/* Outputting text if there are no events on the current day */}
                     {weekDateEvents[index][0] == undefined ? (
-                      <div className="eventLine flexItems">
+                      <div className="eventLine flexSetup noGap flexItems">
                         <p className="noEvents">No events on this day...</p>
                       </div>
                     ) : (
