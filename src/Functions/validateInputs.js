@@ -1,7 +1,7 @@
 //Function to validate the user's inputs, to ensure they are correct
 export const validateInputs = (inputsObj) => {
     //Only validating some of the options if the type is full
-    if (inputsObj.firstName){
+    if (inputsObj.firstName != undefined){
         //Making the regex test, to ensure all letters are alphabetical
         let regex = /^[a-zA-Z]+$/;
       

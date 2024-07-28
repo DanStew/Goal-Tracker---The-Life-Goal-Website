@@ -20,7 +20,6 @@ function MyAccount({ currentUser, colourScheme }) {
     const mainFunction = async () => {
       //Ensuring there is a current user
       if (currentUser.uid) {
-        console.log("Running function");
         setUserRecord(await getUserData(currentUser.uid));
       }
     };
@@ -40,7 +39,6 @@ function MyAccount({ currentUser, colourScheme }) {
         !(currentDate == userRecord.lastEntryDate) &&
         !checkConsecutive(currentDate, userRecord.lastEntryDate)
       ) {
-        console.log("Resetting the streak");
         //If so, reset the streak
         await updateDoc(doc(db, "users", userRecord.uid), {
           entryStreak: 0,
@@ -157,9 +155,7 @@ function MyAccount({ currentUser, colourScheme }) {
     //Closing the window out
     window.location.reload(false);
   }
-
-  console.log("Displaying page");
-
+  
   return (
     <div className={mainClass}>
       {userRecord ? (

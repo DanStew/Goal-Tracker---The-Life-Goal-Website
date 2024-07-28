@@ -28,6 +28,10 @@ body {
 p {
   margin: 0px;
   padding: 0px;
+
+  &.centered{
+    text-align: center;
+  }
 }
 
 /* Generic image stylign for images on the website */
@@ -316,8 +320,13 @@ form {
 
 //Styling some elements of the SignIn / SignUp page
 .transfer{
-  font-size: $smallText;
+  font-size: $buttonText;
   margin-bottom: 5px;
+  font-weight: 500;
+
+  &.error{
+    color: red;
+  }
 }
 
 //Code to style the Goals Page and components on the website
@@ -463,6 +472,10 @@ form {
       font-size: $headingText;
       padding: 10px;
     }
+  }
+
+  .error{
+    font-size: $smallText;
   }
 
   .TimeTableDisplay {
@@ -748,6 +761,10 @@ form {
   //Implementing the code to hide elements
   .goalPage {
     margin-bottom: 40px;
+
+    .completed{
+      background-color: gold;
+    }
 
     /* Styling the skills section of the page */
     .skillsOutput {

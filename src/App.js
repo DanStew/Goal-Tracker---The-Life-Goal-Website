@@ -11,7 +11,7 @@ import Timetable from './Pages/Timetable';
 import Settings from './Pages/Settings';
 
 //Importing the needed functions for this file
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useMatch, useLocation } from 'react-router-dom'
 import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from './Context/AuthContext';
 import { doc, getDoc } from 'firebase/firestore';
@@ -24,7 +24,7 @@ function App() {
   const {currentUser} = useContext(AuthContext)
 
   //Usestate to store the colourscheme the user has
-  const [colourScheme,setColourScheme] = useState("")
+  const [colourScheme,setColourScheme] = useState("default")
 
   //Usestate variable to tell system that the userRecord has changed its colourscheme
   const [changedColourScheme, setChangedColourScheme] = useState(false)
@@ -36,11 +36,17 @@ function App() {
       let userRecord = await getDoc(doc(db,"users",currentUser.uid))
       let userData = userRecord.data()
       //Finding the colourscheme and setting the variable
-      setColourScheme(userData.colourScheme)
+      userData != undefined ? setColourScheme(userData.colourScheme) : setColourScheme("default")   
     }
 
     //Ensuring that there is a current user
-    currentUser.uid ? mainFunction() : setColourScheme("default")
+    //Using try catch as otherwise currentUser.uid will cause error
+    try{
+      currentUser.uid ? mainFunction() : setColourScheme("default")
+    }
+    catch (err) { 
+      setColourScheme("default")
+    }
   },[currentUser,changedColourScheme])
 
   //Creating the protected route for the website

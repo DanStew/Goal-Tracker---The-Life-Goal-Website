@@ -1,9 +1,6 @@
 import { useState } from "react";
 import TimetableDisplay from "./TimeTableDisplay.jsx";
 import exitButton from "../Images/exitButton.jpg";
-import { v4 as uuidv4 } from "uuid";
-import { arrayUnion, doc, setDoc, updateDoc } from "firebase/firestore";
-import { db } from "../Config/firebase.js";
 import { processTimetableForm } from "../Functions/processingForms.js";
 
 function TimetableComp({ currentUser, colourScheme }) {
@@ -31,9 +28,13 @@ function TimetableComp({ currentUser, colourScheme }) {
   const [errorMsg, setErrorMsg] = useState("");
 
   //Function to call the function to process the form
-  function processForm() {
+  async function processForm() {
     //Calling the main function
-    processTimetableForm({eventName:eventName,eventDetails:eventDetails,eventDate:eventDate},currentUser,() => setErrorMsg());
+    let formErrorMsg = await processTimetableForm({eventName:eventName,eventDetails:eventDetails,eventDate:eventDate},currentUser,() => setErrorMsg());
+    setErrorMsg(formErrorMsg)
+    if (formErrorMsg != ""){
+      return 
+    }
     //Implementing the other code
     //Resetting the values for next time
     setEventName("");
@@ -91,8 +92,8 @@ function TimetableComp({ currentUser, colourScheme }) {
               </div>
               {/* Displaying the error msg to the screen, if there is one */}
               {errorMsg != "" ? (
-                <div className="error">
-                  <p>{errorMsg}</p>
+                <div className="error flexItems">
+                  <p className="error centered">{errorMsg}</p>
                 </div>
               ) : (
                 <div style={{ display: "none" }}></div>

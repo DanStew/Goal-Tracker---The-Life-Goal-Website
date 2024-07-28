@@ -14,6 +14,7 @@ function GoalPage({
   goalsObjArray,
   subgoalsObjArray,
   goalRecord,
+  goalAddedRef,
   setGoalAddedRef,
   setNewEntry,
   newEntry,
@@ -72,7 +73,6 @@ function GoalPage({
         !(currentDate == goalRecord.lastEntryDate) &&
         !checkConsecutive(currentDate, goalRecord.lastEntryDate)
       ) {
-        console.log("Resetting the streak");
         //If so, reset the streak
         await updateDoc(doc(db, "Goals", goalRecord.uid), {
           currentEntryStreak: 0,
@@ -324,7 +324,8 @@ function GoalPage({
             className="flexItems"
             toggleWindow={() => showWindow()}
             currentUser={currentUser}
-            setGoalAddedRef={() => setGoalAddedRef()}
+            goalAddedRef={goalAddedRef}
+            setGoalAddedRef={(value) => setGoalAddedRef(value)}
             goalNames={[goalRecord.GoalName]}
             goalsObjArray={goalsObjArray}
             subgoalNames={[]}
@@ -381,7 +382,7 @@ function GoalPage({
           entryIds={goalRecord.Entries}
           windowShown2={windowShown2}
           showWindow2={() => showWindow2()}
-          setNewEntry={setNewEntry}
+          setNewEntry={(value) => setNewEntry(value)}
           newEntry={newEntry}
           subgoalRecords={subgoalRecords}
           currentUser={currentUser}
@@ -393,13 +394,21 @@ function GoalPage({
       {!goalRecord.Completed ? (
         <div className="buttonArea flexSetup flexItems hideElement">
           <button
-            onClick={() => deleteGoal(currentUser, goalRecord)}
+            onClick={async () => {
+              deleteGoal(currentUser, goalRecord).then( () => {
+                window.location.reload(false)
+              })
+            }}
             className="delete"
           >
             Delete Goal
           </button>
           <button
-            onClick={() => completeGoal(currentUser, goalRecord)}
+            onClick={async () => {
+              completeGoal(currentUser, goalRecord).then( () => {
+                window.location.reload(false)
+              })
+            }}
             className="complete"
           >
             Complete Goal

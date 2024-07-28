@@ -129,7 +129,7 @@ function Goal({colourScheme}) {
           {/* The main content of the page */}
           {/* Only displaying if there is a current goalrecord */}
           {goalRecord? 
-            <GoalPage goalName={goalName} currentUser={currentUser} goalsObjArray={goalsObjArray} subgoalsObjArray={subgoalsObjArray} goalRecord={goalRecord} setGoalAddedRef={() => setGoalAddedRef()} setNewEntry={() => setNewEntry()} newEntry={newEntry} colourScheme={colourScheme}/> 
+            <GoalPage goalName={goalName} currentUser={currentUser} goalsObjArray={goalsObjArray} subgoalsObjArray={subgoalsObjArray} goalRecord={goalRecord} goalAddedRef={goalAddedRef} setGoalAddedRef={(value) => setGoalAddedRef(value)} setNewEntry={(value) => setNewEntry(value)} newEntry={newEntry} colourScheme={colourScheme}/> 
             : 
             <div>
                 <p>You don't have a goal of the name : {goalName}</p>

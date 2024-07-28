@@ -8,7 +8,6 @@ function Header({ currentUser, colourScheme }) {
   //Use effect function to call the correct function needed for the page that the user is on
   useEffect(() => {
     const returnFunction = async () => {
-      console.log("Reading from firestore")
       //Getting the record of the currentUser
       let userData = await getUserData(currentUser.uid);
       //Setting profile img to be the photoURL

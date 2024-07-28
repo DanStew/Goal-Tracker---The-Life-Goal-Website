@@ -32,10 +32,11 @@ function SignUp({colourScheme}){
 
         //Calling the validation function, which returns any error messages that could occur
         //If there are no error messages, it returns ""
-        setErrorMsg(validateInputs({firstName : firstName,lastName : lastName,profilePic : profilePic,email : email,password : password}))
+        let formErrorMsg = validateInputs({firstName : firstName,lastName : lastName,profilePic : profilePic,email : email,password : password})
+        setErrorMsg(formErrorMsg)
 
         //If the error message isn't empty, return to output the error message to the user
-        if (errorMsg != ""){
+        if (formErrorMsg != ""){
             return
         }
         else{
@@ -55,9 +56,8 @@ function SignUp({colourScheme}){
             const storageRef = ref(storage, email)
             await uploadBytes(storageRef,profilePic)
                 
-            getDownloadURL(ref(storage,email))
+            await getDownloadURL(ref(storage,email))
             .then( async (downloadURL) => {
-                console.log("This code is running")
                 //Making the user's record in the users database
                 await setDoc(doc(db, "users", res.user.uid),{
                     uid : res.user.uid,
@@ -78,12 +78,13 @@ function SignUp({colourScheme}){
                 //Making the user record to store all of the users goals
                 await setDoc(doc(db,"userGoals", res.user.uid),{
                     goals:[],
-                    subgoals:[]
+                    subgoals:[],
+                    events:[]
                 })
             })
     
             //Transporting the user to the homepage
-            navigator("/")
+            navigator("/SignIn")
         }
     }
 
@@ -115,7 +116,7 @@ function SignUp({colourScheme}){
                 {/* Line of code to output the error message to the user */}
                 {/* Uses conditional rendering, so it only displays when there is a error message set */}
                 <div></div>
-                {errorMsg != "" ? <span className="error">{errorMsg}</span> : <span></span>}
+                {errorMsg != "" ? <span className="transfer error">{errorMsg}</span> : <span></span>}
                 {/* Allowing the user to go to the Login Page */}
                 <p className='transfer'>Already have an account? <Link to="/SignIn">Login</Link></p>
             </div>

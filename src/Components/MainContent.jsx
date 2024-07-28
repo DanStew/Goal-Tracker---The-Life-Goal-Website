@@ -6,7 +6,6 @@ import SettingsComp from "./SettingsComp"
 function MainContent({webpage,currentUser,colourScheme, changedColourScheme, setChangedColourScheme}){
     return(
         <div className="content flexItems">
-          {console.log(webpage)}
           {/* Conditionally rendering the elements, depending on what the webpage value is */}
           {webpage == "My Account" ? <MyAccount currentUser={currentUser} colourScheme={colourScheme}/>: <div style={{display:"none"}}></div>}
           {webpage == "Home" ? 

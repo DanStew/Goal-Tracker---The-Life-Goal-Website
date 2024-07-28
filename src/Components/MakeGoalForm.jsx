@@ -63,16 +63,19 @@ function MakeGoalForm({
   }
 
   //Function used to call the function to process the form
-  function processForm(){
+  async function processForm(){
     //Calling the main function to process the form
-    processMakeGoalForm(currentUser,{goalName: goalName,subgoalOf: subgoalOf,deadline:deadline,deadlineDate:deadlineDate,skillsArray:skillsArray},goalNames,() => setErrorMsg(),showNone,goalsObjArray,subgoalsObjArray)
+    let newErrorMsg = await processMakeGoalForm(currentUser,{goalName: goalName,subgoalOf: subgoalOf,deadline:deadline,deadlineDate:deadlineDate,skillsArray:skillsArray},goalNames,() => setErrorMsg(),showNone,goalsObjArray,subgoalsObjArray)
+    setErrorMsg(newErrorMsg)
     //Running the code that couldn't run in the above function, webpage specific code
-    //Telling goals that a goal has been added
-    setGoalAddedRef(!goalAddedRef);
-    //To end the function, reset all the values of the inputs
-    resetValues();
-    //Closing the window
-    toggleWindow();
+    if (newErrorMsg == ""){
+      //Telling goals that a goal has been added
+      setGoalAddedRef(!goalAddedRef);
+      //To end the function, reset all the values of the inputs
+      resetValues();
+      //Closing the window
+      toggleWindow();
+    }
   }
 
   return (

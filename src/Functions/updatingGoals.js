@@ -67,7 +67,7 @@ export const updateParentGoalsAccounts = async (
     //Looping through to find the non undefined output
     parentRecords.map(async (parentRecord) => {
       if (parentRecord != undefined) {
-        updateParentGoals(parentRecord, currentDateString, entryDate);
+        await updateParentGoalsAccounts(currentUser, parentRecord, currentDateString, entryDate);
       }
     });
   }
@@ -76,7 +76,7 @@ export const updateParentGoalsAccounts = async (
 //Function which uses the name of a goal to find its record
 async function getParentRecords(currentUser,goalName) {
   //Getting the userGoals record
-  let userGoalsData = getUserGoalsData(currentUser.uid)
+  let userGoalsData = await getUserGoalsData(currentUser.uid)
   //Looping through all of the goals
   return await Promise.all(
     userGoalsData.goals.map(async (goalUid) => {

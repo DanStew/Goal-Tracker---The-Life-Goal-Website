@@ -18,10 +18,11 @@ function SignIn(){
         e.preventDefault()
 
         //Validating the inputs, to ensure they are of the correct form
-        setErrorMsg(validateInputs({email:email, password : password}))
+        let formErrorMsg = validateInputs({email:email, password : password})
+        setErrorMsg(formErrorMsg)
 
         //Checking to see whether any errors occurred in the system
-        if (errorMsg != ""){
+        if (formErrorMsg != ""){
             return
         }
 
@@ -48,7 +49,7 @@ function SignIn(){
                 </form>
                 {/* Conditionally rendering any errors that may occur */}
                 <div></div>
-                {errorMsg != "" ? <span className="error">{errorMsg}</span> : <span></span>}
+                {errorMsg != "" ? <span className="transfer error">{errorMsg}</span> : <span></span>}
                 {/* NOTE : This doesn't actually have any functionality yet */}
                 <p className="transfer">Can't remember you password? Change Password</p>
                 <p className="transfer">Don't have an account? <Link to="/SignUp">Sign Up</Link></p>

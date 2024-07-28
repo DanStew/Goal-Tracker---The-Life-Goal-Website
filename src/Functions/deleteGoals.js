@@ -8,7 +8,7 @@ import { getGoalRecord, getUserGoalsData } from "./records";
     //Function to remove the uid from the parent goal
     async function deleteGoalUid(currentUser,goalName, deletedUid) {
       //Finding the goal corresponding to the goal name
-      let userGoalsData = getUserGoalsData(currentUser.uid)
+      let userGoalsData = await getUserGoalsData(currentUser.uid)
       //Looping through all the goal uids
       //You only have to loop through the goals, as the current goal is a subgoal
       userGoalsData.goals.map(async (goalUid) => {
@@ -75,8 +75,6 @@ import { getGoalRecord, getUserGoalsData } from "./records";
 
     //Calling the main function to delete the goal
     await mainFunction(currentUser,goalRecord);
-    //Making sure the webpage refreshed
-    navigator("/MyGoals");
   }
 
   

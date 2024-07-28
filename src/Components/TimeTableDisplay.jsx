@@ -102,6 +102,8 @@ function TimeTableDisplay({ currentUser, colourScheme, eventAdded }) {
   //Useeffect function to get all the events from the weekDates in the current week
   useEffect(() => {
     const mainFunction = async () => {
+      setWeekDateEvents([[],[],[],[],[],[],[]])
+      console.log("Running Function")
       //Formatting date strings to make them more readable
       const formatDate = (date,year) => {
         let dateElements = date.split("-");

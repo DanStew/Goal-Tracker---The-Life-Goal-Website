@@ -3,6 +3,7 @@ import { auth, db, storage } from "../Config/firebase.js";
 import { deleteDoc, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
 import { deleteUser } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 function SettingsComp({
   currentUser,
@@ -12,6 +13,8 @@ function SettingsComp({
 }) {
   //Usestate variable to open the confirmation window
   const [confirmation, setConfirmation] = useState(false);
+
+  const navigator = useNavigate()
 
   //Function to delete the users account, and all the users information
   async function deleteAccount() {
@@ -43,6 +46,12 @@ function SettingsComp({
       //Deleting record
       await deleteDoc(doc(db, "Goals", subgoalId));
     });
+    //Deleting all the users events
+    if(userGoalsData.events[0]){
+      userGoalsData.events.map( async(eventId) => {
+        await deleteDoc(doc(db,"Events",eventId))
+      })
+    }
     //Deleting the userGoals record
     await deleteDoc(doc(db, "userGoals", currentUser.uid));
     //Deleting the user record
@@ -52,6 +61,8 @@ function SettingsComp({
     await deleteObject(profileImgRef);
     //Removing the user from the auth
     await deleteUser(currentUser);
+    //Relocating to the Sign In page
+    navigator("/SignIn")
   }
 
   //Usestate to store the current selected colour
@@ -92,7 +103,7 @@ function SettingsComp({
         <div className="colourPicker flexSetup tripleGap flexItems ">
           <form className="flexSetup flexItems" action="#">
             <select
-              className={"large " + colourScheme}
+              className={"large white" + colourScheme}
               name="colourPicker"
               onChange={(e) => setCurrentColour(e.target.value)}
             >

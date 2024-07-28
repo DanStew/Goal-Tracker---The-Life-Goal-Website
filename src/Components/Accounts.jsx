@@ -66,16 +66,20 @@ function Accounts({goalName,goalUid,entryIds,windowShown2,showWindow2,setNewEntr
   //Function to process the inputs from the form
   async function processForm() {
     //Calling the main function to process the form
-    processMakeAccountForm(currentUser,{entryName:entryName,entryDetails:entryDetails,skillsArray:skillsArray},goalName,goalUid,() => setErrorMsg());
+    let newErrorMsg =  await processMakeAccountForm(currentUser,{entryName:entryName,entryDetails:entryDetails,skillsArray:skillsArray},goalName,goalUid);
+    setErrorMsg(newErrorMsg)
+
     //Applying other component specific code
-    //Telling system new entry made
-    setNewEntry(!newEntry);
-
-    //To end the function, reset all the values of the inputs
-    resetValues();
-
-    //Closing the window
-    showWindow2();
+    if (newErrorMsg == ""){
+      //Telling system new entry made
+      setNewEntry(!newEntry);
+  
+      //To end the function, reset all the values of the inputs
+      resetValues();
+  
+      //Closing the window
+      showWindow2();
+    }
   }
 
   //Useeffect function to get the records of the entries, that need to be displayed to the screen

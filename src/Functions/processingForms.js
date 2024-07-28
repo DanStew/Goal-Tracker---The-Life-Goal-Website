@@ -28,13 +28,9 @@ export const processMakeGoalForm = async (
   goalsObjArray,
   subgoalsObjArray
 ) => {
-  //Resetting the error msg
-  setErrorMsg("");
-
   //Validating the inputs from the user
   if (formInputsObj.goalName == "") {
-    setErrorMsg("Goal Name must not be empty");
-    return;
+    return "Goal Name must not be empty";
   }
 
   //Boolean subgoal variable to see whether variable is a subgoal or not
@@ -47,8 +43,7 @@ export const processMakeGoalForm = async (
     }
     //If none can't be shown, then the user needs to select
     else {
-      setErrorMsg("No set subgoal");
-      return;
+      return "No set subgoal";
     }
   }
 
@@ -64,8 +59,7 @@ export const processMakeGoalForm = async (
   if (formInputsObj.deadline == "Yes") {
     //Ensuring deadlineDate isn't null
     if (formInputsObj.deadlineDate == null) {
-      setErrorMsg("Deadline Date must not be empty");
-      return;
+      return "Deadline Date must not be empty";
     }
     //Breaking down the inputted users date into the same format object
     let inputDateObj = createDateObj(formInputsObj.deadlineDate);
@@ -80,8 +74,7 @@ export const processMakeGoalForm = async (
         inputDateObj.month == currentDateObj.month &&
         inputDateObj.day < currentDateObj.day)
     ) {
-      setErrorMsg("Deadline Date has already passed, Invalid");
-      return;
+      return "Deadline Date has already passed, Invalid";
     }
   }
 
@@ -96,8 +89,7 @@ export const processMakeGoalForm = async (
     }
   });
   if (duplicateName) {
-    setErrorMsg("Goal Name has already been used, Invalid");
-    return;
+    return "Goal Name has already been used, Invalid";
   }
 
   //Keeping track of the unique id we are using
@@ -136,7 +128,7 @@ export const processMakeGoalForm = async (
     goalsObjArray.map(async (goalsObj) => {
       if (goalsObj.GoalName == formInputsObj.subgoalOf) {
         goalObjUid = goalsObj.uid;
-        let mainGoalRecord = getGoalRecord(goalObjUid);
+        let mainGoalRecord = await getGoalRecord(goalObjUid);
         await updateDoc(doc(db, "Goals", goalObjUid), {
           Subgoals: arrayUnion(uniqueId),
           NmbGoals: mainGoalRecord.NmbGoals + 1,
@@ -147,7 +139,7 @@ export const processMakeGoalForm = async (
     subgoalsObjArray.map(async (subgoalsObj) => {
       if (subgoalsObj.GoalName == formInputsObj.subgoalOf) {
         goalObjUid = subgoalsObj.uid;
-        let subgoalData = getGoalRecord(goalObjUid);
+        let subgoalData = await getGoalRecord(goalObjUid);
         await updateDoc(doc(db, "Goals", goalObjUid), {
           Subgoals: arrayUnion(uniqueId),
           NmbGoals: subgoalData.NmbGoals + 1,
@@ -178,11 +170,14 @@ export const processMakeGoalForm = async (
   }
 
   //Updating the goalsMade attribute within the users information
-  let userData = getUserData(currentUser.uid);
+  let userData = await getUserData(currentUser.uid);
   //Updating the doc
   await updateDoc(doc(db, "users", currentUser.uid), {
     goalsMade: userData.goalsMade + 1,
   });
+
+  //Returning blank string
+  return "";
 };
 
 //Function to process and execute the function of the form
@@ -190,17 +185,14 @@ export const processMakeAccountForm = async (
   currentUser,
   formInputsObj,
   goalName,
-  goalUid,
-  setErrorMsg
+  goalUid
 ) => {
   //Validating the inputs into the function
   if (formInputsObj.entryName == "") {
-    setErrorMsg("Entry Name cannot be empty");
-    return;
+    return "Entry Name cannot be empty";
   }
   if (formInputsObj.entryDetails == "") {
-    setErrorMsg("Entry Details cannot be empty");
-    return;
+    return "Entry Details cannot be empty";
   }
 
   //Getting the formatted entryName
@@ -224,7 +216,7 @@ export const processMakeAccountForm = async (
   });
 
   //Getting the goal doc, to check entry streak
-  let goalData = getGoalRecord(goalUid);
+  let goalData = await getGoalRecord(goalUid);
   //Getting the current date
   let entryDate = getCurrentDate("");
   //Keeping track of the entry streak returned
@@ -250,7 +242,7 @@ export const processMakeAccountForm = async (
   });
 
   //Updating the entries made attribute of users record
-  let userData = getUserData(currentUser.uid);
+  let userData = await getUserData(currentUser.uid);
   //Storing the value of the users entry date
   let userEntryStreak = 0;
   //Checking whether the entry date has been set or not
@@ -286,27 +278,49 @@ export const processMakeAccountForm = async (
     currentDateString,
     entryDate
   );
+
+  return "";
 };
 
 //Function to process the Timetable form
-export const processTimetableForm = async (formInputsObj,currentUser,setErrorMsg) => {
-  //Resetting error message
-  setErrorMsg("");
-
+export const processTimetableForm = async (
+  formInputsObj,
+  currentUser,
+  setErrorMsg
+) => {
   //Validating the inputs
   if (formInputsObj.eventName == "") {
-    setErrorMsg("Event Name is empty, please retry...");
-    return;
+    return "Event Name is empty, please retry..."
   }
 
   if (formInputsObj.eventDetails == "") {
-    setErrorMsg("Event Details is empty, please retry...");
-    return;
+    return "Event Details is empty, please retry..."
   }
 
+  //Ensuring that the event hasn't been set for before the current date
+  //Putting all the date information into an object
+  let currentDateObj = getCurrentDateObj();
+
+  console.log(formInputsObj.eventDate);
+
+  //Validating the Event date
+  //Ensuring EventDate isn't null
   if (formInputsObj.eventDate == null) {
-    setErrorMsg("No Event Date set, please retry...");
-    return;
+    return "Event Date must not be empty";
+  }
+  //Breaking down the inputted users date into the same format object
+  let eventDateObj = createDateObj(formInputsObj.eventDate);
+  console.log(eventDateObj);
+  //Ensuring that the inputted date isn't less than the current date
+  if (
+    eventDateObj.year < currentDateObj.year ||
+    (eventDateObj.year == currentDateObj.year &&
+      eventDateObj.month < currentDateObj.month) ||
+    (eventDateObj.year == currentDateObj.year &&
+      eventDateObj.month == currentDateObj.month &&
+      eventDateObj.day < currentDateObj.day)
+  ) {
+    return "Event Date has already passed, Invalid";
   }
 
   //Generating the random recordId
@@ -325,4 +339,6 @@ export const processTimetableForm = async (formInputsObj,currentUser,setErrorMsg
   await updateDoc(doc(db, "userGoals", currentUser.uid), {
     events: arrayUnion(recordId),
   });
-}
+
+  return ""
+};
