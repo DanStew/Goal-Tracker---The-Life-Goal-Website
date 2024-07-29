@@ -102,7 +102,7 @@ function SignUp({colourScheme}){
                     <input type="text" placeholder="First Name..." onChange={(e) => setFirstName(e.target.value)}/>
                     <input type="text" placeholder="Last Name..." onChange={(e) => setLastName(e.target.value)}/>
                     <input type="text" placeholder="Email..." onChange={(e) => setEmail(e.target.value)}/>
-                    <input type="text" placeholder="Password..." onChange={(e) => setPassword(e.target.value)}/>
+                    <input type="password" placeholder="Password..." onChange={(e) => setPassword(e.target.value)}/>
                     {/* The input below is hidden, but then replaced by the htmlFor section to act as that input */}
                     {/* HTMLFor basically uses the functionality of that input with its own bit of code */}
                     <input type="file" style={{display:"none"}} id="file" onChange={(e) => setProfilePic(e.target.files[0])}/>

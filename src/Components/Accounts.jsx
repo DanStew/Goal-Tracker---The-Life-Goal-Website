@@ -253,7 +253,7 @@ function Accounts({goalName,goalUid,entryIds,windowShown2,showWindow2,setNewEntr
               <div className="buttonLine">
                 <div>
                   {/* Allowing the user to submit the information they have enterred on the form */}
-                  <button className="submit" type="button" onClick={() => processForm()}>Make Goal</button>
+                  <button className="submit" type="button" onClick={() => processForm()}>Make Entry</button>
                 </div>
                 <div>
                   {/* Exiting the user from the window */}

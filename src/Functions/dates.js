@@ -1,7 +1,7 @@
 export const getCurrentDate = (type) => {
   //Getting the current date and putting it into an object
   let currentDateObj = getCurrentDateObj();
-  return getDateString(currentDateObj,"type")
+  return getDateString(currentDateObj,"full")
 };
 
 //Creating a date string, using an inputted date object

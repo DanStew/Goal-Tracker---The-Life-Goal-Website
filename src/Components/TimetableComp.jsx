@@ -63,6 +63,7 @@ function TimetableComp({ currentUser, colourScheme }) {
                 <span>Event Name : </span>
                 <div className="lineInput">
                   <input
+                    className={colourScheme}
                     onChange={(e) => setEventName(e.target.value)}
                     value={eventName}
                     type="text"
@@ -74,6 +75,7 @@ function TimetableComp({ currentUser, colourScheme }) {
                 <span>Event Details : </span>
                 <div className="lineInput">
                   <input
+                    className={colourScheme}
                     onChange={(e) => setEventDetails(e.target.value)}
                     value={eventDetails}
                     type="text"
@@ -85,6 +87,7 @@ function TimetableComp({ currentUser, colourScheme }) {
                 <span>Event Date : </span>
                 <div className="lineInput">
                   <input
+                    className={colourScheme}
                     onChange={(e) => setEventDate(e.target.value)}
                     type="date"
                   />

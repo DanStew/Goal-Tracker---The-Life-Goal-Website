@@ -106,6 +106,7 @@ function MakeGoalForm({
             <div className={"lineInput flexItems " + colourScheme}>
               {/* Will output an option for every main goal that the website has */}
               <select
+                className={colourScheme}
                 onChange={(e) => setSubgoalOf(e.target.value)}
                 name="SubgoalOf"
                 id="SubgoalOf"
@@ -232,6 +233,7 @@ function MakeGoalForm({
             </div>
             <div className={"lineInput flexItems " + colourScheme}>
               <select
+                className={colourScheme}
                 onChange={(e) => setDeadline(e.target.value)}
                 name="DeadlineDate"
                 id="DeadlineDate"

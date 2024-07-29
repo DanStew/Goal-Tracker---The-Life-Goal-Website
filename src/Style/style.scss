@@ -402,11 +402,9 @@ form {
 
         p {
           font-size: $smallText;
-          padding-bottom: 10px;
         }
 
         .hpgHeaderLine {
-          height: 20px;
 
           &.progress {
             width: 60%;
@@ -426,11 +424,10 @@ form {
       .hpgMain {
         font-size: $smallText;
         flex: 1 1;
-        min-height: 40px;
+        min-height: 20px;
 
         p {
-          padding: 0px;
-          margin: 5px;
+          margin-top: 5px;
 
           &:hover {
             text-decoration: underline;
@@ -476,6 +473,12 @@ form {
 
   .error{
     font-size: $smallText;
+  }
+
+  input{
+    &.light{
+      color: white;
+    }
   }
 
   .TimeTableDisplay {
@@ -749,6 +752,13 @@ form {
     img {
       &:hover {
         border: 2px solid white;
+      }
+    }
+
+    select{
+      &.light{
+        border-bottom: 2px solid white;
+        color: white;
       }
     }
   }

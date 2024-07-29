@@ -20,9 +20,9 @@ function HomePageGoal({goalObj,subgoalToMaingoalConnector,setUpdatedGoal,updated
   }, [goalObj]);
 
   return (
-    <div id={mainId} className={"homePageGoal flexSetup column flexItems " + colourScheme}>
+    <div id={mainId} className={"homePageGoal flexSetup noGap column flexItems " + colourScheme}>
       {/* Making the header of the Goal Component */}
-      <div className="hpgHeader flexSetup column flexItems">
+      <div className="hpgHeader flexSetup smallGap column flexItems">
         <div>
           {/* Displaying the GoalName of the Goal */}
           <span onClick={() => navigator(`/Goals/${goalObj.GoalName}`)}>
@@ -100,6 +100,7 @@ function HomePageGoal({goalObj,subgoalToMaingoalConnector,setUpdatedGoal,updated
         </div>
       {/* Displaying the subgoals of the goal, allowing the user to be able to click on them */}
       <div className="hpgMain flexItems">
+        {console.log(subgoalToMaingoalConnector)}
         {subgoalToMaingoalConnector[goalObj.GoalName] ? (
           subgoalToMaingoalConnector[goalObj.GoalName].map((goalName) => {
             return (
@@ -121,7 +122,10 @@ function HomePageGoal({goalObj,subgoalToMaingoalConnector,setUpdatedGoal,updated
       {showOptions ? (
         <div className="options flexSetup column flexItems">
           <div className="optionsContent">
-            <button className="delete" onClick={() => deleteGoal(currentUser,goalObj)}>
+            <button className="delete flexItems" onClick={async () => {
+              await deleteGoal(currentUser,goalObj)
+              setUpdatedGoal(!updatedGoal)
+              }}>
               Delete Goal
             </button>
           </div>

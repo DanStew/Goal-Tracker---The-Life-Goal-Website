@@ -103,7 +103,6 @@ function TimeTableDisplay({ currentUser, colourScheme, eventAdded }) {
   useEffect(() => {
     const mainFunction = async () => {
       setWeekDateEvents([[],[],[],[],[],[],[]])
-      console.log("Running Function")
       //Formatting date strings to make them more readable
       const formatDate = (date,year) => {
         let dateElements = date.split("-");

@@ -68,54 +68,61 @@ function Goals({ currentUser, colourScheme }) {
 
   //Useeffect to collect all the goal information from the screen
   useEffect(() => {
+    const linkerFunction = async () => {
+      await mainFunction()
+    }
     //Making the main function
     const mainFunction = async () => {
       //Making sure that the website does have a current user
-      if (currentUser.uid) {
-        //Getting the userGoals record data
-        const userGoalsData = await getUserGoalsData(currentUser.uid);
-        //Resetting the goalsObj and goalNames array
-        setGoalsObjArray([]);
-        setSubgoalsObjArray([]);
-        setGoalNames([]);
-        setSubgoalNames([]);
-        setGoalAddedRef(false);
-        //Looping through the different goal types and storing all the information
-        //Finding the goal data from all of the users goals
-        userGoalsData.goals.forEach(async (goalId) => {
-          //Getting the goal information and putting it into an object
-          const goalObj = await getGoalRecord(goalId);
+      console.log("Getting the goal objects");
+      //Resetting the goalsObj and goalNames array
+      setGoalsObjArray([]);
+      setSubgoalsObjArray([]);
+      setGoalNames([]);
+      setSubgoalNames([]);
+      //Making temporary arrays to store the information
+      let tempGoalsObj = [];
+      let tempSubgoalsObjArr = [];
+      //Getting the userGoals record data
+      const userGoalsData = await getUserGoalsData(currentUser.uid);
+      //Looping through the different goal types and storing all the information
+      //Finding the goal data from all of the users goals
+      userGoalsData.goals.map(async (goalId) => {
+        //Getting the goal information and putting it into an object
+        const goalObj = await getGoalRecord(goalId);
+        if (goalObj.Completed != true) {
           //Adding the goal name to the goalnames array
           setGoalNames((prevNames) => {
             return [...prevNames, goalObj.GoalName];
           });
-          //Adding the goalInformation to the GoalsObjArray
-          setGoalsObjArray((prevArr) => {
-            return [...prevArr, goalObj];
-          });
+        }
+        //Adding the goalInformation to the GoalsObjArray
+        tempGoalsObj.push(goalObj);
+        //Setting the goalsObjArray
+        setGoalsObjArray(tempGoalsObj);
+      });
+      //Finding the goal data from all of the users goals
+      userGoalsData.subgoals.map(async (subgoalId) => {
+        //Getting the goal information and putting it into an object
+        const subgoalObj = await getGoalRecord(subgoalId);
+        //Adding the subgoal name to the array
+        setSubgoalNames((prevSubgoalNames) => {
+          return [...prevSubgoalNames, subgoalObj.GoalName];
         });
-        //Finding the goal data from all of the users goals
-        userGoalsData.subgoals.forEach(async (subgoalId) => {
-          //Getting the goal information and putting it into an object
-          const subgoalObj = await getGoalRecord(subgoalId);
-          //Adding the subgoal name to the array
-          setSubgoalNames((prevSubgoalNames) => {
-            return [...prevSubgoalNames, subgoalObj.GoalName];
-          });
-          //Adding the goalInformation to the GoalsObjArray
-          setSubgoalsObjArray((prevArr) => {
-            return [...prevArr, subgoalObj];
-          });
-        });
-        setGoalsObjChanged(!goalsObjChanged);
-      }
+        //Adding the goalInformation to the GoalsObjArray
+        tempSubgoalsObjArr.push(subgoalObj);
+        //Setting the subgoalsObjArray
+        setSubgoalsObjArray(tempSubgoalsObjArr);
+      });
     };
 
-    mainFunction();
+    if (currentUser.uid) {
+      linkerFunction();
+    }
   }, [currentUser, goalAddedRef, updatedGoal]);
 
   useEffect(() => {
-    const mainFunction = () => {
+    const mainFunction = async () => {
       let tempObj = {};
       //Resetting the mainGoal array
       setMainGoalArray([]);
@@ -160,11 +167,14 @@ function Goals({ currentUser, colourScheme }) {
         }
       });
       //Permanently storing the changes made
+      console.log(tempObj)
       setSubgoalsToMaingoalsConnector(tempObj);
     };
 
-    mainFunction();
-  }, [goalsObjChanged]);
+    if (goalsObjArray != []){
+      mainFunction();
+    }
+  },[goalsObjArray])
 
   //Usestate to filter the goalObjsArray into different parts, and then display the parts the user wants
   //Array of all goals that will be displayed to the screen
@@ -179,36 +189,57 @@ function Goals({ currentUser, colourScheme }) {
 
   //Useeffect to correctly split the goalsObjArray into different sections
   useEffect(() => {
-    //Resetting the arrays
-    setMainGoalArray([]);
-    setSubgoalMainGoalsArray([]);
-    setCompletedGoals([]);
-    //Looping through all the goals and adding them to the correct array
-    goalsObjArray.map((goalRecord) => {
-      if (goalRecord.Subgoal == false && goalRecord.Completed == false) {
-        //Appending the goal to the main goal array
-        setMainGoalArray((prevArr) => {
-          return [...prevArr, goalRecord];
-        });
-      } else if (goalRecord.Completed) {
-        //Appending the goal to the completed goals array
-        setCompletedGoals((prevArr) => {
-          return [...prevArr, goalRecord];
-        });
-      } else {
-        //Appending the goal to the subgoals array
-        setSubgoalMainGoalsArray((prevArr) => {
-          return [...prevArr, goalRecord];
-        });
+    const linkerFunction = async () => {
+      await mainFunction()
+    }
+    const mainFunction = async () => {
+      console.log(goalsObjArray);
+      console.log(subgoalsObjArray);
+      //Resetting the arrays
+      setMainGoalArray([]);
+      setSubgoalMainGoalsArray([]);
+      setCompletedGoals([]);
+      //Creating boolean to see if arrays have been changed
+      let arraysChanged = false
+      //Looping through all the goals and adding them to the correct array
+      goalsObjArray.map((goalRecord) => {
+        if (goalRecord.Subgoal == false && goalRecord.Completed == false) {
+          //Appending the goal to the main goal array
+          setMainGoalArray((prevArr) => {
+            return [...prevArr, goalRecord];
+          });
+          arraysChanged = true
+        } else if (goalRecord.Completed) {
+          //Appending the goal to the completed goals array
+          setCompletedGoals((prevArr) => {
+            return [...prevArr, goalRecord];
+          });
+          arraysChanged = true
+        } else {
+          //Appending the goal to the subgoals array
+          setSubgoalMainGoalsArray((prevArr) => {
+            return [...prevArr, goalRecord];
+          });
+          arraysChanged = true
+        }
+      });
+      //Notifying that the arrays have been updated
+      if (arraysChanged){
+        setUpdatedArrays(!updatedArrays);
       }
-    });
-    //Notifying that the arrays have been updated
-    setUpdatedArrays(!updatedArrays);
+    };
+
+    if (goalsObjArray != []){
+      linkerFunction();
+    }
   }, [goalsObjArray]);
 
   //Useeffect function to display the correct goals to the screen
   useEffect(() => {
     //Storing the main goals into the array
+    console.log(mainGoalArray)
+    console.log(subgoalMainGoalsArray)
+    console.log(completedGoals)
     setDisplayObjsArray(mainGoalArray);
     //If you want to see subgoals, or completed goals, adding them to the array
     if (!hideSubgoals) {
@@ -273,7 +304,7 @@ function Goals({ currentUser, colourScheme }) {
                 toggleWindow={() => showWindow()}
                 currentUser={currentUser}
                 goalAddedRef={goalAddedRef}
-                setGoalAddedRef={() => setGoalAddedRef()}
+                setGoalAddedRef={(val) => setGoalAddedRef(val)}
                 goalNames={goalNames}
                 goalsObjArray={goalsObjArray}
                 subgoalNames={subgoalNames}
@@ -364,7 +395,7 @@ function Goals({ currentUser, colourScheme }) {
             <HomePageGoal
               goalObj={goalObj}
               subgoalToMaingoalConnector={subgoalsToMaingoalsConnector}
-              setUpdatedGoal={() => setUpdatedGoal()}
+              setUpdatedGoal={(value) => setUpdatedGoal(value)}
               updatedGoal={updatedGoal}
               currentUser={currentUser}
               colourScheme={colourScheme}

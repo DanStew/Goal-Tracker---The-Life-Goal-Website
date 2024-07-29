@@ -34,13 +34,13 @@ function SettingsComp({
     let userGoalsRecord = await getDoc(doc(db, "userGoals", currentUser.uid));
     let userGoalsData = userGoalsRecord.data();
     //Looping through all the goals
-    userGoalsData.goals.map(async (goalId) => {
+    await userGoalsData.goals.map(async (goalId) => {
       //Deleting entries
       await deleteEntries(goalId);
       //Deleting record
       await deleteDoc(doc(db, "Goals", goalId));
     });
-    userGoalsData.subgoals.map(async (subgoalId) => {
+    await userGoalsData.subgoals.map(async (subgoalId) => {
       //Deleting entries
       await deleteEntries(subgoalId);
       //Deleting record
@@ -103,7 +103,7 @@ function SettingsComp({
         <div className="colourPicker flexSetup tripleGap flexItems ">
           <form className="flexSetup flexItems" action="#">
             <select
-              className={"large white" + colourScheme}
+              className={"large white " + colourScheme}
               name="colourPicker"
               onChange={(e) => setCurrentColour(e.target.value)}
             >
