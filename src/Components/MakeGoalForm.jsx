@@ -26,8 +26,13 @@ function MakeGoalForm({
 
   //Function to add the current enterred skill to the skill array, and set the skill variable to null
   function addSkill() {
+    setErrorMsg("")
     //If the skill is empty, reject it
     if (currentSkill == "") {
+      return;
+    }
+    if (currentSkill.length > 8){
+      setErrorMsg("Skills must have maximum 8 characters")
       return;
     }
     //Formatting the string correctly

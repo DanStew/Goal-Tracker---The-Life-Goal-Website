@@ -29,6 +29,10 @@ function Accounts({goalName,goalUid,entryIds,windowShown2,showWindow2,setNewEntr
     if (currentSkill == "") {
       return;
     }
+    if (currentSkill.length > 10){
+      setErrorMsg("Skills must have a maximum of 10 characters")
+      return
+    }
     //Formatting the string correctly
     let formattedString = formatString(currentSkill);
     /* Appending the new skills to the skills array */
@@ -192,7 +196,7 @@ function Accounts({goalName,goalUid,entryIds,windowShown2,showWindow2,setNewEntr
                     <button type="button" className="submit addSkill" onClick={() => addSkill()}>Add Skill</button>
                   </div>
                 </div>
-                <div className="skillsOutput flexSetup column">
+                <div className="skillsOutput flexSetup noGap column">
                   {/* For each item in the skills array, output them here */}
                   {/* NOTE : The skills are output in groups of two, that is why the code may be a bit funny */}
                   {skillsArray.map((skill, index) => {
@@ -200,34 +204,34 @@ function Accounts({goalName,goalUid,entryIds,windowShown2,showWindow2,setNewEntr
                       <div key={index}>
                         {index % 4 == 0 ? (
                           <div className="skillLine flexSetup flexItems">
-                            <div className="individualSkill flexItems">
+                            <div className="individualSkill flexSetup noGap flexItems">
                               <p>{skillsArray[index]}</p>
                               {/* Button to enable the user to remvoe the skill from the array */}
                               <button type="button" onClick={() => removeSkill(skillsArray[index])}>-</button>
                             </div>
                             {skillsArray[index + 1] ? (
-                              <div className="individualSkill flexItems">
+                              <div className="individualSkill flexSetup noGap flexItems">
                                 <p>{skillsArray[index + 1]}</p>
                                 <button type="button" onClick={() => removeSkill(skillsArray[index + 1])}>-</button>
                               </div>
                             ) : (
-                              <div className="individualSkill flexItems"> </div>
+                              <div className="individualSkill flexSetup noGap flexItems"> </div>
                             )}
                             {skillsArray[index + 2] ? (
-                              <div className="individualSkill flexItems">
+                              <div className="individualSkill flexSetup noGap flexItems">
                                 <p>{skillsArray[index + 2]}</p>
                                 <button type="button" onClick={() => removeSkill(skillsArray[index + 2])}>-</button>
                               </div>
                             ) : (
-                              <div className="individualSkill flexItems"> </div>
+                              <div className="individualSkill flexSetup noGap flexItems"> </div>
                             )}
                             {skillsArray[index + 3] ? (
-                              <div className="individualSkill flexItems">
+                              <div className="individualSkill flexSetup noGap flexItems">
                                 <p>{skillsArray[index + 3]}</p>
                                 <button type="button" onClick={() => removeSkill(skillsArray[index + 3])}>-</button>
                               </div>
                             ) : (
-                              <div className="individualSkill flexItems"> </div>
+                              <div className="individualSkill flexSetup noGap flexItems"> </div>
                             )}
                           </div>
                         ) : (

@@ -32,6 +32,15 @@ p {
   &.centered{
     text-align: center;
   }
+  &.error{
+    font-size: $smallText;
+    color: red;
+  }
+
+  &.ChangePassword{
+    font-size: $smallText;
+    color: black;
+  }
 }
 
 /* Generic image stylign for images on the website */
@@ -59,6 +68,11 @@ button {
   cursor: pointer;
   background-color: orange;
   border-radius: 20px;
+
+  &.changePassword{
+    padding: 5px;
+    width: 30%;
+  }
 
   &:hover {
     border: 2px solid white;
@@ -786,6 +800,12 @@ form {
       .skillInputLine {
         width: 60%;
 
+        input{
+          &.dark{
+            color: white;
+          }
+        }
+
         button {
           margin-top: 15px;
           padding: 5px;
@@ -939,6 +959,7 @@ form {
         text-align-last: left;
         margin-left: 20px;
         color: black;
+        overflow-wrap: anywhere;
 
         &.light {
           color: white;
@@ -1084,5 +1105,17 @@ form {
 
   .subheading {
     font-size: $headingText;
+  }
+}
+
+//Styling the verificationFailure section of the website
+.verificationFailure{
+  overflow-y: hidden;
+  p{
+    font-size: $subheadingText;
+
+    &.lighter{
+      font-weight: 500;
+    }
   }
 }

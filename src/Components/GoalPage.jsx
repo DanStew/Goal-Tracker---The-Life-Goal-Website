@@ -73,9 +73,11 @@ function GoalPage({
         !(currentDate == goalRecord.lastEntryDate) &&
         !checkConsecutive(currentDate, goalRecord.lastEntryDate)
       ) {
+        let currentDateString = getCurrentDate()
         //If so, reset the streak
         await updateDoc(doc(db, "Goals", goalRecord.uid), {
           currentEntryStreak: 0,
+          lastEntryDate: currentDateString
         });
         setGoalAddedRef(false);
       }
@@ -115,6 +117,9 @@ function GoalPage({
   async function addSkill() {
     //Ensuring that the skill isn't empty
     if (currentSkill == "") {
+      return;
+    }
+    if (currentSkill.length > 12){
       return;
     }
     //Adding the skill to the array

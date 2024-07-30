@@ -124,7 +124,7 @@ function HomePageGoal({goalObj,subgoalToMaingoalConnector,setUpdatedGoal,updated
           <div className="optionsContent">
             <button className="delete flexItems" onClick={async () => {
               await deleteGoal(currentUser,goalObj)
-              setUpdatedGoal(!updatedGoal)
+              window.location.reload(false)
               }}>
               Delete Goal
             </button>

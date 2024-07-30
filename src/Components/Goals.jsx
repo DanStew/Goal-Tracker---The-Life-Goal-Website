@@ -159,11 +159,14 @@ function Goals({ currentUser, colourScheme }) {
           !(currentDate == goalObj.lastEntryDate) &&
           !checkConsecutive(currentDate, goalObj.lastEntryDate)
         ) {
+          //Getting the current date string
+          let currentDateString = getCurrentDate()
           //If so, reset the streak
           await updateDoc(doc(db, "Goals", goalObj.uid), {
             currentEntryStreak: 0,
+            lastEntryDate: currentDateString
           });
-          setGoalAddedRef(!goalAddedRef);
+          setUpdatedGoal(!updatedGoal)
         }
       });
       //Permanently storing the changes made
@@ -269,6 +272,8 @@ function Goals({ currentUser, colourScheme }) {
     //Storing the new sorted array
     setDisplayObjsArray(tempArr);
   }, [sortLastUpdated, updatedDisplayArray]);
+
+  console.log(currentUser)
 
   return (
     <div className={mainClass}>

@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 import { getUserData } from "../Functions/records";
+import { useNavigate } from "react-router-dom";
 
 function Header({ currentUser, colourScheme }) {
   //Making a variable to store the location of the user's profile image
   const [profileImgLocation, setProfileImgLocation] = useState("");
+
+  //Making the navigator
+  const navigator = useNavigate()
 
   //Use effect function to call the correct function needed for the page that the user is on
   useEffect(() => {
@@ -22,7 +26,7 @@ function Header({ currentUser, colourScheme }) {
 
   return (
     <div className={colourScheme}>
-      <img src={profileImgLocation} alt="" />
+      <img onClick={() => navigator("/Account")}src={profileImgLocation} alt="" />
     </div>
   );
 }

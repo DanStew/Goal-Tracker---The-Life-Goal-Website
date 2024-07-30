@@ -16,6 +16,7 @@ import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from './Context/AuthContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from './Config/firebase';
+import VerificationFailure from './Pages/VerificationFailure';
 
 
 function App() {
@@ -54,6 +55,9 @@ function App() {
     if (!currentUser){
       return <Navigate to="/SignIn" />
     }
+    if (!currentUser.emailVerified){
+        return <Navigate to="/VerificationFailure" />
+    }
     return children
   }
 
@@ -70,6 +74,7 @@ function App() {
           <Route path="Goals/:goalName" element={<ProtectedRoute><Goal colourScheme={colourScheme}/></ProtectedRoute>} />
           <Route path="Timetable" element={<ProtectedRoute ><Timetable colourScheme={colourScheme}/></ProtectedRoute>} />
           <Route path="Settings" element={<ProtectedRoute ><Settings colourScheme={colourScheme} changedColourScheme={changedColourScheme} setChangedColourScheme={(e) => setChangedColourScheme(e)}/></ProtectedRoute>} />
+          <Route path="VerificationFailure" element={<VerificationFailure/>} />
         </Route>
       </Routes>
     </BrowserRouter>

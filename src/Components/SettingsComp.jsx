@@ -2,7 +2,7 @@ import { useState } from "react";
 import { auth, db, storage } from "../Config/firebase.js";
 import { deleteDoc, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
-import { deleteUser } from "firebase/auth";
+import { deleteUser, reauthenticateWithCredential } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
 function SettingsComp({
@@ -60,9 +60,12 @@ function SettingsComp({
     const profileImgRef = ref(storage, currentUser.email);
     await deleteObject(profileImgRef);
     //Removing the user from the auth
-    await deleteUser(currentUser);
-    //Relocating to the Sign In page
-    navigator("/SignIn")
+    try{
+      await deleteUser(currentUser);
+    }
+    catch (err){
+      
+    }
   }
 
   //Usestate to store the current selected colour
@@ -92,7 +95,11 @@ function SettingsComp({
         {confirmation ? (
           <div>
             <p>Are you sure you want to delete your account?</p>
-            <button className="delete" onClick={() => deleteAccount()}>
+            <button className="delete" onClick={async () => {
+              await deleteAccount()
+              navigator("/SignIn")
+            }
+            }>
               Confirm Delete Account
             </button>
           </div>

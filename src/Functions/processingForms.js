@@ -32,6 +32,9 @@ export const processMakeGoalForm = async (
   if (formInputsObj.goalName == "") {
     return "Goal Name must not be empty";
   }
+  if (formInputsObj.goalName.length > 25){
+    return "Goal Name must be a maximum of 25 characters"
+  }
 
   //Boolean subgoal variable to see whether variable is a subgoal or not
   let subgoal = true;
@@ -191,8 +194,14 @@ export const processMakeAccountForm = async (
   if (formInputsObj.entryName == "") {
     return "Entry Name cannot be empty";
   }
+  if (formInputsObj.entryName.length > 50){
+    return "Entry Name must be a maximum of 50 characters"
+  }
   if (formInputsObj.entryDetails == "") {
     return "Entry Details cannot be empty";
+  }
+  if (formInputsObj.entryDetails.length > 300){
+    return "Entry Details must have a maximum of 300 characters"
   }
 
   //Getting the formatted entryName
@@ -292,17 +301,21 @@ export const processTimetableForm = async (
   if (formInputsObj.eventName == "") {
     return "Event Name is empty, please retry..."
   }
+  console.log(formInputsObj.eventName)
+  if (formInputsObj.eventName.length > 20){
+    return "Event Name must have a maximum of 20 characters"
+  }
 
   if (formInputsObj.eventDetails == "") {
     return "Event Details is empty, please retry..."
+  }
+  if (formInputsObj.eventDetails.length > 20){
+    return "Event Details must have a maximum of 20 characters"
   }
 
   //Ensuring that the event hasn't been set for before the current date
   //Putting all the date information into an object
   let currentDateObj = getCurrentDateObj();
-
-  console.log(formInputsObj.eventDate);
-
   //Validating the Event date
   //Ensuring EventDate isn't null
   if (formInputsObj.eventDate == null) {
@@ -310,7 +323,6 @@ export const processTimetableForm = async (
   }
   //Breaking down the inputted users date into the same format object
   let eventDateObj = createDateObj(formInputsObj.eventDate);
-  console.log(eventDateObj);
   //Ensuring that the inputted date isn't less than the current date
   if (
     eventDateObj.year < currentDateObj.year ||

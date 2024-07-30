@@ -264,10 +264,10 @@ function TimeTableDisplay({ currentUser, colourScheme, eventAdded }) {
                                   {optionsId != eventInfo.uid ? (
                                     <div>
                                       <div className="eventContent flexItems">
-                                        <p className="eventName">
+                                        <p className="eventName flexItems ">
                                           {eventInfo.eventName}
                                         </p>
-                                        <p className="eventDetails">
+                                        <p className="eventDetails flexItems">
                                           {eventInfo.eventDetails}
                                         </p>
                                       </div>

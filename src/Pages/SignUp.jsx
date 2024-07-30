@@ -4,7 +4,7 @@ import imgIcon from '../Images/imgIcon.jpg'
 //Importing the needed functions for the file
 import { useState } from "react"
 import { auth, db, storage } from "../Config/firebase.js"
-import { createUserWithEmailAndPassword} from 'firebase/auth'
+import { createUserWithEmailAndPassword, sendEmailVerification} from 'firebase/auth'
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
 import { doc, setDoc } from 'firebase/firestore'
 import { useNavigate, Link } from 'react-router-dom'
@@ -45,6 +45,8 @@ function SignUp({colourScheme}){
             try{
                 //Creating the new user
                 res = await createUserWithEmailAndPassword(auth,email,password)
+
+                await sendEmailVerification(res.user)
             }
             catch (err){
                 setErrorMsg("User's email is already in use")

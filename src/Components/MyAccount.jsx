@@ -122,6 +122,30 @@ function MyAccount({ currentUser, colourScheme }) {
       return;
     }
 
+    //Ensuring the names are a maximum of 20 characters
+    if (firstName.length > 20){
+      setErrorMsg("First Name must be a maximum of 20 characters")
+      return
+    }
+
+    if (lastName.length > 20){
+      setErrorMsg("Last Name must be a maximum of 20 characters")
+      return
+    }
+
+    //Ensuring that the name is only made of letters
+    //Making the regex test, to ensure all letters are alphabetical
+    let regex = /^[a-zA-Z]+$/;
+
+    if (!regex.test(firstName)) {
+      setErrorMsg("All characters in First Name must be alphabetical");
+      return
+    }
+    if (!regex.test(lastName)) {
+      setErrorMsg("All characters in Last Name must be alphabetical");
+      return
+    }
+
     //Formatting the two strings
     let formattedFirstName = formatString(firstName);
     let formattedLastName = formatString(lastName);
@@ -155,7 +179,7 @@ function MyAccount({ currentUser, colourScheme }) {
     //Closing the window out
     window.location.reload(false);
   }
-  
+
   return (
     <div className={mainClass}>
       {userRecord ? (
@@ -178,7 +202,7 @@ function MyAccount({ currentUser, colourScheme }) {
                   <p>Change Name</p>
                 </div>
                 <div className="popupMain">
-                  <form className="flexSetup column noGap"action="#">
+                  <form className="flexSetup column noGap" action="#">
                     <div className="popupLine flexSetup flexItems">
                       <p>First Name : </p>
                       <input
