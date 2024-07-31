@@ -63,10 +63,10 @@ export const validateInputs = (inputsObj) => {
 export const validateResetEmail = (email) => {
     //Ensuring email is valid
     if (email == "") {
-      return "Reset Email input must not be empty";
+      return "Email input must not be empty";
     }
     if (email.length > 40){
-      return "Reset Email can only be a maximum of 30 characters"
+      return "Email can only be a maximum of 30 characters"
     }
   
     //Ensuring that an @ occurs in the email

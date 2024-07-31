@@ -2,8 +2,9 @@ import { useState } from "react";
 import { auth, db, storage } from "../Config/firebase.js";
 import { deleteDoc, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
-import { deleteUser, reauthenticateWithCredential } from "firebase/auth";
+import { deleteUser,   EmailAuthProvider, getAuth, reauthenticateWithCredential } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import firebase from "firebase/compat/app";
 
 function SettingsComp({
   currentUser,
@@ -14,7 +15,21 @@ function SettingsComp({
   //Usestate variable to open the confirmation window
   const [confirmation, setConfirmation] = useState(false);
 
-  const navigator = useNavigate()
+  const navigator = useNavigate();
+
+  //Function to validate that the user is able to enter the deleteAccount phase
+  async function validateDeleteAccount() {
+    //Validating the password
+    let passwordErrorMsg = "";
+    //Ensuring that the password is valid
+    if (password == "" || password.length < 6) {
+      passwordErrorMsg = "Password inputs must be of atleast length 6";
+    }
+    //If passed validation, continue to the deleteAccount
+    passwordErrorMsg == ""
+      ? await deleteAccount()
+      : setErrorMsg(passwordErrorMsg);
+  }
 
   //Function to delete the users account, and all the users information
   async function deleteAccount() {
@@ -30,42 +45,60 @@ function SettingsComp({
       });
     };
 
-    //Getting the usergoals record
-    let userGoalsRecord = await getDoc(doc(db, "userGoals", currentUser.uid));
-    let userGoalsData = userGoalsRecord.data();
-    //Looping through all the goals
-    await userGoalsData.goals.map(async (goalId) => {
-      //Deleting entries
-      await deleteEntries(goalId);
-      //Deleting record
-      await deleteDoc(doc(db, "Goals", goalId));
-    });
-    await userGoalsData.subgoals.map(async (subgoalId) => {
-      //Deleting entries
-      await deleteEntries(subgoalId);
-      //Deleting record
-      await deleteDoc(doc(db, "Goals", subgoalId));
-    });
-    //Deleting all the users events
-    if(userGoalsData.events[0]){
-      userGoalsData.events.map( async(eventId) => {
-        await deleteDoc(doc(db,"Events",eventId))
-      })
-    }
-    //Deleting the userGoals record
-    await deleteDoc(doc(db, "userGoals", currentUser.uid));
-    //Deleting the user record
-    await deleteDoc(doc(db, "users", currentUser.uid));
-    //Deleting the users profile img from storage
-    const profileImgRef = ref(storage, currentUser.email);
-    await deleteObject(profileImgRef);
-    //Removing the user from the auth
-    try{
+    //Main function, where all the information is deleted
+    const mainFunction = async () => {
+
+      //Getting the usergoals record
+      let userGoalsRecord = await getDoc(doc(db, "userGoals", currentUser.uid));
+      let userGoalsData = userGoalsRecord.data();
+      //Looping through all the goals
+      await userGoalsData.goals.map(async (goalId) => {
+        //Deleting entries
+        await deleteEntries(goalId);
+        //Deleting record
+        await deleteDoc(doc(db, "Goals", goalId));
+      });
+      await userGoalsData.subgoals.map(async (subgoalId) => {
+        //Deleting entries
+        await deleteEntries(subgoalId);
+        //Deleting record
+        await deleteDoc(doc(db, "Goals", subgoalId));
+      });
+      //Deleting all the users events
+      if (userGoalsData.events[0]) {
+        userGoalsData.events.map(async (eventId) => {
+          await deleteDoc(doc(db, "Events", eventId));
+        });
+      }
+      //Deleting the userGoals record
+      await deleteDoc(doc(db, "userGoals", currentUser.uid));
+      //Deleting the user record
+      await deleteDoc(doc(db, "users", currentUser.uid));
+      //Deleting the users profile img from storage
+      const profileImgRef = ref(storage, currentUser.email);
+      await deleteObject(profileImgRef);
+      //Removing the user from the auth
       await deleteUser(currentUser);
+      //Moving the user to the signIn page
+      navigator("/SignIn");
     }
-    catch (err){
-      
+    //Making a credential to reauthenticate the user
+    const credential = EmailAuthProvider.credential(
+      currentUser.email,
+      password
+    );
+    // Now you can use that to reauthenticate
+    try{
+      const result = await reauthenticateWithCredential(
+        auth.currentUser, 
+        credential
+      )
+      await mainFunction()
     }
+    catch{
+      setErrorMsg("Invalid Password for Account")
+    }
+
   }
 
   //Usestate to store the current selected colour
@@ -79,6 +112,10 @@ function SettingsComp({
     //Telling system that the colour scheme has been changed
     setChangedColourScheme(!changedColourScheme);
   }
+
+  //Usestate variables to store the users email and password input
+  const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   return (
     <div className={"settingsComp flexSetup column flexItems " + colourScheme}>
@@ -94,14 +131,31 @@ function SettingsComp({
         </button>
         {confirmation ? (
           <div>
-            <p>Are you sure you want to delete your account?</p>
-            <button className="delete" onClick={async () => {
-              await deleteAccount()
-              navigator("/SignIn")
-            }
-            }>
+            <p>Confirm Deletion of your Account</p>
+            <div>
+              <form className="flexSetup smallGap white" action="#">
+                <input
+                  type="password"
+                  placeholder="Enter User Password..."
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </form>
+            </div>
+            <button
+              className="delete"
+              onClick={async () => {
+                await validateDeleteAccount();
+              }}
+            >
               Confirm Delete Account
             </button>
+            {errorMsg != "" ? (
+              <div>
+                <p className="error">{errorMsg}</p>
+              </div>
+            ) : (
+              <div style={{ display: "none" }}></div>
+            )}
           </div>
         ) : (
           <div style={{ display: "none" }}></div>
@@ -118,7 +172,9 @@ function SettingsComp({
               <option value="light">Light</option>
               <option value="dark">Dark</option>
             </select>
-            <button type="button" onClick={() => changeColour()}>Change Colour</button>
+            <button type="button" onClick={() => changeColour()}>
+              Change Colour
+            </button>
           </form>
         </div>
       </div>

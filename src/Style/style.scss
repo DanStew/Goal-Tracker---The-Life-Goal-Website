@@ -135,6 +135,10 @@ form {
     }
   }
 
+  &.white{
+    color: white;
+  }
+
   //Styling the select and options within the form
   select {
     padding: 10px;
