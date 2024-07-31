@@ -100,7 +100,6 @@ function HomePageGoal({goalObj,subgoalToMaingoalConnector,setUpdatedGoal,updated
         </div>
       {/* Displaying the subgoals of the goal, allowing the user to be able to click on them */}
       <div className="hpgMain flexItems">
-        {console.log(subgoalToMaingoalConnector)}
         {subgoalToMaingoalConnector[goalObj.GoalName] ? (
           subgoalToMaingoalConnector[goalObj.GoalName].map((goalName) => {
             return (

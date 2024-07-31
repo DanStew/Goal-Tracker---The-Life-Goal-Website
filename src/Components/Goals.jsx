@@ -74,7 +74,6 @@ function Goals({ currentUser, colourScheme }) {
     //Making the main function
     const mainFunction = async () => {
       //Making sure that the website does have a current user
-      console.log("Getting the goal objects");
       //Resetting the goalsObj and goalNames array
       setGoalsObjArray([]);
       setSubgoalsObjArray([]);
@@ -170,7 +169,6 @@ function Goals({ currentUser, colourScheme }) {
         }
       });
       //Permanently storing the changes made
-      console.log(tempObj)
       setSubgoalsToMaingoalsConnector(tempObj);
     };
 
@@ -196,8 +194,6 @@ function Goals({ currentUser, colourScheme }) {
       await mainFunction()
     }
     const mainFunction = async () => {
-      console.log(goalsObjArray);
-      console.log(subgoalsObjArray);
       //Resetting the arrays
       setMainGoalArray([]);
       setSubgoalMainGoalsArray([]);
@@ -240,9 +236,6 @@ function Goals({ currentUser, colourScheme }) {
   //Useeffect function to display the correct goals to the screen
   useEffect(() => {
     //Storing the main goals into the array
-    console.log(mainGoalArray)
-    console.log(subgoalMainGoalsArray)
-    console.log(completedGoals)
     setDisplayObjsArray(mainGoalArray);
     //If you want to see subgoals, or completed goals, adding them to the array
     if (!hideSubgoals) {
@@ -272,8 +265,6 @@ function Goals({ currentUser, colourScheme }) {
     //Storing the new sorted array
     setDisplayObjsArray(tempArr);
   }, [sortLastUpdated, updatedDisplayArray]);
-
-  console.log(currentUser)
 
   return (
     <div className={mainClass}>

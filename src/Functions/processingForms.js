@@ -301,7 +301,6 @@ export const processTimetableForm = async (
   if (formInputsObj.eventName == "") {
     return "Event Name is empty, please retry..."
   }
-  console.log(formInputsObj.eventName)
   if (formInputsObj.eventName.length > 20){
     return "Event Name must have a maximum of 20 characters"
   }
