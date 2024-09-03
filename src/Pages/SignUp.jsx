@@ -2,7 +2,7 @@
 import imgIcon from '../Images/imgIcon.jpg'
 
 //Importing the needed functions for the file
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { auth, db, storage } from "../Config/firebase.js"
 import { createUserWithEmailAndPassword, sendEmailVerification} from 'firebase/auth'
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
@@ -25,6 +25,17 @@ function SignUp({colourScheme}){
    //Making the navigator for this file
    const navigator = useNavigate()
 
+   //Making a useEffect to reload the page once
+   useEffect(() => {
+       const reloadCount = sessionStorage.getItem('reloadCount');
+       if(reloadCount < 2) {
+         sessionStorage.setItem('reloadCount', String(reloadCount + 1));
+         window.location.reload();
+       } else {
+         sessionStorage.removeItem('reloadCount');
+       }
+   },[])
+
     //Function to handle the actions when the user presses the make account button
     async function handleSelect(e){
         //Preventing the page from automatically refreshing
@@ -45,7 +56,6 @@ function SignUp({colourScheme}){
             try{
                 //Creating the new user
                 res = await createUserWithEmailAndPassword(auth,email,password)
-
                 await sendEmailVerification(res.user)
             }
             catch (err){

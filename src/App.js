@@ -1,14 +1,14 @@
 import './Style/style.scss'
 
 //Importing the needed Pages for this file
-import SignUp from './Pages/SignUp';
-import SignIn from './Pages/SignIn';
-import Home from './Pages/Home';
-import Account from './Pages/Account';
-import MyGoals from './Pages/MyGoals';
-import Goal from './Pages/Goal';
-import Timetable from './Pages/Timetable';
-import Settings from './Pages/Settings';
+import SignUp from './Pages/SignUp.jsx';
+import SignIn from './Pages/SignIn.jsx';
+import Home from './Pages/Home.jsx';
+import Account from './Pages/Account.jsx';
+import MyGoals from './Pages/MyGoals.jsx';
+import Goal from './Pages/Goal.jsx';
+import Timetable from './Pages/Timetable.jsx';
+import Settings from './Pages/Settings.jsx';
 
 //Importing the needed functions for this file
 import { BrowserRouter, Routes, Route, Navigate, useMatch, useLocation } from 'react-router-dom'
@@ -16,7 +16,7 @@ import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from './Context/AuthContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from './Config/firebase';
-import VerificationFailure from './Pages/VerificationFailure';
+import VerificationFailure from './Pages/VerificationFailure.jsx';
 
 
 function App() {
@@ -55,8 +55,10 @@ function App() {
     if (!currentUser){
       return <Navigate to="/SignIn" />
     }
-    if (!currentUser.emailVerified){
+    if (currentUser){
+      if (!currentUser.emailVerified){
         return <Navigate to="/VerificationFailure" />
+      }
     }
     return children
   }
@@ -64,18 +66,16 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/">
-          <Route path="SignUp" element={<SignUp colourScheme={colourScheme}/>} />
-          <Route path="SignIn" element={<SignIn colourScheme={colourScheme}/>} />
+          <Route path="/SignUp" element={<SignUp colourScheme={colourScheme}/>} />
+          <Route path="/SignIn" element={<SignIn colourScheme={colourScheme}/>} />
           {/* Implementing the protected route onto the home page */}
-          <Route index element={<ProtectedRoute ><Home colourScheme={colourScheme}/></ProtectedRoute>} />
-          <Route path="Account" element={<ProtectedRoute ><Account colourScheme={colourScheme}/></ProtectedRoute>} />
-          <Route path="MyGoals" element={<ProtectedRoute ><MyGoals colourScheme={colourScheme}/></ProtectedRoute>} />
-          <Route path="Goals/:goalName" element={<ProtectedRoute><Goal colourScheme={colourScheme}/></ProtectedRoute>} />
-          <Route path="Timetable" element={<ProtectedRoute ><Timetable colourScheme={colourScheme}/></ProtectedRoute>} />
-          <Route path="Settings" element={<ProtectedRoute ><Settings colourScheme={colourScheme} changedColourScheme={changedColourScheme} setChangedColourScheme={(e) => setChangedColourScheme(e)}/></ProtectedRoute>} />
-          <Route path="VerificationFailure" element={<VerificationFailure/>} />
-        </Route>
+          <Route path="/" element={<ProtectedRoute ><Home colourScheme={colourScheme}/></ProtectedRoute>} />
+          <Route path="/Account" element={<ProtectedRoute ><Account colourScheme={colourScheme}/></ProtectedRoute>} />
+          <Route path="/MyGoals" element={<ProtectedRoute ><MyGoals colourScheme={colourScheme}/></ProtectedRoute>} />
+          <Route path="/Goals/:goalName" element={<ProtectedRoute><Goal colourScheme={colourScheme}/></ProtectedRoute>} />
+          <Route path="/Timetable" element={<ProtectedRoute ><Timetable colourScheme={colourScheme}/></ProtectedRoute>} />
+          <Route path="/VerificationFailure" element={<VerificationFailure/>} />
+          <Route path="/Settings" element={<ProtectedRoute ><Settings colourScheme={colourScheme} changedColourScheme={changedColourScheme} setChangedColourScheme={(e) => setChangedColourScheme(e)}/></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   );

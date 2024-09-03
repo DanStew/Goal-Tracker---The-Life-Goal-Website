@@ -10,7 +10,10 @@ function VerificationFailure(){
   const navigator = useNavigate()
 
   useEffect(() => {
-    if (currentUser.emailVerified){
+    if (!currentUser){
+      navigator("/SignUp")
+    }
+    else if (currentUser.emailVerified){
       navigator("/")
     }
   },[currentUser])
